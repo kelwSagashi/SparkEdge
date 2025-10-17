@@ -7,5 +7,12 @@ O nmg8 é uma plataforma Agente de automação de monitoramento com nós, para s
 - **Controle Total**: Você define o que fazer com os dados de monitoramento que foram coletados.
 - **Serviço local**: permite rodar em sistemas mais criticos tendo flexibilidade em conseguir armazenar dados e enviar quando houver conexão.
 
+# Como rodar (Versão desenvolvimento)
+```bash
+npm run dev
+```
+
+
+
 # O que significa nmg8?
 Para ser curto, é uma sigla para "node monitor agent", a pronuncia rápida, em inglês, faz parecer que se fala n m agent.

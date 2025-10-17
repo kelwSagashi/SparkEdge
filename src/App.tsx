@@ -3,7 +3,7 @@ import './App.css'
 import Header from './components/header'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
 import SideBar from './components/sidebar';
-import { Routes, Route, } from 'react-router-dom'
+import { Routes, Route, Navigate, } from 'react-router-dom'
 import Instances from './pages/instances';
 import Hub from './pages/Hub';
 import { DndProvider } from 'react-dnd';
@@ -34,6 +34,7 @@ function App() {
             <div className="flex-grow relative overflow-y-auto">
               <Routes>
                 {/* Rotas para o Editor de Fluxos */}
+                <Route path="/" element={<Navigate to="/workflow" replace />} />
                 <Route path="/workflow/new" element={<FlowEditor />} />
                 <Route path="/workflow/:id" element={<FlowEditor />} />
                 <Route path="/workflow" element={<Instances />} />

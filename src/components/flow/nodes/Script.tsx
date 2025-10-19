@@ -1,36 +1,35 @@
-import { useCallback, useState } from "react";
-import { Handle, Position } from "@xyflow/react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useCallback, useEffect, useState } from "react";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Play, Code2, Trash2, MoreHorizontal } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ScriptNodeProps {
     id: string;
     data: {
         label: string;
         onChange?: (value: string) => void;
-        onRun?: (code: string) => void;
+        onRun?: () => void;
+        onDelete?: (id: string) => void;
+        sources: string[];
+        isConnecting?: boolean;
     };
+    selected: boolean;
 }
 
-export default function ScriptNode({ id, data }: ScriptNodeProps) {
+export default function ScriptNode({ id, data, selected }: ScriptNodeProps) {
     const [isHovered, setIsHovered] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditingLabel, setIsEditingLabel] = useState(false);
     const [label, setLabel] = useState(data.label || "Script");
-
-    const handleChange = useCallback(
-        (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-            data.onChange?.(e.target.value);
-        },
-        [data]
-    );
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const handleRun = useCallback(() => {
-        console.log('run')
+        console.log("run");
     }, []);
 
     const handleLabelBlur = useCallback(() => {
-        setIsEditing(false);
+        setIsEditingLabel(false);
     }, []);
 
     const handleLabelChange = useCallback(
@@ -41,60 +40,118 @@ export default function ScriptNode({ id, data }: ScriptNodeProps) {
     );
 
     return (
-        <div
-            className="w-[100px] h-[100px] shadow-md border-primary/80 border-2 rounded-xl bg-foreground"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            onDoubleClick={() => setIsEditing(true)}
-        >
-            {isHovered && (
-                <div className="absolute -top-10 flex space-x-2 z-10">
-                    <Button size="icon" variant="secondary" className="h-7 w-7 p-1">
-                        <Play className="h-4 w-4 text-primary" />
-                    </Button>
-                    <Button size="icon" variant="secondary" className="h-7 w-7 p-1">
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                    <Button size="icon" variant="secondary" className="h-7 w-7 p-1">
-                        <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                </div>
-            )}
-            {/* Entradas e saídas */}
-            <Handle
-                type="target"
-                position={Position.Left}
-                className="!w-2.5 !h-6 !bg-primary !rounded-[2px] !border-none"
-            />
-
-            <div className="absolute right-[-38px] top-1/2 -translate-y-1/2 flex items-center">
-                <div className="w-[16px] h-[16px] bg-muted-foreground rounded-full"></div>
-                <div className="w-[30px] h-[2px] bg-muted-foreground"></div>
-                <Handle
-                    type="source"
-                    position={Position.Right}
-                    className="!w-6 !h-6 !bg-none !border border-border !rounded relative flex items-center justify-center"
-                >
-                    <span className="absolute text-sm font-bold text-primary">+</span>
-                </Handle>
-            </div>
-            <div className="flex items-center justify-center">
-                <Code2 className="h-10 w-10 text-primary" />
-            </div>
-
-
-            <div className="relative -bottom-20 w-full text-center">
-                {isEditing ? (
-                    <input
-                        value={label}
-                        onChange={handleLabelChange}
-                        onBlur={handleLabelBlur}
-                        autoFocus
-                        className="w-[90%] text-sm text-center bg-transparent border-b border-muted-foreground outline-none text-foreground"
-                    />
-                ) : (
-                    <span className="text-sm font-medium text-primary">{label}</span>
+        <div className="relative">
+            <div
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className="bottom-0 relative"
+            >
+                {/* Botões de ação */}
+                {isHovered && (
+                    <div
+                        className="absolute -top-10 flex space-x-2 z-10 h-[50px]"
+                        onMouseDown={(e) => e.stopPropagation()}
+                    >
+                        <Button size="icon" variant="secondary" className="h-7 w-7 p-1" onClick={handleRun}>
+                            <Play className="h-4 w-4 text-primary" />
+                        </Button>
+                        <Button size="icon" variant="secondary" className="h-7 w-7 p-1" onClick={() => data.onDelete?.(id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                        <Button size="icon" variant="secondary" className="h-7 w-7 p-1">
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                    </div>
                 )}
+
+                {/* === NÓ PRINCIPAL === */}
+
+                <div
+                    className={cn("relative w-[100px] h-[100px] shadow-md",
+                        "border-primary/80 rounded-xl bg-foreground flex",
+                        "items-center justify-center cursor-pointer border-2",
+                        selected ? "ring-8" : "")}
+                    onDoubleClick={() => setIsDialogOpen(true)}
+                >
+
+                    {/* Handle de entrada */}
+                    <Handle
+                        type="target"
+                        position={Position.Left}
+                        className="!w-2.5 !h-6 !bg-primary !rounded-[2px] !border-none"
+                    />
+
+                    {/* Handle de saída */}
+                    <Handle
+                        type="source"
+                        position={Position.Right}
+                        className="absolute"
+                        onDragEnd={() => {
+                            console.log("end")
+                        }}
+                        isValidConnection={(con) => data.sources.includes(con.target)}
+
+                    >
+                        <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 flex items-center">
+                            <span className="left-5 bg-background/70 p-0.5 absolute text-xs font-light text-primary">Saída</span>
+                            <div className="hover:bg-accent-foreground w-[16px] h-[16px] bg-muted-foreground rounded-full" />
+                        </div>
+                        <div className={cn(
+                            "absolute left-[-6px] top-1/2 -translate-y-1/2 flex items-center",
+                            "transition-all ease-linear duration-100",
+                            !data.isConnecting ? "scale-x-100 scale-y-100 opacity-100" : "scale-x-0 scale-y-0 opacity-0")}>
+                            <>
+                                <div className="w-18 h-[2px] bg-muted-foreground" />
+                                <span className="!w-6 !h-6 !bg-none border-3 border-muted-foreground hover:border-accent-foreground !rounded relative flex items-center justify-center">
+                                    <span className="absolute text-sm font-bold text-primary">+</span>
+                                </span>
+                            </>
+                        </div>
+                    </Handle>
+
+                    {/* Ícone central */}
+                    <Code2 className="h-10 w-10 text-primary" />
+                </div>
+
+                {/* === LABEL FORA DO NÓ === */}
+                <div className="relative text-center mt-2">
+                    {isEditingLabel ? (
+                        <input
+                            value={label}
+                            onChange={handleLabelChange}
+                            onBlur={handleLabelBlur}
+                            autoFocus
+                            className="w-[100px] text-sm text-center bg-transparent border-b border-muted-foreground outline-none text-foreground"
+                        />
+                    ) : (
+                        <span
+                            className="text-sm font-medium text-primary cursor-text"
+                            onDoubleClick={() => setIsEditingLabel(true)}
+                        >
+                            {label}
+                        </span>
+                    )}
+                </div>
+
+                {/* === DIALOG DE EDIÇÃO === */}
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle>Configurações do Nó: {label}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                                Aqui você poderá editar as propriedades e o script deste nó.
+                            </p>
+                            <textarea
+                                placeholder="Digite o código aqui..."
+                                className="w-full h-40 p-2 border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                defaultValue={data.onChange ? "" : "// seu código aqui"}
+                            />
+                            <Button onClick={() => setIsDialogOpen(false)}>Fechar</Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );

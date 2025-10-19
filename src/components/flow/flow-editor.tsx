@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useCallback, useEffect } from 'react';
-import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Controls, Background, MiniMap, type Node, type NodeChange, type Connection, type Edge, type EdgeChange } from '@xyflow/react';
+import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Controls, Background, MiniMap, type Node, type NodeChange, type Connection, type Edge, type EdgeChange, SelectionMode, useReactFlow, type EdgeTypes } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../ui/sheet';
 import { Separator } from '@radix-ui/react-separator';
@@ -12,28 +12,40 @@ import ScriptNode from './nodes/Script';
 import { NodeCommandDialog } from './node-command';
 import * as uuid from 'uuid';
 import { useParams } from 'react-router-dom';
+import { useNodeAutoAdjust } from '@/hooks/use-node-auto-adjust';
+import { FlowContextMenu } from './components/context-menu';
+import CustomDeletableEdge from './edges/custom-deletable-edge';
 
 
 const nodeTypes = {
     script: ScriptNode,
 };
 
-export default function FlowEditor() {
-    const { id } = useParams<{ id: string }>();
+const edgeTypes: EdgeTypes = {
+    deletable: CustomDeletableEdge
+}
+
+export default function FlowEditor({ id }: { id: string | undefined }) {
     const [open, setOpen] = useState<boolean>(false);
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
 
+    const autoAdjustNode = useNodeAutoAdjust();
+
     const onNodesChange = useCallback(
-        (changes: NodeChange<Node>[]) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
+        (changes: NodeChange<Node>[]) => {
+            setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot))
+        },
         [],
     );
     const onEdgesChange = useCallback(
-        (changes: EdgeChange<Edge>[]) => setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
+        (changes: EdgeChange<Edge>[]) => {
+            setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot))
+        },
         [],
     );
     const onConnect = useCallback(
-        (params: Edge | Connection) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
+        (params: Edge | Connection) => setEdges((edgesSnapshot) => addEdge({ ...params, type: "deletable" }, edgesSnapshot)),
         [],
     );
 
@@ -95,7 +107,6 @@ export default function FlowEditor() {
                 onRun: () => {
                     console.log("executar script");
                 },
-                sources: ["server", "filter", "edit_fields"]
             },
         };
 
@@ -104,7 +115,7 @@ export default function FlowEditor() {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Delete" || e.key === "Backspace") {
+            if (e.key === "Delete") {
                 const selectedNodes = nodes.filter((n) => n.selected);
                 if (selectedNodes.length > 0) {
                     selectedNodes.forEach((node) => handleDeleteNode(node.id));
@@ -132,7 +143,7 @@ export default function FlowEditor() {
     };
 
     return (
-        <div className="absolute inset-0 flex h-full w-full">
+        <>
             <Sheet> {/* open e defaultOpen para ele iniciar sempre aberto */}
                 <SheetContent side="left" className="w-64 sm:w-[300px] bg-background border-r border-border p-4 pt-8 z-50">
                     <SheetHeader>
@@ -152,47 +163,58 @@ export default function FlowEditor() {
             <NodeCommandDialog addNode={addScriptNode} open={open} setOpen={setOpen} />
 
             <div className="flex-grow h-full bg-background relative">
-                <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    nodeTypes={nodeTypes}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                    onNodeClick={(e, node) => {
-                        console.log("node", node)
-                    }}
-                    onConnectStart={(e, c) => {
-                        updateNodeConnectingState(c.nodeId, true)
-                    }}
-                    onConnectEnd={(e, c) => {
-                        updateNodeConnectingState(c.fromNode?.id ?? null, false)
-                    }}
-                    onContextMenu={() => {
-                        console.log("context menu")
-                    }}
-                    fitView
-                    className="react-flow-dark-theme"
-                >
-                    <MiniMap
-                        position="bottom-right"
-                        nodeStrokeColor={(n) => {
-                            if (n.type === 'script') return 'hsl(var(--primary))';
-                            if (n.type === 'output') return 'hsl(var(--destructive))';
-                            if (n.type === 'modbusRead' || n.type === 'apiCall') return 'hsl(var(--accent))';
-                            return 'hsl(var(--card))';
+                <FlowContextMenu>
+                    <ReactFlow
+                        proOptions={{ hideAttribution: true }}
+                        onInit={({ fitView }) => fitView().then()}
+                        nodes={nodes}
+                        edges={edges}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                        onNodeClick={(e, node) => {
+                            console.log("node", node)
                         }}
-                        nodeColor={(n) => {
-                            if (n.type === 'script') return 'hsl(var(--primary))';
-                            if (n.type === 'output') return 'hsl(var(--destructive))';
-                            if (n.type === 'modbusRead' || n.type === 'apiCall') return 'hsl(var(--accent))';
-                            return 'hsl(var(--card))';
+                        onConnectStart={(_, c) => {
+                            updateNodeConnectingState(c.nodeId, true)
                         }}
-                        maskColor="hsl(var(--muted))"
-                    />
-                    <Controls position="top-left" />
-                    <Background gap={12} size={1} />
-                </ReactFlow>
+                        onConnectEnd={(_, c) => {
+                            updateNodeConnectingState(c.fromNode?.id ?? null, !!c.toNode?.id)
+                        }}
+                        selectionMode={SelectionMode.Full}
+                        multiSelectionKeyCode="Control"
+                        selectionOnDrag={true}
+                        selectionKeyCode={null}
+                        onNodeDragStop={(_, node) => {
+                            autoAdjustNode(node);
+                        }}
+                        snapGrid={[16, 16]}
+                        snapToGrid
+                        fitView
+                        className="react-flow-dark-theme"
+                    >
+                        <MiniMap
+                            position="bottom-right"
+                            nodeStrokeColor={(n) => {
+                                if (n.type === 'script') return 'hsl(var(--primary))';
+                                if (n.type === 'output') return 'hsl(var(--destructive))';
+                                if (n.type === 'modbusRead' || n.type === 'apiCall') return 'hsl(var(--accent))';
+                                return 'hsl(var(--card))';
+                            }}
+                            nodeColor={(n) => {
+                                if (n.type === 'script') return 'hsl(var(--primary))';
+                                if (n.type === 'output') return 'hsl(var(--destructive))';
+                                if (n.type === 'modbusRead' || n.type === 'apiCall') return 'hsl(var(--accent))';
+                                return 'hsl(var(--card))';
+                            }}
+                            maskColor="hsl(var(--muted))"
+                        />
+                        <Controls position="top-left" />
+                        <Background gap={12} size={1} />
+                    </ReactFlow>
+                </FlowContextMenu>
 
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-2xl border border-border px-4 py-2 flex items-center gap-3 z-50">
                     <Button size="sm" onClick={handleRun}>
@@ -228,6 +250,6 @@ export default function FlowEditor() {
                     </DropdownMenu>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

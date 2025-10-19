@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState, useCallback, useEffect } from 'react';
 import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Controls, Background, MiniMap, type Node, type NodeChange, type Connection, type Edge, type EdgeChange } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../ui/sheet';
@@ -10,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import ScriptNode from './nodes/Script';
 import { NodeCommandDialog } from './node-command';
 import * as uuid from 'uuid';
+import { useParams } from 'react-router-dom';
 
 
 const nodeTypes = {
@@ -17,6 +19,7 @@ const nodeTypes = {
 };
 
 export default function FlowEditor() {
+    const { id } = useParams<{ id: string }>();
     const [open, setOpen] = useState<boolean>(false);
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
@@ -34,6 +37,45 @@ export default function FlowEditor() {
         [],
     );
 
+    const updateNodeConnectingState = useCallback((nodeId: string | null, isConnecting: boolean) => {
+        console.log(nodeId)
+        if (nodeId === null) return;
+        setNodes((nds) =>
+            nds.map((n) => {
+                if (n.id === nodeId) {
+                    return { ...n, data: { ...n.data, isConnecting } };
+                }
+                return { ...n, data: { ...n.data } };
+            })
+        );
+    }, [setNodes]);
+
+    const onUpdateNodeData = useCallback((nodeId: string, data: Record<string, unknown>) => {
+        setNodes((nds) =>
+            nds.map((node) =>
+                node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node
+            )
+        );
+    }, [setNodes]);
+
+    const onSaveFlow = useCallback(() => {
+        const flowDefinition = {
+            id: id,
+            nodes,
+            edges,
+            name: `Fluxo`
+        };
+        console.log(`Salvando fluxo:`, JSON.stringify(flowDefinition, null, 2));
+    }, [id, nodes, edges]);
+
+    const handleDeleteNode = useCallback(
+        (nodeId: string) => {
+            setNodes((prev) => prev.filter((n) => n.id !== nodeId));
+            setEdges((prev) => prev.filter((e) => e.source !== nodeId && e.target !== nodeId));
+        },
+        [setNodes, setEdges]
+    );
+
     const addScriptNode = useCallback(() => {
         const id = uuid.v4();
         const newNode: Node = {
@@ -41,7 +83,7 @@ export default function FlowEditor() {
             type: "script",
             position: { x: Math.random() * 400 + 200, y: Math.random() * 200 + 100 },
             data: {
-                code: "",
+                id: "",
                 onChange: (value: string) => {
                     setNodes((nds) =>
                         nds.map((n) =>
@@ -49,21 +91,32 @@ export default function FlowEditor() {
                         )
                     );
                 },
-                onRun: (code: string) => {
-                    console.log("executar script:", code);
+                onDelete: handleDeleteNode,
+                onRun: () => {
+                    console.log("executar script");
                 },
+                sources: ["server", "filter", "edit_fields"]
             },
         };
 
         setNodes((nds) => [...nds, newNode]);
-    }, [setNodes]);
+    }, [setNodes, handleDeleteNode]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Delete" || e.key === "Backspace") {
+                const selectedNodes = nodes.filter((n) => n.selected);
+                if (selectedNodes.length > 0) {
+                    selectedNodes.forEach((node) => handleDeleteNode(node.id));
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [nodes, handleDeleteNode]);
 
     const handleRun = () => {
         console.log("Executando fluxo...");
-    };
-
-    const handleSave = () => {
-        console.log("Salvando fluxo...");
     };
 
     const handleShare = () => {
@@ -106,24 +159,36 @@ export default function FlowEditor() {
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
+                    onNodeClick={(e, node) => {
+                        console.log("node", node)
+                    }}
+                    onConnectStart={(e, c) => {
+                        updateNodeConnectingState(c.nodeId, true)
+                    }}
+                    onConnectEnd={(e, c) => {
+                        updateNodeConnectingState(c.fromNode?.id ?? null, false)
+                    }}
+                    onContextMenu={() => {
+                        console.log("context menu")
+                    }}
                     fitView
                     className="react-flow-dark-theme"
                 >
                     <MiniMap
                         position="bottom-right"
                         nodeStrokeColor={(n) => {
-                            if (n.type === 'input') return 'hsl(var(--primary))';
+                            if (n.type === 'script') return 'hsl(var(--primary))';
                             if (n.type === 'output') return 'hsl(var(--destructive))';
                             if (n.type === 'modbusRead' || n.type === 'apiCall') return 'hsl(var(--accent))';
                             return 'hsl(var(--card))';
                         }}
                         nodeColor={(n) => {
-                            if (n.type === 'input') return 'hsl(var(--primary))';
+                            if (n.type === 'script') return 'hsl(var(--primary))';
                             if (n.type === 'output') return 'hsl(var(--destructive))';
                             if (n.type === 'modbusRead' || n.type === 'apiCall') return 'hsl(var(--accent))';
                             return 'hsl(var(--card))';
                         }}
-                        maskColor="hsl(var(--secondary))"
+                        maskColor="hsl(var(--muted))"
                     />
                     <Controls position="top-left" />
                     <Background gap={12} size={1} />
@@ -134,7 +199,7 @@ export default function FlowEditor() {
                         <Play className="h-4 w-4 mr-1" />
                         Executar
                     </Button>
-                    <Button size="sm" variant="secondary" onClick={handleSave}>
+                    <Button size="sm" variant="secondary" onClick={onSaveFlow}>
                         <Save className="h-4 w-4 mr-1" />
                         Salvar
                     </Button>

@@ -8,7 +8,7 @@ import Instances from './pages/instances';
 import Hub from './pages/Hub';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import FlowEditor from './components/flow/flow-editor';
+import { FlowBuilderPage } from './components/flow/flow-builder';
 
 
 function App() {
@@ -35,13 +35,13 @@ function App() {
               <Routes>
                 {/* Rotas para o Editor de Fluxos */}
                 <Route path="/" element={<Navigate to="/workflow" replace />} />
-                <Route path="/workflow/new" element={<FlowEditor />} />
-                <Route path="/workflow/:id" element={<FlowEditor />} />
+                <Route path="/workflow/new" element={<FlowBuilderPage />} />
+                <Route path="/workflow/:id" element={<FlowBuilderPage />} />
                 <Route path="/workflow" element={<Instances />} />
                 <Route path="/script-hub" element={<Hub />} />
               </Routes>
             </div>
-            <SidebarTrigger className="relative -ml-4 -mb-4 top-4 z-10 bg-secondary-foreground rounded-full" />
+            {/* <SidebarTrigger className="relative -ml-4 -mb-4 top-4 z-10 bg-secondary-foreground rounded-full" /> */}
           </SidebarInset>
         </div>
       </SidebarProvider>

@@ -12,7 +12,6 @@ interface ScriptNodeProps {
         onChange?: (value: string) => void;
         onRun?: () => void;
         onDelete?: (id: string) => void;
-        sources: string[];
         isConnecting?: boolean;
     };
     selected: boolean;
@@ -85,11 +84,14 @@ export default function ScriptNode({ id, data, selected }: ScriptNodeProps) {
                     <Handle
                         type="source"
                         position={Position.Right}
-                        className="absolute"
+                        className={cn(
+                            "absolutecursor-crosshair",
+                            "size-3 hover:border-primary/50  border-2 border-card-foreground/40",
+                            ""
+                        )}
                         onDragEnd={() => {
                             console.log("end")
                         }}
-                        isValidConnection={(con) => data.sources.includes(con.target)}
 
                     >
                         <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 flex items-center">

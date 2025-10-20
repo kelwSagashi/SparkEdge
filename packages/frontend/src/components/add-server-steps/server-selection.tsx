@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
-import { DefaultServerTypes } from '@/services/db.seed';
-import type { ServerTypeReturningValues } from '@/services/db.service.d';
+import { DefaultServerTypes } from '@nmg8/db/src/services/db.seed';
+import type { ServerTypeReturningValues } from '@nmg8/db/src/services/db.service.d';
 
 type Props = {
   onSelect: (type: ServerTypeReturningValues | undefined) => void;

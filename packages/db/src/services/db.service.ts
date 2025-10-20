@@ -1,4 +1,4 @@
-import { db, Tables, type DBType } from "@/db";
+import { db, Tables, type DBType } from "../db";
 import type { DeviceReturningValues, DeviceUpsertValues, ServerEndpointsReturningValues, ServerEndpointsUpsertValues, ServerReturningValues, ServerUpsertValues } from './db.service.d';
 import { eq } from "drizzle-orm";
 

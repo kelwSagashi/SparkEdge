@@ -20,8 +20,8 @@ import DraggableValue from './DraggableValue';
 import { useDrop } from 'react-dnd';
 import { ItemTypes } from '@/lib/constants';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { DeviceConnectionMethods } from '@/db/schema';
-import type { ServerEndpointsReturningValues, ServerReturningValues } from '@/services/db.service.d';
+import { DeviceConnectionMethods } from '@nmg8/db/src/db/schema';
+import type { ServerEndpointsReturningValues, ServerReturningValues } from '@nmg8/db/src/services/db.service.d';
 
 export type ServiceType = 'rest' | 'google_drive' | null;
 

@@ -1,4 +1,4 @@
-import type { DeviceReturningValues } from "@/services/db.service.d";
+import type { DeviceReturningValues } from "@nmg8/db/src/services/db.service.d";
 
 export const Devices: DeviceReturningValues[] = [
     {

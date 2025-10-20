@@ -1,4 +1,4 @@
-import type { ServerEndpointsReturningValues, ServerReturningValues } from "@/services/db.service.d";
+import type { ServerEndpointsReturningValues, ServerReturningValues } from "@nmg8/db/src/services/db.service.d";
 
 export const Servers: ServerReturningValues[] = [
     {

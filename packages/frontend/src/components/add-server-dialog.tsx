@@ -4,7 +4,7 @@ import ServerTypeSelection from './add-server-steps/server-selection';
 import ServerStepForm from './add-server-steps/server-form';
 import GdriveForm from './add-server-steps/gdrive-form';
 import { Separator } from './ui/separator';
-import type { ServerTypeReturningValues } from '@/services/db.service.d';
+import type { ServerTypeReturningValues } from '@nmg8/db/src/services/db.service.d';
 import { Button } from './ui/button';
 
 type Props = {

@@ -1,0 +1,40 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/core"
+    },
+    {
+      "path": "./packages/frontend"
+    },
+    {
+      "path": "./packages/db"
+    }
+  ],
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "nodenext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nmg8/core/*": [
+        "packages/core/src/*"
+      ],
+      "@nmg8/frontend/*": [
+        "packages/frontend/src/*"
+      ],
+      "@nmg8/db/*": [
+        "packages/db/src/*"
+      ],
+      "@nmg8/cli/*": [
+        "packages/cli/src/*"
+      ]
+    },
+    "outDir": "dist"
+  }
+}

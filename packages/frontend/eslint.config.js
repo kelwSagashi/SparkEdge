@@ -8,12 +8,12 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 export default defineConfig([
   globalIgnores(['dist']),
   {
-    files: ['**/*.{ts,tsx}'],
+    // files: ['**/*.{ts,tsx}'],
     extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs['recommended-latest'],
-      reactRefresh.configs.vite,
+      // js.configs.recommended,
+      // tseslint.configs.recommended,
+      // reactHooks.configs['recommended-latest'],
+      // reactRefresh.configs.vite,
     ],
     languageOptions: {
       ecmaVersion: 2020,

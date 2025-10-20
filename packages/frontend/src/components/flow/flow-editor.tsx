@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useCallback, useEffect } from 'react';
-import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Controls, Background, MiniMap, type Node, type NodeChange, type Connection, type Edge, type EdgeChange, SelectionMode, useReactFlow, type EdgeTypes } from '@xyflow/react';
+import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Controls, Background, MiniMap, type Node, type NodeChange, type Connection, type Edge, type EdgeChange, SelectionMode, useReactFlow, type EdgeTypes, type FinalConnectionState } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '../ui/sheet';
 import { Separator } from '@radix-ui/react-separator';
@@ -8,18 +8,15 @@ import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import { Button } from '../ui/button';
 import { Copy, Download, MoreVertical, Play, Save, Share2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import ScriptNode from './nodes/Script';
 import { NodeCommandDialog } from './node-command';
-import * as uuid from 'uuid';
-import { useParams } from 'react-router-dom';
 import { useNodeAutoAdjust } from '@/hooks/use-node-auto-adjust';
 import { FlowContextMenu } from './components/context-menu';
 import CustomDeletableEdge from './edges/custom-deletable-edge';
-
-
-const nodeTypes = {
-    script: ScriptNode,
-};
+import { useAddOnEdgeDrop } from '@/hooks/use-add-on-edge-drop';
+import { BuilderNodes } from "@/components/flow/nodes/types";
+import { useInsertNode } from '@/hooks/use-insert-node';
+import { useDeleteNode } from '@/hooks/use-delete-node';
+import { NODE_TYPES } from './nodes';
 
 const edgeTypes: EdgeTypes = {
     deletable: CustomDeletableEdge
@@ -30,10 +27,47 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
 
+    const { getNodes } = useReactFlow();
+
+    const { handleOnEdgeDropConnectedEnd, handleOnEdgeConnectedStart } = useAddOnEdgeDrop()
+
     const autoAdjustNode = useNodeAutoAdjust();
+    const insertNode = useInsertNode();
+    const deleteNode = useDeleteNode();
+
+    const handleAutoAdjustNodeAfterNodeMeasured = useCallback(
+        (id: string) => {
+            setTimeout(() => {
+                const node = getNodes().find((n) => n.id === id);
+                if (!node) {
+                    return;
+                }
+
+                if (node.measured === undefined) {
+                    handleAutoAdjustNodeAfterNodeMeasured(id);
+                    return;
+                }
+
+                autoAdjustNode(node);
+            });
+        },
+        [autoAdjustNode, getNodes]
+    );
 
     const onNodesChange = useCallback(
         (changes: NodeChange<Node>[]) => {
+            changes.forEach((change) => {
+                if (change.type === "dimensions") {
+                    const node = getNodes().find((n) => n.id === change.id);
+                    if (node) {
+                        autoAdjustNode(node);
+                    }
+                }
+
+                if (change.type === "add") {
+                    handleAutoAdjustNodeAfterNodeMeasured(change.item.id);
+                }
+            });
             setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot))
         },
         [],
@@ -49,26 +83,13 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
         [],
     );
 
-    const updateNodeConnectingState = useCallback((nodeId: string | null, isConnecting: boolean) => {
-        console.log(nodeId)
-        if (nodeId === null) return;
-        setNodes((nds) =>
-            nds.map((n) => {
-                if (n.id === nodeId) {
-                    return { ...n, data: { ...n.data, isConnecting } };
-                }
-                return { ...n, data: { ...n.data } };
-            })
-        );
-    }, [setNodes]);
-
-    const onUpdateNodeData = useCallback((nodeId: string, data: Record<string, unknown>) => {
-        setNodes((nds) =>
-            nds.map((node) =>
-                node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node
-            )
-        );
-    }, [setNodes]);
+    // const onUpdateNodeData = useCallback((nodeId: string, data: Record<string, unknown>) => {
+    //     setNodes((nds) =>
+    //         nds.map((node) =>
+    //             node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node
+    //         )
+    //     );
+    // }, [setNodes]);
 
     const onSaveFlow = useCallback(() => {
         const flowDefinition = {
@@ -80,51 +101,22 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
         console.log(`Salvando fluxo:`, JSON.stringify(flowDefinition, null, 2));
     }, [id, nodes, edges]);
 
-    const handleDeleteNode = useCallback(
-        (nodeId: string) => {
-            setNodes((prev) => prev.filter((n) => n.id !== nodeId));
-            setEdges((prev) => prev.filter((e) => e.source !== nodeId && e.target !== nodeId));
-        },
-        [setNodes, setEdges]
-    );
-
     const addScriptNode = useCallback(() => {
-        const id = uuid.v4();
-        const newNode: Node = {
-            id,
-            type: "script",
-            position: { x: Math.random() * 400 + 200, y: Math.random() * 200 + 100 },
-            data: {
-                id: "",
-                onChange: (value: string) => {
-                    setNodes((nds) =>
-                        nds.map((n) =>
-                            n.id === id ? { ...n, data: { ...n.data, code: value } } : n
-                        )
-                    );
-                },
-                onDelete: handleDeleteNode,
-                onRun: () => {
-                    console.log("executar script");
-                },
-            },
-        };
-
-        setNodes((nds) => [...nds, newNode]);
-    }, [setNodes, handleDeleteNode]);
+        insertNode(BuilderNodes.SCRIPT)
+    }, [insertNode]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Delete") {
                 const selectedNodes = nodes.filter((n) => n.selected);
                 if (selectedNodes.length > 0) {
-                    selectedNodes.forEach((node) => handleDeleteNode(node.id));
+                    selectedNodes.forEach((node) => deleteNode(node.id));
                 }
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [nodes, handleDeleteNode]);
+    }, [nodes, deleteNode]);
 
     const handleRun = () => {
         console.log("Executando fluxo...");
@@ -169,20 +161,13 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                         onInit={({ fitView }) => fitView().then()}
                         nodes={nodes}
                         edges={edges}
-                        nodeTypes={nodeTypes}
+                        nodeTypes={NODE_TYPES}
                         edgeTypes={edgeTypes}
                         onNodesChange={onNodesChange}
                         onEdgesChange={onEdgesChange}
                         onConnect={onConnect}
-                        onNodeClick={(e, node) => {
-                            console.log("node", node)
-                        }}
-                        onConnectStart={(_, c) => {
-                            updateNodeConnectingState(c.nodeId, true)
-                        }}
-                        onConnectEnd={(_, c) => {
-                            updateNodeConnectingState(c.fromNode?.id ?? null, !!c.toNode?.id)
-                        }}
+                        onConnectStart={handleOnEdgeConnectedStart}
+                        onConnectEnd={handleOnEdgeDropConnectedEnd}
                         selectionMode={SelectionMode.Full}
                         multiSelectionKeyCode="Control"
                         selectionOnDrag={true}

@@ -1,27 +1,31 @@
-import { useCallback, useEffect, useState } from "react";
-import { Handle, Position, useReactFlow } from "@xyflow/react";
+import { memo, useCallback, useState } from "react";
+import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Play, Code2, Trash2, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BuilderNodes, type BaseNodeData, type RegisterNodeMetadata } from "./types";
+import { useDeleteNode } from "@/hooks/use-delete-node";
 
-interface ScriptNodeProps {
-    id: string;
-    data: {
-        label: string;
-        onChange?: (value: string) => void;
-        onRun?: () => void;
-        onDelete?: (id: string) => void;
-        isConnecting?: boolean;
-    };
-    selected: boolean;
-}
+const NODE_TYPE = BuilderNodes.SCRIPT;
+export interface ScriptNodeData extends BaseNodeData {
+};
 
-export default function ScriptNode({ id, data, selected }: ScriptNodeProps) {
+type ScriptNodeProps = NodeProps<
+    Node<ScriptNodeData, typeof NODE_TYPE>
+>;
+
+export default function ScriptNode({
+    id,
+    data,
+    selected
+}: ScriptNodeProps) {
     const [isHovered, setIsHovered] = useState(false);
     const [isEditingLabel, setIsEditingLabel] = useState(false);
     const [label, setLabel] = useState(data.label || "Script");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const deleteNode = useDeleteNode();
 
     const handleRun = useCallback(() => {
         console.log("run");
@@ -54,7 +58,7 @@ export default function ScriptNode({ id, data, selected }: ScriptNodeProps) {
                         <Button size="icon" variant="secondary" className="h-7 w-7 p-1" onClick={handleRun}>
                             <Play className="h-4 w-4 text-primary" />
                         </Button>
-                        <Button size="icon" variant="secondary" className="h-7 w-7 p-1" onClick={() => data.onDelete?.(id)}>
+                        <Button size="icon" variant="secondary" className="h-7 w-7 p-1" onClick={() => deleteNode(id)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                         <Button size="icon" variant="secondary" className="h-7 w-7 p-1">
@@ -158,3 +162,18 @@ export default function ScriptNode({ id, data, selected }: ScriptNodeProps) {
         </div>
     );
 }
+
+export const ScriptNodeMetadata: RegisterNodeMetadata<ScriptNodeData> = {
+    type: BuilderNodes.SCRIPT,
+    node: memo(ScriptNode),
+    connection: {
+        inputs: 1,
+        outputs: 1,
+    },
+    available: false,
+    defaultData: {
+        label: "Script",
+        deletable: true,
+    },
+    selected: false
+};

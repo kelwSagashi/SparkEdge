@@ -5,7 +5,7 @@ import {
     getBezierPath,
     useReactFlow,
 } from "@xyflow/react";
-import { X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 
 export default function CustomDeletableEdge(props: EdgeProps) {
     const {
@@ -35,7 +35,7 @@ export default function CustomDeletableEdge(props: EdgeProps) {
             <EdgeLabelRenderer>
                 <button
                     type="button"
-                    className="group pointer-events-auto absolute size-5 flex items-center justify-center rounded-full bg-card text-red-400 transition-colors  hover:bg-card-foreground/10"
+                    className="group pointer-events-auto absolute size-5 flex items-center justify-center rounded bg-foreground text-red-400 transition-colors hover:ring-accent-foreground hover:bg-background"
                     style={{
                         transform: `translate(${labelX}px, ${labelY}px) translate(-50%, -50%)`,
                     }}
@@ -53,7 +53,7 @@ export default function CustomDeletableEdge(props: EdgeProps) {
                         setEdges((edges) => edges.filter((edge) => edge.id !== id))
                     }}
                 >
-                    <X className="size-3 transition group-hover:scale-75" />
+                    <Trash2 className="size-3 transition " />
                 </button>
             </EdgeLabelRenderer>
         </>

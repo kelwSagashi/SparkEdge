@@ -1,6 +1,5 @@
 import React from "react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
-import { Button } from "../ui/button";
 
 export function NodeCommandDialog({
     open,

@@ -9,6 +9,12 @@
     },
     {
       "path": "./packages/db"
+    },
+    {
+      "path": "./packages/workflow"
+    },
+    {
+      "path": "./packages/nodes"
     }
   ],
   "compilerOptions": {
@@ -33,6 +39,12 @@
       ],
       "@nmg8/cli/*": [
         "packages/cli/src/*"
+      ],
+      "@nmg8/workflow/*": [
+        "packages/workflow/src/*"
+      ],
+      "@nmg8/nodes/*": [
+        "packages/nodes/src/*"
       ]
     },
     "outDir": "dist"

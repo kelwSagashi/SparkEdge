@@ -1,5 +1,5 @@
 import { db, Tables, type DBType } from "../db";
-import type { DeviceReturningValues, DeviceUpsertValues, ServerEndpointsReturningValues, ServerEndpointsUpsertValues, ServerReturningValues, ServerUpsertValues } from './db.service.d';
+import type { CodeInstanceReturningValues, DeviceReturningValues, DeviceUpsertValues, ServerEndpointsReturningValues, ServerEndpointsUpsertValues, ServerReturningValues, ServerUpsertValues } from './db.service.d';
 import { eq } from "drizzle-orm";
 
 type ReturningQueries<T> = {
@@ -111,6 +111,21 @@ export class DatabaseService {
                 data: this.db.select()
                     .from(Tables.ServerEndpointsTable)
                     .where(eq(Tables.ServerEndpointsTable.server_id, server_id))
+                    .all()
+            }
+        } catch (error: unknown) {
+            return {
+                error,
+                data: []
+            }
+        }
+    }
+
+    listAllCodeInstances(): ReturningQueries<CodeInstanceReturningValues[]> {
+        try {
+            return {
+                data: this.db.select()
+                    .from(Tables.CodeInstance)
                     .all()
             }
         } catch (error: unknown) {

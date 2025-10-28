@@ -15,4 +15,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  optimizeDeps: {
+    exclude: ["react-resizable-panels"],
+  },
 })

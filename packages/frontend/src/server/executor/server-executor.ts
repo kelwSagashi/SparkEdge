@@ -1,4 +1,4 @@
-import type { Path, Server } from "@/mock";
+import type { ServerEndpointsReturningValues, ServerReturningValues } from "@nmg8/db/src/services/db.service.d";
 
 export function interpolate(template: string, params: Record<string, string> = {}) {
   return template.replace(/{{(.*?)}}/g, (_, key) => params[key.trim()] ?? null)
@@ -40,7 +40,12 @@ export function parseEndpoint(endpoint: string): EndpointPart[] {
 }
 
 
-export async function execute(server: Server, endpoint: string, path: Path, body?: any) {
+export async function execute(
+  server: ServerReturningValues,
+  endpoint: string,
+  path: ServerEndpointsReturningValues,
+  body?: any
+) {
   const response = await fetch(server.base_url + endpoint, {
     method: path.method,
     body,

@@ -1,28 +1,32 @@
 import type { ComponentType } from "react";
-
-export enum BuilderNodes {
-    SCRIPT = 'script',
-    SERVER = 'server'
-}
-export type BuilderNodeType = `${BuilderNodes}`;
-
+import type { BuilderNodeGroupTypes, BuilderNodeTypes } from '@nmg8/workflow/src/constants'
+import type { ExpressionString, INodeInputConfiguration, INodeOutputConfiguration, INodeTypeDescription, NodeGroupType } from '@nmg8/workflow/src'
 
 export interface RegisterNodeMetadata<T = Record<string, unknown>> {
-    type: BuilderNodeType,
+    group: BuilderNodeGroupTypes,
+    types: BuilderNodeTypes[];
     defaultData?: T;
     selected: boolean;
     node: ComponentType<any>;
-    connection: {
-        inputs: number;
-        outputs: number;
-    };
     available?: boolean;
     propertyPanel?: ComponentType<any>;
+    deletable?: boolean;
+    isConnecting?: boolean;
+    notes?: string;
 };
 
+export type IBaseNodeTypeDescription = {
+    type: BuilderNodeTypes;
+    group: NodeGroupType;
+}
+
 export interface BaseNodeData extends Record<string, unknown> {
-    label: string;
-    onExecute?: () => void;
-    isConnecting?: boolean;
-    deletable?: boolean;
+    name: string;
+    inputNames?: string[];
+	inputs: Array<INodeInputConfiguration> | ExpressionString;
+	outputs: Array<INodeOutputConfiguration> | ExpressionString;
+	outputNames?: string[];
+	requiredInputs?: string | number[] | number;
+    parameters: IBaseNodeTypeDescription;
+    onExecute: () => void;
 }

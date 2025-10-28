@@ -1,5 +1,6 @@
-import { NODES } from "@/components/flow/nodes";
-import type { BaseNodeData, BuilderNodes } from "@/components/flow/nodes/types";
+import type { BaseNodeData } from "@/components/flow/nodes/types";
+import type { INodeTypeDescription } from "@nmg8/workflow/src";
+import { BuilderNodes, NodeGroupTypes, type BuilderNodeGroupTypes, type BuilderNodeTypes } from "@nmg8/workflow/src/constants";
 import { useReactFlow, type Node, type XYPosition } from "@xyflow/react";
 import { useCallback } from "react";
 import * as uuid from 'uuid';
@@ -9,7 +10,7 @@ export function useInsertNode() {
         useReactFlow();
 
     return useCallback(
-        (type: BuilderNodes, pos?: XYPosition) => {
+        async (type: BuilderNodeTypes, pos?: XYPosition) => {
             const _pos =
                 pos ||
                 screenToFlowPosition({
@@ -25,19 +26,31 @@ export function useInsertNode() {
 
             const id = uuid.v4();
 
-            const defaultData = NODES.find((node) => node.type === type)?.defaultData;
-
+            const res = await fetch(`http://localhost:3000/api/nodes/${type}/description`);
+            const description = await res.json() as INodeTypeDescription;
             const data: BaseNodeData = {
-                label: "Sem titulo",
-                ...defaultData
+                name: description.displayName,
+                inputs: description.inputs,
+                outputs: description.outputs,
+                inputNames: description.inputNames,
+                outputNames: description.outputNames,
+                requiredInputs: description.requiredInputs,
+                parameters: {
+                    group: description.group,
+                    type: type
+                },
+                onExecute() {
+                    console.log("executar")
+                },
             }
 
-            const newNode: Node<BaseNodeData, typeof type> = {
+            const newNode: Node<BaseNodeData, string> = {
                 id,
-                type,
+                type: `${description.group}.${type}`,
                 position: _pos,
                 selected: true,
-                data
+                data,
+                deletable: true,
             };
 
             addNodes(newNode);

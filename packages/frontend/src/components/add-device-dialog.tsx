@@ -11,17 +11,16 @@ import { Input } from './ui/input';
 import z from 'zod';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronRight, Folder, Trash } from 'lucide-react';
+import { Trash } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import DraggableValue from './DraggableValue';
 import { useDrop } from 'react-dnd';
 import { ItemTypes } from '@/lib/constants';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { DeviceConnectionMethods } from '@nmg8/db/src/db/schema';
 import type { ServerEndpointsReturningValues, ServerReturningValues } from '@nmg8/db/src/services/db.service.d';
+import { JsonViewMain } from './json-view/json-view';
 
 export type ServiceType = 'rest' | 'google_drive' | null;
 
@@ -78,134 +77,7 @@ const endpointSchema = z.object({
 
 type EndpointsFormValues = z.infer<typeof endpointSchema>;
 
-function TreeMain({
-    className,
-    data,
-    onParamChange,
-    inputProps,
-    pProps,
-    ...props
-}: React.ComponentProps<"div"> & {
-    data: Record<string, any>,
-    onParamChange?: (endpointName: string, paramName: string, value: string) => void;
-    inputProps?: React.ComponentProps<"input">;
-    pProps?: React.ComponentProps<"p">;
-}) {
-    return (
-        <div className='flex flex-col'>
-            <div className='flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden'>
-                <div className='relative flex w-full min-w-0 flex-col p-2'>
-                    <div className='w-full text-sm'>
-                        <div className={cn('flex w-full min-w-0 flex-col gap-1', className)} {...props}>
-                            {Object.entries(data).map(([name, value]) => (
-                                <Tree key={name} name={name} value={value} onParamChange={onParamChange} inputProps={inputProps} pProps={pProps} />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
 
-
-function TreeButton({
-    className,
-    ...props
-}: React.ComponentProps<"button">) {
-    return (
-        <button className={
-            cn('flex items-center gap-2 overflow-hidden',
-                'rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring',
-                'transition-[width,height,padding]',
-                'focus-visible:ring-2',
-                'disabled:pointer-events-none disabled:opacity-50',
-                'pointer-events-auto cursor-pointer aria-disabled:opacity-50',
-                'data-[active=true]:font-medium',
-                'group-data-[collapsible=icon]:size-8!',
-                'group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
-                'text-primary',
-                className
-            )}
-            {...props} />
-    )
-}
-
-function Tree({
-    name,
-    value,
-    inputProps,
-    pProps,
-    onParamChange,
-}: {
-    name: string;
-    value: any;
-    onParamChange?: (endpointName: string, paramName: string, value: string) => void;
-    inputProps?: React.ComponentProps<"input">;
-    pProps?: React.ComponentProps<"p">;
-}) {
-    const isObject = typeof value === "object" && value !== null;
-
-    if (!isObject) {
-        return (
-            <TreeButton
-                className="w-80 data-[active=true]:bg-transparent"
-            >
-                <div className='w-full flex gap-2 items-center'>
-                    <span className='bg-foreground p-2 rounded w-auto'>{name}</span>
-                    {inputProps && <Input
-                        defaultValue={value}
-                        onChange={(e) => onParamChange?.("", name, e.target.value)}
-                        {...inputProps}
-                    />}
-                    {pProps && (
-                        <DraggableValue type={ItemTypes.OUTPUT_VALUE} isDropped={false} value={String(value)}>
-                            <p {...pProps}>{String(value)}</p>
-                        </DraggableValue>
-                    )}
-                </div>
-            </TreeButton>
-        )
-    }
-    return (
-        <div className='relative'>
-            <Collapsible
-                className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
-                defaultOpen={name === "components" || name === "ui"}
-            >
-                <CollapsibleTrigger asChild>
-                    <TreeButton>
-                        <ChevronRight className="transition-transform" />
-                        <Folder />
-                        {name}
-                    </TreeButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                    <div
-                        className={cn(
-                            "border-sidebar-border mx-3.5 flex min-w-0 translate-x-px",
-                            "flex-col gap-1 border-l px-2.5 py-0.5",
-                            "group-data-[collapsible=icon]:hidden"
-                        )}
-                    >
-                        {Object.entries(value).map(([childName, childValue]) => (
-                            <Tree
-                                key={childName}
-                                name={childName}
-                                value={childValue}
-                                onParamChange={(_, param, val) =>
-                                    onParamChange?.(name, param, val)
-                                }
-                                inputProps={inputProps}
-                                pProps={pProps}
-                            />
-                        ))}
-                    </div>
-                </CollapsibleContent>
-            </Collapsible>
-        </div>
-    )
-}
 
 function GetPath({ serverSelected }: { serverSelected: ServerReturningValues | undefined }) {
     const [selectedParams, setSelectedParams] = useState<Record<number, string[]>>({});
@@ -460,7 +332,7 @@ function GetPath({ serverSelected }: { serverSelected: ServerReturningValues | u
                         <TabsContent value="inputs" className='flex-1 overflow-hidden min-h-0'>
                             <ScrollArea className='h-full w-full'>
                                 <h3 className="text-muted-foreground text-lg font-medium">Inputs</h3>
-                                <TreeMain
+                                <JsonViewMain
                                     inputProps={{
                                         className: "w-auto border-border rounded"
                                     }}
@@ -472,7 +344,7 @@ function GetPath({ serverSelected }: { serverSelected: ServerReturningValues | u
                         <TabsContent value="outputs" className='flex-1 overflow-hidden min-h-0'>
                             <ScrollArea className='h-full w-full'>
                                 <h3 className="text-muted-foreground text-lg font-medium">Outputs</h3>
-                                <TreeMain
+                                <JsonViewMain
                                     pProps={{
                                         className: cn(
                                             "border-none break-all w-full text-sm py-1 px-2 rounded hover:bg-accent cursor-grab"

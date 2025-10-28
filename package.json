@@ -24,12 +24,13 @@
     "url": "https://github.com/kelwSagashi/nmg8/issues"
   },
   "homepage": "https://github.com/kelwSagashi/nmg8#readme",
-  "private": "true",
+  "private": true,
   "workspaces": [
     "packages/*"
   ],
   "devDependencies": {
     "concurrently": "^9.2.1",
+    "turbo": "^2.5.8",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -44,6 +45,8 @@
     "get-caller-file": "^2.0.5",
     "has-flag": "^4.0.0",
     "is-fullwidth-code-point": "^3.0.0",
+    "re-resizable": "^6.11.2",
+    "react-draggable": "^4.5.0",
     "require-directory": "^2.1.1",
     "rxjs": "^7.8.2",
     "shell-quote": "^1.8.3",

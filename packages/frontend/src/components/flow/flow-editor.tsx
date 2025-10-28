@@ -13,10 +13,12 @@ import { useNodeAutoAdjust } from '@/hooks/use-node-auto-adjust';
 import { FlowContextMenu } from './components/context-menu';
 import CustomDeletableEdge from './edges/custom-deletable-edge';
 import { useAddOnEdgeDrop } from '@/hooks/use-add-on-edge-drop';
-import { BuilderNodes } from "@/components/flow/nodes/types";
 import { useInsertNode } from '@/hooks/use-insert-node';
 import { useDeleteNode } from '@/hooks/use-delete-node';
+import { BuilderNodes } from '@nmg8/workflow/src/constants';
 import { NODE_TYPES } from './nodes';
+import { NodePanel } from './nodes/panel';
+import type { BaseNodeData } from './nodes/types';
 
 const edgeTypes: EdgeTypes = {
     deletable: CustomDeletableEdge
@@ -24,8 +26,11 @@ const edgeTypes: EdgeTypes = {
 
 export default function FlowEditor({ id }: { id: string | undefined }) {
     const [open, setOpen] = useState<boolean>(false);
-    const [nodes, setNodes] = useState<Node[]>([]);
+    const [nodes, setNodes] = useState<Node<BaseNodeData, string>[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
+
+    const [openNodePanel, setOpenNodePanel] = useState(false);
+    const [nodeClicked, setNodeClicked] = useState<Node<BaseNodeData, string>>();
 
     const { getNodes } = useReactFlow();
 
@@ -55,7 +60,7 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
     );
 
     const onNodesChange = useCallback(
-        (changes: NodeChange<Node>[]) => {
+        (changes: NodeChange<Node<BaseNodeData, string>>[]) => {
             changes.forEach((change) => {
                 if (change.type === "dimensions") {
                     const node = getNodes().find((n) => n.id === change.id);
@@ -68,7 +73,7 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                     handleAutoAdjustNodeAfterNodeMeasured(change.item.id);
                 }
             });
-            setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot))
+            setNodes((nodesSnapshot) => applyNodeChanges<Node<BaseNodeData, string>>(changes, nodesSnapshot))
         },
         [],
     );
@@ -175,6 +180,10 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                         onNodeDragStop={(_, node) => {
                             autoAdjustNode(node);
                         }}
+                        onNodeDoubleClick={(e, node) => {
+                            setOpenNodePanel(true);
+                            setNodeClicked(node);
+                        }}
                         snapGrid={[16, 16]}
                         snapToGrid
                         fitView
@@ -200,6 +209,16 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                         <Background gap={12} size={1} />
                     </ReactFlow>
                 </FlowContextMenu>
+
+                <NodePanel
+                    isDialogOpen={openNodePanel}
+                    setIsDialogOpen={setOpenNodePanel}
+                    onClose={() => {
+                        setOpenNodePanel(false);
+                        setNodeClicked(undefined)
+                    }}
+                    node={nodeClicked}
+                />
 
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-2xl border border-border px-4 py-2 flex items-center gap-3 z-50">
                     <Button size="sm" onClick={handleRun}>

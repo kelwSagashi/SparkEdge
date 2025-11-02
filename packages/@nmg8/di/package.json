@@ -1,0 +1,24 @@
+{
+  "name": "@nmg8/di",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/di.js",
+  "module": "src/di.ts",
+  "types": "dist/di.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "clean": "rimraf dist .turbo",
+    "dev": "pnpm watch",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json --watch"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@nmg8/typescript-config": "workspace:*"
+  }
+}

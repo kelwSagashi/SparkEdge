@@ -1,5 +1,5 @@
 {
-	"extends": ["./tsconfig.json", "../../tsconfig.cjs.json"],
+	"extends": ["./tsconfig.json", "@nmg8/typescript-config/modern/tsconfig.cjs.json"],
 	"compilerOptions": {
 		"outDir": "dist",
 		"module": "commonjs",

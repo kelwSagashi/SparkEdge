@@ -4,10 +4,14 @@
   "description": "",
   "scripts": {
     "test": "vitest run",
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.json",
+    "dev": "pnpm watch",
+    "watch": "tsc-watch -p tsconfig.build.json --onCompilationComplete \"tsc-alias -p tsconfig.build.json\"",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "node dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -24,8 +28,11 @@
     "@types/cors": "^2.8.19",
     "@types/socket.io": "^3.0.1",
     "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.16",
+    "tsc-watch": "^7.2.0",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@nmg8/typescript-config": "workspace:*"
   },
   "dependencies": {
     "bullmq": "^5.61.0",

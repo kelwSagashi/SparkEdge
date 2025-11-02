@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "test": "vitest run",
-    "build": "tsc",
+    "build": "tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json",
     "dev": "pnpm watch",
     "start": "node dist/index.js",
     "watch": "tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json --watch"
@@ -31,6 +31,10 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "tsc-esm-fix": "^3.1.2"
-  }
+    "tsc-esm-fix": "^3.1.2",
+    "@nmg8/typescript-config": "workspace:*"
+  },
+  "files": [
+    "dist/**/*"
+  ]
 }

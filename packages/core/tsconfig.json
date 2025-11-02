@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.common.json",
+  "extends": "@nmg8/typescript-config/tsconfig.common.json",
   "compilerOptions": {
     "lib": ["es2022"],
 		"rootDir": ".",
@@ -8,6 +8,8 @@
     "paths": {
 			"@/*": ["./*"],
 		},
+
+    "downlevelIteration": true,
 
     "tsBuildInfoFile": "dist/typecheck.tsbuildinfo",
 		"emitDecoratorMetadata": true,

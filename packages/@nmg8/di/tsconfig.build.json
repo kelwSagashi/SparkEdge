@@ -1,5 +1,5 @@
 {
-	"extends": ["./tsconfig.json", "@nmg8/typescript-config/tsconfig.build.json"],
+	"extends": ["./tsconfig.json", "@n8n/typescript-config/tsconfig.build.json"],
 	"compilerOptions": {
 		"composite": true,
 		"rootDir": "src",
@@ -7,5 +7,5 @@
 		"tsBuildInfoFile": "dist/build.tsbuildinfo"
 	},
 	"include": ["src/**/*.ts"],
-	"exclude": ["test/**", "src/**/__tests__/**"]
+	"exclude": ["src/**/__tests__/**"]
 }

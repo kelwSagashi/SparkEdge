@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.modern.json",
+  "extends": "@nmg8/typescript-config/modern/tsconfig.json",
   "compilerOptions": {
     "tsBuildInfoFile": "dist/typecheck.tsbuildinfo",
 

@@ -13,7 +13,9 @@
     "nmg8-workflow": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "tsc-watch": "^7.2.0",
+    "typescript": "^5.9.3",
+    "@nmg8/typescript-config": "workspace:*"
   },
   "keywords": [],
   "author": "",

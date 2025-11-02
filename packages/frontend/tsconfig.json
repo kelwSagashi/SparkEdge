@@ -1,14 +1,16 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.frontend.json",
   "files": [],
   "compilerOptions": {
+    "composite": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
-      ]
+      ],
     }
   },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx"],
   "references": [
     {
       "path": "./tsconfig.app.json"
@@ -16,14 +18,6 @@
     {
       "path": "./tsconfig.node.json"
     },
-    {
-      "path": "../core"
-    },
-    {
-      "path": "../db"
-    },
-    {
-      "path": "../workflow"
-    }
+    { "path": "../workflow/tsconfig.build.esm.json" },
   ],
 }

@@ -1,4 +1,4 @@
-import type { ServerEndpointsReturningValues, ServerReturningValues } from "@nmg8/db/src/services/db.service.d";
+import axios from "axios";
 
 export function interpolate(template: string, params: Record<string, string> = {}) {
   return template.replace(/{{(.*?)}}/g, (_, key) => params[key.trim()] ?? null)
@@ -37,19 +37,4 @@ export function parseEndpoint(endpoint: string): EndpointPart[] {
   }
 
   return parts;
-}
-
-
-export async function execute(
-  server: ServerReturningValues,
-  endpoint: string,
-  path: ServerEndpointsReturningValues,
-  body?: any
-) {
-  const response = await fetch(server.base_url + endpoint, {
-    method: path.method,
-    body,
-  });
-
-  return await response.json();
 }

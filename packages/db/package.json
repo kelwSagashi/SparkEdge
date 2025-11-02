@@ -1,11 +1,10 @@
 {
-  "name": "@nmg8/db",
+  "name": "nmg8-db",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc -p tsconfig.json",
     "generate": "drizzle-kit generate:sqlite",
     "migrate": "drizzle-kit migrate:sqlite",
@@ -14,10 +13,19 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": "./*"
+  },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "ts-node-dev": "^2.0.0",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {

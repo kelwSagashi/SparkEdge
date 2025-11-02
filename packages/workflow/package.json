@@ -1,19 +1,32 @@
 {
-  "name": "@nmg8/workflow",
+  "name": "nmg8-workflow",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "test": "vitest run",
+    "build": "pnpm watch",
     "dev": "tsc -w",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "watch": "tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json --watch"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
+  "types": "dist/esm/index.d.ts",
+  "module": "dist/esm/index.js",
+  "main": "dist/cjs/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./common": {
+      "types": "./dist/esm/common/index.d.ts",
+      "import": "./dist/esm/common/index.js",
+      "require": "./dist/cjs/common/index.js"
+    },
+    "./*": "./*"
+  },
   "dependencies": {
+    "nmg8-frontend": "workspace:*",
     "axios": "^1.12.2",
     "express": "^5.1.0",
     "typescript": "^5.9.3"

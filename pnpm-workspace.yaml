@@ -1,0 +1,8 @@
+packages:
+  - packages/*
+  - packages/frontend/**
+
+ignoredBuiltDependencies:
+  - better-sqlite3
+  - esbuild
+  - msgpackr-extract

@@ -1,0 +1,16 @@
+{
+	"extends": ["./tsconfig.json", "../../tsconfig.cjs.json"],
+	"compilerOptions": {
+		"outDir": "dist",
+		"module": "commonjs",
+		"tsBuildInfoFile": "dist/typecheck.tsbuildinfo"
+	},
+	"include": [
+		"src/nodes/**/*.ts",
+		"src/nodes/**/*.json",
+	],
+	"exclude": [
+		"node_modules",
+		"nodes/**/*.test.ts"
+	]
+}

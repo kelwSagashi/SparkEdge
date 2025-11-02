@@ -1,19 +1,15 @@
 import express from "express";
 import http from "http";
-import { Server } from "socket.io";
 import cors from "cors";
-import { NodeRegistry } from "./registry";
-import { Script } from "@nmg8/nodes/src/nodes/Script/ScriptNode";
 import { Expression } from "./expression";
+import { NodeRegistry } from 'nmg8-workflow';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
-
-NodeRegistry.register('script', Script);
+// const io = new Server(server, { cors: { origin: "*" } });
 
 // const queue = new Queue("scripts", { connection: { host: "localhost", port: 6379 } });
 
@@ -47,6 +43,15 @@ app.post("/api/expression/resolve", async (req, res) => {
     res.json(ev.evaluateExpression(
         expression, context))
     return;
+});
+
+app.post("/api/workflow/execute/:id", async (req, res) => {
+    
+})
+
+app.post("/api/workflow/execute/test/", async (req, res) => {
+    const {node} = req.body;
+    
 })
 
 server.listen(3000, () => {

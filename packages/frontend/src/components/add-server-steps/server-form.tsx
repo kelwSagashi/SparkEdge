@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
-import { AuthorizationTypes, ServerEndpointMethods } from '@nmg8/db/src/db/schema';
+import { AuthorizationTypes, ServerEndpointMethods } from 'nmg8-db/src/schema/constants.ts';
 import { useCallback, useMemo, useState } from 'react';
 import { ApiKeyAuthForm } from '../auth-forms/APIKeyForm';
 import { BasicAuthForm } from '../auth-forms/BasicAuth';

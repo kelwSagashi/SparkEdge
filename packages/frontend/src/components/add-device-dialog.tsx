@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useDrop } from 'react-dnd';
 import { ItemTypes } from '@/lib/constants';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { DeviceConnectionMethods } from 'nmg8-db/src/schema/index.ts';
+import { DeviceConnectionMethods } from 'nmg8-db/src/schema/constants.ts';
 import type { ServerEndpointsReturningValues, ServerReturningValues } from 'nmg8-db/src/types/index.ts';
 import { JsonViewMain } from './json-view/json-view';
 import { api } from '@/server/server.service';

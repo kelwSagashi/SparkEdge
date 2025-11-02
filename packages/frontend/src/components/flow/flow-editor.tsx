@@ -15,10 +15,10 @@ import CustomDeletableEdge from './edges/custom-deletable-edge';
 import { useAddOnEdgeDrop } from '@/hooks/use-add-on-edge-drop';
 import { useInsertNode } from '@/hooks/use-insert-node';
 import { useDeleteNode } from '@/hooks/use-delete-node';
-import { BuilderNodes } from '@nmg8/workflow/src/constants';
+import { BuilderNodes } from 'nmg8-workflow';
 import { NODE_TYPES } from './nodes';
 import { NodePanel } from './nodes/panel';
-import type { BaseNodeData } from './nodes/types';
+import type { INode } from '@/interfaces';
 
 const edgeTypes: EdgeTypes = {
     deletable: CustomDeletableEdge
@@ -26,11 +26,11 @@ const edgeTypes: EdgeTypes = {
 
 export default function FlowEditor({ id }: { id: string | undefined }) {
     const [open, setOpen] = useState<boolean>(false);
-    const [nodes, setNodes] = useState<Node<BaseNodeData, string>[]>([]);
+    const [nodes, setNodes] = useState<INode[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
 
     const [openNodePanel, setOpenNodePanel] = useState(false);
-    const [nodeClicked, setNodeClicked] = useState<Node<BaseNodeData, string>>();
+    const [nodeClicked, setNodeClicked] = useState<INode>();
 
     const { getNodes } = useReactFlow();
 
@@ -60,7 +60,7 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
     );
 
     const onNodesChange = useCallback(
-        (changes: NodeChange<Node<BaseNodeData, string>>[]) => {
+        (changes: NodeChange<INode>[]) => {
             changes.forEach((change) => {
                 if (change.type === "dimensions") {
                     const node = getNodes().find((n) => n.id === change.id);
@@ -73,7 +73,7 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                     handleAutoAdjustNodeAfterNodeMeasured(change.item.id);
                 }
             });
-            setNodes((nodesSnapshot) => applyNodeChanges<Node<BaseNodeData, string>>(changes, nodesSnapshot))
+            setNodes((nodesSnapshot) => applyNodeChanges<INode>(changes, nodesSnapshot))
         },
         [],
     );

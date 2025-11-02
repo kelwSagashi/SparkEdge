@@ -1,6 +1,7 @@
 
 import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import * as uuid from 'uuid';
+import { AuthorizationTypes, DeviceConnectionMethods, ServerEndpointMethods } from './constants';
 
 export const ServerTypesTable = sqliteTable('server-types', {
   id: text("id").primaryKey().$defaultFn(() => uuid.v4()),
@@ -8,8 +9,6 @@ export const ServerTypesTable = sqliteTable('server-types', {
   type: text('type').notNull(),
   description: text('description')
 });
-
-export const AuthorizationTypes = ['No Auth', 'API Key', 'Bearer Token', 'Basic Auth', 'Digest Auth'] as const;
 
 export const ServersTable = sqliteTable('servers', {
   id: text("id").primaryKey().$defaultFn(() => uuid.v4()),
@@ -22,8 +21,6 @@ export const ServersTable = sqliteTable('servers', {
   created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
   updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
 });
-
-export const ServerEndpointMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as const;
 
 export const ServerEndpointsTable = sqliteTable('server_endpoints', {
   id: text("id").primaryKey().$defaultFn(() => uuid.v4()),
@@ -42,8 +39,6 @@ export const ServerEndpointsTable = sqliteTable('server_endpoints', {
   created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
   updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
 });
-
-export const DeviceConnectionMethods = ["none", "serial", "tcp", "udp"] as const;
 
 export const DeviceTable = sqliteTable('devices', {
   id: text("id").primaryKey().$defaultFn(() => uuid.v4()),

@@ -26,7 +26,6 @@
     "./*": "./*"
   },
   "dependencies": {
-    "nmg8-frontend": "workspace:*",
     "axios": "^1.12.2",
     "express": "^5.1.0",
     "typescript": "^5.9.3"

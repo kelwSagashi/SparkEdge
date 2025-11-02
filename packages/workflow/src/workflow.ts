@@ -2,12 +2,11 @@ import type { IConnections } from "./interfaces/connection";
 import type { IDataObject } from "./interfaces/data";
 import type { INodeTypes } from "./interfaces/node";
 import type { IWorkflowSettings } from "./interfaces/workflow";
-import { type INode } from 'nmg8-frontend/src/interfaces';
 
 export interface WorkflowParameters {
 	id: string;
 	name: string;
-	nodes: INode[];
+	nodes: {}[];
 	connections: IConnections;
 	active: boolean;
 	nodeTypes: INodeTypes;
@@ -18,7 +17,7 @@ export interface WorkflowParameters {
 export class Workflow {
     id: string;
     name: string;
-    nodes: INode[] = [];
+    nodes: {}[] = [];
     edges: string[] = [];
     connectionsByDestinationNode: IConnections = {};
     // nodeTypes: INodeTypes;

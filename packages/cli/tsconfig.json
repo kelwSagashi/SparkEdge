@@ -1,0 +1,27 @@
+{
+	"extends": [
+		"@nmg8/typescript-config/tsconfig.common.json",
+		"@nmg8/typescript-config/tsconfig.backend.json"
+	],
+	"compilerOptions": {
+		"rootDir": ".",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"baseUrl": "src",
+		"paths": {
+			"@/*": ["./*"],
+		},
+		"tsBuildInfoFile": "dist/typecheck.tsbuildinfo",
+
+		"strict": false,
+		"useUnknownInCatchVariables": false,
+	},
+	"include": ["src/**/*.ts"],
+	"references": [
+		{ "path": "../core/tsconfig.build.json" },
+		{ "path": "../nodes/tsconfig.build.esm.json" },
+		{ "path": "../workflow/tsconfig.build.esm.json" },
+		{ "path": "../@nmg8/di/tsconfig.build.json" },
+		{ "path": "../db/tsconfig.build.json" },
+	]
+}

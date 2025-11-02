@@ -3,31 +3,29 @@
   "compilerOptions": {
     "tsBuildInfoFile": "dist/typecheck.tsbuildinfo",
 
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
+		// "emitDecoratorMetadata": true,
+		// "experimentalDecorators": true,
 
-		"module": "commonjs",
+		// "module": "commonjs",
     
-		"moduleResolution": "node",
-		"noImplicitReturns": false,
-		"useUnknownInCatchVariables": false,
-		"isolatedModules": false,
-		"verbatimModuleSyntax": false,
-		"noUncheckedIndexedAccess": false,
-		"noImplicitOverride": false,
+		// "moduleResolution": "node",
+		// "noImplicitReturns": false,
+		// "useUnknownInCatchVariables": false,
+		// "isolatedModules": false,
+		// "verbatimModuleSyntax": false,
+		// "noUncheckedIndexedAccess": false,
+		// "noImplicitOverride": false,
 
-		"noImplicitAny": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"strictNullChecks": true,
-		"preserveConstEnums": true,
+		// "noImplicitAny": true,
+		// "noUnusedLocals": true,
+		// "noUnusedParameters": true,
+		// "strictNullChecks": true,
+		// "preserveConstEnums": true,
 
-    "baseUrl": "./src",
-    "paths": {
-      "@nodes/*": [
-        "./src/*"
-      ]
-    },
+    "rootDir": ".",
+    "noUncheckedIndexedAccess": false,
+    "verbatimModuleSyntax": false,
+    "downlevelIteration": true,
   },
   "references": [
     {

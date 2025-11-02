@@ -12,17 +12,15 @@
   "files": [
     "dist"
   ],
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
+    },
+    "./*": "./*"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

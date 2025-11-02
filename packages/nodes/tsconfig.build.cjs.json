@@ -1,13 +1,13 @@
 {
 	"extends": ["./tsconfig.json", "@nmg8/typescript-config/modern/tsconfig.cjs.json"],
 	"compilerOptions": {
-		"outDir": "dist",
-		"module": "commonjs",
-		"tsBuildInfoFile": "dist/typecheck.tsbuildinfo"
+		"rootDir": "src",
+		"outDir": "dist/cjs",
+		"tsBuildInfoFile": "dist/cjs/typecheck.tsbuildinfo"
 	},
 	"include": [
-		"src/nodes/**/*.ts",
-		"src/nodes/**/*.json",
+		"src/**/*.ts",
+		"src/**/*.json",
 	],
 	"exclude": [
 		"node_modules",

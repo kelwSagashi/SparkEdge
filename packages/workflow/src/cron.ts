@@ -1,4 +1,4 @@
-import { CronExpression, TriggerTime } from "./interfaces/cron";
+import type { CronExpression, TriggerTime } from "./interfaces/cron";
 import { randomInt } from "./utils";
 
 export const toCronExpression = (item: TriggerTime): CronExpression => {

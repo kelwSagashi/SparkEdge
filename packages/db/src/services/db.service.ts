@@ -1,5 +1,13 @@
-import { db, Tables, type DBType } from "../db";
-import type { CodeInstanceReturningValues, DeviceReturningValues, DeviceUpsertValues, ServerEndpointsReturningValues, ServerEndpointsUpsertValues, ServerReturningValues, ServerUpsertValues } from './db.service.d';
+import { db, Tables, type DBType } from "../schema";
+import type { 
+    CodeInstanceReturningValues, 
+    DeviceReturningValues, 
+    DeviceUpsertValues, 
+    ServerEndpointsReturningValues, 
+    ServerEndpointsUpsertValues, 
+    ServerReturningValues, 
+    ServerUpsertValues 
+    } from '../types';
 import { eq } from "drizzle-orm";
 
 type ReturningQueries<T> = {

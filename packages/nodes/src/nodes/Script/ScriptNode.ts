@@ -1,5 +1,9 @@
-import { DeclarativeRestApiSettings, INodeIOPosition, INodeType, INodeTypeDescription } from '@nmg8/workflow/src'
-import { NodeConnectionTypes } from '@nmg8/workflow/src/constants'
+import { 
+    DeclarativeRestApiSettings, 
+    INodeIOPosition, 
+    INodeType, 
+    INodeTypeDescription
+} from 'nmg8-workflow'
 
 export const configuredOutputs = (parameters: DeclarativeRestApiSettings.HttpRequestOptions) => {
     const httpMethod = parameters.method;

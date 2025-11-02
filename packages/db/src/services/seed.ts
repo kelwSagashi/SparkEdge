@@ -1,5 +1,4 @@
-import type { ServerTypeReturningValues } from "./db.service.d";
-
+import { ServerTypeReturningValues } from '../types'
 export const DefaultServerTypes: ServerTypeReturningValues[] = [
     {
         id: "http",

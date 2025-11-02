@@ -1,7 +1,7 @@
-import type { BaseNodeData } from "@/components/flow/nodes/types";
-import type { INodeTypeDescription } from "@nmg8/workflow/src";
-import { BuilderNodes, NodeGroupTypes, type BuilderNodeGroupTypes, type BuilderNodeTypes } from "@nmg8/workflow/src/constants";
-import { useReactFlow, type Node, type XYPosition } from "@xyflow/react";
+import type { INode } from "@/interfaces/nodes";
+import { api } from "@/server/server.service";
+import { type INodeData, type BuilderNodeTypes } from 'nmg8-workflow/src/index.ts';
+import { useReactFlow, type XYPosition } from "@xyflow/react";
 import { useCallback } from "react";
 import * as uuid from 'uuid';
 
@@ -10,7 +10,7 @@ export function useInsertNode() {
         useReactFlow();
 
     return useCallback(
-        async (type: BuilderNodeTypes, pos?: XYPosition) => {
+        async (builderType: BuilderNodeTypes, pos?: XYPosition) => {
             const _pos =
                 pos ||
                 screenToFlowPosition({
@@ -26,27 +26,26 @@ export function useInsertNode() {
 
             const id = uuid.v4();
 
-            const res = await fetch(`http://localhost:3000/api/nodes/${type}/description`);
-            const description = await res.json() as INodeTypeDescription;
-            const data: BaseNodeData = {
+
+            const description = (await api.getNodeDescription({type: builderType})).data;
+            const type = `${description.group}.${builderType}`;
+            const data: INodeData = {
                 name: description.displayName,
                 inputs: description.inputs,
                 outputs: description.outputs,
                 inputNames: description.inputNames,
                 outputNames: description.outputNames,
                 requiredInputs: description.requiredInputs,
-                parameters: {
-                    group: description.group,
-                    type: type
-                },
-                onExecute() {
-                    console.log("executar")
-                },
+                parameters: {},
+                id,
+                type: builderType,
+                group: description.group,
+                version: description.version
             }
 
-            const newNode: Node<BaseNodeData, string> = {
+            const newNode: INode = {
                 id,
-                type: `${description.group}.${type}`,
+                type,
                 position: _pos,
                 selected: true,
                 data,

@@ -5,8 +5,8 @@ import { Separator } from './ui/separator';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './ui/select';
 import { Paths, Servers } from '@/mock/severs';
 import { Button } from './ui/button';
-import React, { useEffect, useState } from 'react';
-import { execute, extractEndpointKeys, interpolate, parseEndpoint } from '@/server/executor/server-executor';
+import React, { useCallback, useEffect, useState } from 'react';
+import { extractEndpointKeys, parseEndpoint } from '@/server/executor/server-executor';
 import { Input } from './ui/input';
 import z from 'zod';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -18,9 +18,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useDrop } from 'react-dnd';
 import { ItemTypes } from '@/lib/constants';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { DeviceConnectionMethods } from '@nmg8/db/src/db/schema';
-import type { ServerEndpointsReturningValues, ServerReturningValues } from '@nmg8/db/src/services/db.service.d';
+import { DeviceConnectionMethods } from 'nmg8-db/src/schema/index.ts';
+import type { ServerEndpointsReturningValues, ServerReturningValues } from 'nmg8-db/src/types/index.ts';
 import { JsonViewMain } from './json-view/json-view';
+import { api } from '@/server/server.service';
 
 export type ServiceType = 'rest' | 'google_drive' | null;
 
@@ -201,13 +202,24 @@ function GetPath({ serverSelected }: { serverSelected: ServerReturningValues | u
         console.log("REST Server Data:", data);
     };
 
-    const handleExecute = async (path: ServerEndpointsReturningValues | undefined, endpointUniqueKey: string, params?: Record<string, string> | undefined) => {
+    const handleExecute = useCallback(
+        async (
+        path: ServerEndpointsReturningValues | undefined, 
+        endpointUniqueKey: string, 
+        params?: Record<string, string>
+        ) => {
         if (path && serverSelected) {
-            const response = await execute(serverSelected, interpolate(path.path, params), path, null);
-            handleResponseChange(endpointUniqueKey, response)
+            const response = await api.execute({
+                server: serverSelected, 
+                endpoint: path, 
+                params, 
+                body: null
+                });
+            handleResponseChange(endpointUniqueKey, response.data)
             setCurrentRTab("outputs");
         }
-    };
+    }, []
+    );
 
     const handleSaveDevice = (deviceData: DeviceFormValues) => {
         console.log("Dispositivo Salvo:", deviceData);

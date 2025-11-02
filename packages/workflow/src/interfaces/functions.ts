@@ -4,7 +4,7 @@ import { ExecuteWorkflowData, IDataObject, IExecuteData, IExecuteResponsePromise
 import { ExecutionError, RelatedExecution } from "./execution";
 import { ChunkType } from "./http";
 import { Logger } from "./logs";
-import { IGetNodeParameterOptions, INode, INodeExecutionData, INodeInputConfiguration, INodeOutputConfiguration, INodeParameters, INodeProperties, NodeConnectionType, NodeExecutionHint, NodeParameterValueType, NodeTypeAndVersion } from "./node";
+import { IGetNodeParameterOptions, INodeData, INodeExecutionData, INodeInputConfiguration, INodeOutputConfiguration, INodeParameters, INodeProperties, NodeConnectionType, NodeExecutionHint, NodeParameterValueType, NodeTypeAndVersion } from "./node";
 import { Result } from "./result";
 import { ITaskMetadata } from "./task";
 import { IExecuteWorkflowInfo, IWorkflowMetadata, WorkflowActivateMode, WorkflowExecuteMode } from "./workflow";
@@ -89,7 +89,7 @@ export interface FunctionsBase {
 	): Promise<T>;
 	getCredentialsProperties(type: string): INodeProperties[];
 	getExecutionId(): string;
-	getNode(): INode;
+	getNode(): INodeData;
 	getWorkflow(): IWorkflowMetadata;
 	getWorkflowStaticData(type: string): IDataObject;
 	getTimezone(): string;
@@ -115,7 +115,7 @@ export interface FunctionsBase {
 	getKnownNodeTypes(): IDataObject;
 	getMode?: () => WorkflowExecuteMode;
 	getActivationMode?: () => WorkflowActivateMode;
-	getChatTrigger: () => INode | null;
+	getChatTrigger: () => INodeData | null;
 	prepareOutputData(outputData: INodeExecutionData[]): Promise<INodeExecutionData[][]>;
 }
 

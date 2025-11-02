@@ -1,6 +1,6 @@
 import { IConnections } from "./connection";
 import { IDataObject, IPinData, IRunData, IRunExecutionData, StartNodeData } from "./data";
-import { INode } from "./node";
+import { INodeData } from "./node";
 import { ITaskData } from "./task";
 import type * as express from 'express';
 
@@ -64,7 +64,7 @@ export interface IWorkflowBase {
 	createdAt: Date;
 	startedAt?: Date;
 	updatedAt: Date;
-	nodes: INode[];
+	nodes: INodeData[];
 	connections: IConnections;
 	settings?: IWorkflowSettings;
 	staticData?: IDataObject;

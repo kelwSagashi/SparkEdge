@@ -1,9 +1,9 @@
-import { IContextObject } from "./context";
-import { ExecutionError, RelatedExecution } from "./execution";
-import { INode, INodeExecutionData } from "./node";
-import { ITaskData, ITaskDataConnections, ITaskDataConnectionsSource, ITaskMetadata, IWaitingForExecution, IWaitingForExecutionSource } from "./task";
-import { CloseFunction } from "./utils";
-import { IWorkflowExecutionDataProcess } from "./workflow";
+import type { IContextObject } from "./context";
+import type { ExecutionError, RelatedExecution } from "./execution";
+import type { INodeData, INodeExecutionData } from "./node";
+import type { ITaskData, ITaskDataConnections, ITaskDataConnectionsSource, ITaskMetadata, IWaitingForExecution, IWaitingForExecutionSource } from "./task";
+import type { CloseFunction } from "./utils";
+import type { IWorkflowExecutionDataProcess } from "./workflow";
 
 export type GenericValue = string | object | number | boolean | undefined | null;
 
@@ -74,7 +74,7 @@ export interface IExecuteContextData {
 export interface IExecuteData {
 	data: ITaskDataConnections;
 	metadata?: ITaskMetadata;
-	node: INode;
+	node: INodeData;
 	source: ITaskDataConnectionsSource | null;
 	runIndex?: number;
 }

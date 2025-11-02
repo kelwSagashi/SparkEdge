@@ -1,22 +1,17 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { Handle, Position, useReactFlow, type Node, type NodeProps } from "@xyflow/react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, Code2, Trash2, MoreHorizontal } from "lucide-react";
+import { useReactFlow, type Node, type NodeProps } from "@xyflow/react";
+import { Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { type BaseNodeData, type RegisterNodeMetadata } from "./types";
 import { useDeleteNode } from "@/hooks/use-delete-node";
 import { BuilderNodeValues, NodeGroupTypes } from "@nmg8/workflow/src/constants";
 import BaseNodeActions from "./Node-Actions";
-import { NodePanel } from "./panel";
-import { type INodeTypeDescription } from "@nmg8/workflow/src";
+import { type INodeData, type INodeTypeDescription } from "@nmg8/workflow/src";
 import BaseInputHandle from "./base-input-handle";
 import BaseOutputHandle from "./base-output-handle";
+import { api } from "@/server/server.service";
+import type { IBaseNodeProps, RegisterNodeMetadata } from "@/interfaces/nodes";
 
 
-type IbaseNodeProps = NodeProps<
-    Node<BaseNodeData, string>
->;
 
 const NODE_HANDLE_SIZE_GAP = 2;
 const NODE_HANDLE_SIZE = 4;
@@ -31,7 +26,7 @@ export default function BaseNode({
     id,
     data,
     selected
-}: IbaseNodeProps) {
+}: IBaseNodeProps) {
     const [isHovered, setIsHovered] = useState(false);
     const [isEditingLabel, setIsEditingLabel] = useState(false);
     const [label, setLabel] = useState(data.name);
@@ -66,7 +61,6 @@ export default function BaseNode({
 
     const handleRun = useCallback(() => {
         console.log(getNode(id));
-        data.onExecute();
     }, [id, data]);
 
     const handleLabelBlur = useCallback(() => {
@@ -81,10 +75,9 @@ export default function BaseNode({
     );
 
     const handleLoadDescription = useCallback(async () => {
-        const res = await fetch(`http://localhost:3000/api/nodes/${data.parameters.type}/description`);
-        const _description = await res.json() as INodeTypeDescription;
+        const _description = (await api.getNodeDescription({type: data.type})).data;
         setDescription(_description);
-    }, [data.parameters.type]);
+    }, [data.type]);
 
     useEffect(() => {
         handleLoadDescription();
@@ -154,11 +147,11 @@ export default function BaseNode({
     );
 }
 
-export const BaseNodeMetadata: RegisterNodeMetadata<BaseNodeData> = {
+export const BaseNodeMetadata: RegisterNodeMetadata<INodeData> = {
     group: NodeGroupTypes.BASE,
     types: BuilderNodeValues,
     node: memo(BaseNode),
     selected: false,
     deletable: true,
-    available: true
+    available: true,
 };

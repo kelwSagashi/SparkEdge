@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { CodeInstanceReturningValues } from "@nmg8/db/src/services/db.service.d";
+import type { CodeInstanceReturningValues } from "@nmg8/db/src/services";
 import { useEffect, useState } from "react";
 
 export default function ScriptSelector() {

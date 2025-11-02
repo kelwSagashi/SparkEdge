@@ -1,5 +1,4 @@
-import { Tables } from '../db';
-
+import { Tables } from '../schema';
 
 export type ServerTypeUpsertValues = typeof Tables.ServerTypesTable.$inferInsert;
 export type ServerUpsertValues = typeof Tables.ServersTable.$inferInsert;

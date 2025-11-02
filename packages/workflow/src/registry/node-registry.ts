@@ -1,6 +1,6 @@
-import { INodeType } from '@nmg8/workflow/src';
+import type { INodeType } from "../interfaces/node";
 
-type NodeConstructor = new () => INodeType;
+export type NodeConstructor = new () => INodeType;
 
 class NodeRegistry {
 	private static registry = new Map<string, NodeConstructor>();

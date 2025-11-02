@@ -9,6 +9,7 @@ import type { BaseNodeData } from "./types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { INodeProperties, INodeTypeDescription } from "@nmg8/workflow/src";
 import ScriptSelector from "./panel/script-selector";
+import { api } from "@/server/server.service";
 
 interface INodePanelProps {
     isDialogOpen: boolean;
@@ -48,8 +49,7 @@ export const NodePanel: React.FC<INodePanelProps> = React.memo(({
 
     const handleLoadDescription = useCallback(async () => {
         if (!node) return;
-        const res = await fetch(`http://localhost:3000/api/nodes/${node.data.parameters.type}/description`);
-        const _description = await res.json() as INodeTypeDescription;
+        const _description = (await api.getNodeDescription({type: node.data.parameters.type})).data;
         setDescription(_description);
     }, [node?.data.parameters.type]);
 

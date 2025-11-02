@@ -355,7 +355,7 @@ export interface INodeProperties {
 }
 
 export interface IGetNodeParameterOptions {
-	contextNode?: INode;
+	contextNode?: INodeData;
 	// make sure that returned value would be of specified type, converts it if needed
 	ensureType?: EnsureTypeOptions;
 	// extract value from regex, works only when parameter type is resourceLocator
@@ -392,12 +392,12 @@ export interface INodeCredentials {
 
 export type OnError = 'continueErrorOutput' | 'continueRegularOutput' | 'stopWorkflow';
 
-export interface INode {
-	id: string;
+
+export interface INodeData extends Record<string, unknown> {
 	name: string;
-	typeVersion: number;
-	type: string;
-	position: [number, number];
+	version?: string | number | number[];
+	type: BuilderNodeTypes;
+    group: NodeGroupType;
 	disabled?: boolean;
 	notes?: string;
 	notesInFlow?: boolean;
@@ -411,23 +411,18 @@ export interface INode {
 	parameters: INodeParameters;
 	credentials?: INodeCredentials;
 	webhookId?: string;
-	extendsCredential?: string;
-	rewireOutputLogTo?: NodeConnectionType;
 
-	// forces the node to execute a particular custom operation
-	// based on resource and operation
-	// instead of calling default execute function
-	// used by evaluations test-runner
-	forceCustomOperation?: {
-		resource: string;
-		operation: string;
-	};
+    inputNames?: string[];
+	inputs: Array<INodeInputConfiguration> | ExpressionString;
+	outputs: Array<INodeOutputConfiguration> | ExpressionString;
+	outputNames?: string[];
+	requiredInputs?: string | number[] | number;
+    // parameters: IBaseNodeTypeDescription;
 }
 
 export interface INodes {
-	[key: string]: INode;
+	[key: string]: INodeData;
 }
-
 export interface INodeExecutionData {
 	[key: string]:
 		| IDataObject
@@ -497,6 +492,12 @@ export type NodeHint = {
 };
 
 export type NodeExecutionHint = Omit<NodeHint, 'whenToDisplay' | 'displayCondition'>;
+
+export interface INodeTypes {
+	getByName(nodeType: string): INodeType;
+	getByNameAndVersion(nodeType: string, version?: number): INodeType;
+	getKnownTypes(): IDataObject;
+}
 
 export interface INodeType {
 	description: INodeTypeDescription;

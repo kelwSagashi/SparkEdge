@@ -1,3 +1,5 @@
+import { Workflow } from "./workflow";
+
 export function randomInt(max: number): number;
 export function randomInt(min: number, max: number): number;
 /**
@@ -13,4 +15,20 @@ export function randomInt(min: number, max?: number): number {
 		min = 0;
 	}
 	return min + (crypto.getRandomValues(new Uint32Array(1))[0] % (max - min));
+}
+
+export function buildGraph(workflow: Workflow) {
+  const graph: Record<string, string[]> = {};
+
+  // Inicializa todos os nós
+  // for (const node of workflow.nodes) {
+  //   graph[node.id] = [];
+  // }
+
+  // // Adiciona conexões (arestas)
+  // for (const edge of workflow.edges) {
+  //   graph[edge.source].push(edge.target);
+  // }
+
+  return graph;
 }

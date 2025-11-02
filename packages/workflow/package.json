@@ -4,8 +4,8 @@
   "description": "",
   "scripts": {
     "test": "vitest run",
-    "build": "pnpm watch",
-    "dev": "tsc -w",
+    "build": "tsc",
+    "dev": "pnpm watch",
     "start": "node dist/index.js",
     "watch": "tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json --watch"
   },

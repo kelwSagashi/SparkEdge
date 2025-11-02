@@ -2,7 +2,6 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import { Expression } from "./expression";
-import { NodeRegistry } from 'nmg8-workflow';
 
 const app = express();
 app.use(cors());
@@ -22,18 +21,18 @@ app.post("/api/run", async (req, res) => {
 app.get("/api/nodes/:type/description", async (req, res) => {
     const type = req.params.type;
 
-    const NodeClass = NodeRegistry.get(type);
+    // const NodeClass = NodeRegistry.get(type);
 
-    if (!NodeClass) {
-        res.status(404).json({
-            message: "not found!"
-        });
-        return;
-    }
+    // if (!NodeClass) {
+    //     res.status(404).json({
+    //         message: "not found!"
+    //     });
+    //     return;
+    // }
 
-    const nodeInstance = new NodeClass();
+    // const nodeInstance = new NodeClass();
 
-    res.json(nodeInstance.getProperties());
+    // res.json(nodeInstance.getProperties());
     return;
 })
 

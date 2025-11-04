@@ -8,6 +8,7 @@
 	"include": [
 		"src/**/*.ts",
 		"src/**/*.json",
+		"src/**/*.svg",
 	],
 	"exclude": [
 		"node_modules",

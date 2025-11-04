@@ -4,19 +4,23 @@
   "description": "",
   "scripts": {
     "test": "vitest run",
-    "build": "tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json",
-    "watch": "tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json --watch",
+    "build": "pnpm run copy && tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json",
+    "watch": "pnpm run copy && tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json --watch",
     "dev": "pnpm watch",
-    "start": "node dist/index.js"
+    "start": "node dist/cjs/index.js",
+    "copy": "copyfiles -u 1 \"src/**/*.svg\" dist/"
   },
   "dependencies": {
-    "nmg8-workflow": "workspace:*",
-    "@nmg8/di": "workspace:*"
+    "@nmg8/di": "workspace:*",
+    "nmg8-workflow": "workspace:*"
   },
   "devDependencies": {
+    "@nmg8/typescript-config": "workspace:*",
+    "copyfiles": "^2.4.1",
+    "tsc-alias": "^1.8.16",
     "tsc-watch": "^7.2.0",
-    "typescript": "^5.9.3",
-    "@nmg8/typescript-config": "workspace:*"
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
   },
   "types": "dist/esm/index.d.ts",
   "module": "dist/esm/index.js",

@@ -2,9 +2,9 @@
   "name": "@nmg8/di",
   "version": "0.0.0",
   "description": "",
-  "main": "dist/di.js",
-  "module": "src/di.ts",
-  "types": "dist/di.d.ts",
+  "main": "dist/index.js",
+  "module": "src/index.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist/**/*"
   ],

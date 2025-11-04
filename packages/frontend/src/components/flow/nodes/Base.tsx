@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useReactFlow, type Node, type NodeProps } from "@xyflow/react";
-import { Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDeleteNode } from "@/hooks/use-delete-node";
 import { BuilderNodeValues, NodeGroupTypes, type INodeData, type INodeTypeDescription } from "nmg8-workflow";
@@ -9,8 +8,6 @@ import BaseInputHandle from "./base-input-handle";
 import BaseOutputHandle from "./base-output-handle";
 import { api } from "@/server/server.service";
 import type { IBaseNodeProps, RegisterNodeMetadata } from "@/interfaces/nodes";
-
-
 
 const NODE_HANDLE_SIZE_GAP = 2;
 const NODE_HANDLE_SIZE = 4;
@@ -80,7 +77,15 @@ export default function BaseNode({
 
     useEffect(() => {
         handleLoadDescription();
-    }, [handleLoadDescription])
+    }, [handleLoadDescription]);
+
+    const getIconUrl = useCallback((icon: string = "", type: string = "") => {
+        if (icon.startsWith("file:")) {
+            const fileName = icon.replace("file:", "");
+            return `http://localhost:3000/icons/${type}/${fileName}`;
+        }
+        return icon;
+    }, []);
 
     return (
         <div className="relative">
@@ -119,8 +124,12 @@ export default function BaseNode({
                     />
 
                     {/* Ícone central */}
-                    <Code2 className="h-10 w-10 text-primary" />
-                </div>
+                    <img
+                        src={getIconUrl(description?.icon as string, description?.name)}
+                        alt={description?.displayName}
+                        className="size-6"
+                    />
+                    </div>
 
                 {/* === LABEL FORA DO NÓ === */}
                 <div className="relative text-center mt-2">

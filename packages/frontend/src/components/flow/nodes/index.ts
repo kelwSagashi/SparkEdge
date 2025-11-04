@@ -1,5 +1,5 @@
+import type { RegisterNodeMetadata } from "@/interfaces";
 import { BaseNodeMetadata } from "./Base";
-import type { RegisterNodeMetadata } from "./types";
 
 export const NODES: RegisterNodeMetadata[] = [
   BaseNodeMetadata

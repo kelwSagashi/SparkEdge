@@ -8,11 +8,19 @@ O nmg8 é uma plataforma Agente de automação de monitoramento com nós, para s
 - **Serviço local**: permite rodar em sistemas mais criticos tendo flexibilidade em conseguir armazenar dados e enviar quando houver conexão.
 
 # Como rodar (Versão desenvolvimento)
+Primeiro você deve instalar o pnpm e depois instalar todas as dependencias com 
 ```bash
-npm run dev
+pnpm install
+```
+Esse comando percorre todo o monorepo e instala tudo.
+
+Em seguida execute:
+
+```bash
+pnpm dev
 ```
 
-
+Abra o nmg8 no http://localhost:5173
 
 # O que significa nmg8?
 Para ser curto, é uma sigla para "node monitor agent", a pronuncia rápida, em inglês, faz parecer que se fala n m agent.

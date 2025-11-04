@@ -2,6 +2,8 @@ import {Container, Service} from '@nmg8/di'
 import { Server } from './server';
 import { CommandMetadata } from './commands/command-metadata';
 
+import '@/server'
+
 @Service()
 export class CommandRegistry {
     private commandName: string;

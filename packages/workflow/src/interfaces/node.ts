@@ -13,10 +13,11 @@ import { FilterTypeOptions, FilterValue } from "./filter";
 import { AssignmentCollectionValue, AssignmentTypeOptions } from "./assignment";
 import { CalloutAction } from "./callout";
 import { FieldType } from "./field";
-import { EnsureTypeOptions, ExpressionString } from "./utils";
+import { EnsureTypeOptions, ExpressionString, Optional } from "./utils";
 import { DeclarativeRestApiSettings } from "./restapi";
 import { ICredentialTestFunction } from "./credential";
 import { ResourceMapperFields, ResourceMapperValue } from "./resource-mapper";
+import { IHandle } from "./edge";
 
 export type NodeGroupType = (typeof NodeGroupTypes)[keyof typeof NodeGroupTypes];
 
@@ -495,8 +496,8 @@ export type NodeExecutionHint = Omit<NodeHint, 'whenToDisplay' | 'displayConditi
 
 export interface INodeTypes {
 	getByName(nodeType: string): INodeType;
-	getByNameAndVersion(nodeType: string, version?: number): INodeType;
-	getKnownTypes(): IDataObject;
+	// getByNameAndVersion(nodeType: string, version?: number): INodeType;
+	// getKnownTypes(): IDataObject;
 }
 
 export interface INodeType {
@@ -568,3 +569,60 @@ export type NodeOutput =
 	| NodeExecutionWithMetadata[][]
 	| EngineRequest
 	| null;
+
+export declare enum Position {
+    Left = "left",
+    Top = "top",
+    Right = "right",
+    Bottom = "bottom"
+}
+
+export type CoordinateExtent = [[number, number], [number, number]];
+
+export type NodeHandle = Omit<Optional<IHandle, 'width' | 'height'>, 'nodeId'>;
+
+export type INodeBase<NodeData extends Record<string, unknown> = Record<string, unknown>, NodeType extends string | undefined = string | undefined> = {
+    id: string;
+    position: {
+		x: number,
+		y: number
+	};
+    data: NodeData;
+    sourcePosition?: Position;
+    targetPosition?: Position;
+    hidden?: boolean;
+    selected?: boolean;
+    dragging?: boolean;
+    draggable?: boolean;
+    selectable?: boolean;
+    connectable?: boolean;
+    deletable?: boolean;
+    dragHandle?: string;
+    width?: number;
+    height?: number;
+    initialWidth?: number;
+    initialHeight?: number;
+    parentId?: string;
+    zIndex?: number;
+    extent?: 'parent' | CoordinateExtent | null;
+    expandParent?: boolean;
+    ariaLabel?: string;
+    origin?: [number, number];
+    handles?: NodeHandle[];
+    measured?: {
+        width?: number;
+        height?: number;
+    };
+} & (undefined extends NodeType ? {
+    type?: string | undefined;
+} : {
+    type: NodeType;
+});
+
+export type INodeConstructor<NodeData extends Record<string, unknown> = Record<string, unknown>, NodeType extends string | undefined = string | undefined> = INodeBase<NodeData, NodeType> & {
+    className?: string;
+    resizing?: boolean;
+    focusable?: boolean;
+};
+
+export type INode = INodeConstructor<INodeData, string>;

@@ -1,41 +1,37 @@
-import type { IConnections } from "./interfaces/connection";
 import type { IDataObject } from "./interfaces/data";
-import type { INodeTypes } from "./interfaces/node";
+import { IEdge } from "./interfaces/edge";
+import type { INode, INodeTypes } from "./interfaces/node";
 import type { IWorkflowSettings } from "./interfaces/workflow";
 
 export interface WorkflowParameters {
 	id: string;
 	name: string;
-	nodes: {}[];
-	connections: IConnections;
-	active: boolean;
-	nodeTypes: INodeTypes;
-	staticData?: IDataObject;
+	nodes: INode[];
+	edges: IEdge[];
+	active?: boolean;
 	settings?: IWorkflowSettings;
+	nodeTypes: INodeTypes;
 }
 
 export class Workflow {
     id: string;
     name: string;
-    nodes: {}[] = [];
-    edges: string[] = [];
-    connectionsByDestinationNode: IConnections = {};
-    // nodeTypes: INodeTypes;
+    nodes: INode[] = [];
+    edges: IEdge[] = [];
     active: boolean;
 
+	nodeTypes: INodeTypes;
+
     settings: IWorkflowSettings = {};
-
-    // staticData: IDataObject;
-
 	testStaticData: IDataObject | undefined;
 
     constructor(parameters: WorkflowParameters) {
         this.id = parameters.id;
         this.name = parameters.name;
 
-        // this.setNodes(parameters.nodes);
-		// this.setConnections(parameters.connections);
-		this.setSettings(parameters.settings ?? {});
+		this.nodeTypes = parameters.nodeTypes;
+
+        this.settings = parameters.settings || {};
 
 		this.active = parameters.active || false;
     }
@@ -44,12 +40,39 @@ export class Workflow {
 		this.settings = settings;
 	}
 
-    // setNodes(nodes: INode[]) {
-	// 	this.nodes = nodes;
-	// }
+    setNodes(nodes: INode[]) {
+		this.nodes = nodes;
+	}
 
-    // setConnections(connections: IConnections) {
-	// 	this.connectionsBySourceNode = connections;
-	// 	this.connectionsByDestinationNode = mapConnectionsByDestination(this.connectionsBySourceNode);
-	// }
+    setEdges(edges: IEdge[]) {
+		this.edges = edges;
+	}
+
+	buildGraph(this: Workflow) {
+		const graph: Record<string, string[]> = {};
+
+		// Inicializa todos os nós
+		for (const node of this.nodes) {
+			graph[node.id] = [];
+		}
+
+		// Adiciona conexões (arestas)
+		for (const edge of this.edges) {
+			graph[edge.source].push(edge.target);
+		}
+
+		return graph;
+	}
+
+	getOnlySelected() {
+		return new Workflow({
+			edges: this.edges.filter(item => item.selected),
+			nodes: this.nodes.filter(item => item.selected),
+			id: this.id,
+			name: this.name,
+			active: this.active,
+			settings: this.settings,
+			nodeTypes: this.nodeTypes
+		});
+	}
 }

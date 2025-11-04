@@ -1,6 +1,6 @@
 import { Service } from "@nmg8/di";
+import { NodeRegistry } from "nmg8-nodes";
 import { INodeTypeData, Types } from "nmg8-workflow";
-import { Script } from 'nmg8-nodes'
 
 @Service()
 export class LoadNodes{
@@ -13,11 +13,9 @@ export class LoadNodes{
     // loaders: Record<string, DirectoryLoader> = {};
 
     constructor(
-        
+        private readonly nodeRegistry: NodeRegistry
     ) {
-        this.registry = new Map();
-        
-        this.registry.set("script", { sourcePath: "", type: new Script });
+        this.registry = this.nodeRegistry.getLoaded();
     }
 
     getLoaded() {
@@ -25,6 +23,11 @@ export class LoadNodes{
     }
 
     getNode(name: string) {
-        return this.registry.get(name);
+        const node = this.registry.get(name);
+        if (!node) {
+            throw new Error(`${name} not found!`)
+        }
+
+        return node;
     }
 }

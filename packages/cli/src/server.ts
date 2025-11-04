@@ -1,11 +1,12 @@
-import express, {Application} from "express";
-import http from "http";
+import express, {Application, Request, Response, Router} from "express";
 import cors from "cors";
 import { Logger } from "./simple-logger";
 import { Container, Service } from "@nmg8/di";
-import { Expression } from "nmg8-core";
-import { LoadNodes } from "./load-nodes";
-// import { Expression } from "";
+import { ControllerRegistry } from "./controller.registry";
+import path from "node:path";
+
+import '@/nodes/node.controller';
+import { send } from "./response-helper";
 
 @Service()
 export class Server {
@@ -20,57 +21,59 @@ export class Server {
     }
 
     public async start(port: number = 3000) {
+
         // this.setupMiddlewares();
+        const nodesIconsPath = path.resolve(__dirname, "../../nodes/dist/nodes")
+        this.app.use("/icons", express.static(nodesIconsPath));
+
         this.setupRoutes();
+        
+        // console.log(this.app._router);
+
+        // this.app.use((req, res, next) => {
+        //     res.json({aaaaaaaaa: 'aaaaaaaaaaaa'});
+        // });
 
         this.app.listen(port, () => {
-        this.logger.log(`🚀 Servidor rodando em http://localhost:${port}`);
+            this.logger.log(`🚀 Servidor rodando em http://localhost:${port}`);
         });
     }
 
     setupRoutes() {
-        // const server = http.createServer(this.app);
-        // const io = new Server(server, { cors: { origin: "*" } });
 
-        // const queue = new Queue("scripts", { connection: { host: "localhost", port: 6379 } });
+        const this_router = this.activate();
 
-        // Rota de exemplo
-        this.app.post("/api/run", async (req, res) => {
-            // const job = await queue.add("runScript", req.body);
-            res.json({ jobId: "id" });
-        });
+        this.app.use('/api', this_router);
 
-        this.app.get("/api/nodes/:type/description", async (req, res) => {
-            const type = req.params.type;
+        const routers = Container.get(ControllerRegistry).activate();
 
-            const Node = Container.get(LoadNodes).getNode(type);
+        for (const router of routers) {
+            this.app.use(router.basePath, router.router);
+        }
+    }
 
-            if (!Node?.type) {
-                res.status(404).json({
-                    message: "not found!"
-                });
-                return;
+    activate(): ReturnType<typeof Router> {
+        const router = Router();
+
+        const handler = async (req: Request, res: Response) => {
+            return await {
+                status: 'OK',
+                id: '',
+                app: ''
             }
+        }
 
-            res.json(Node.type.getProperties());
-            return;
-        })
+        router['get'](
+            '/health', 
+            ...([]),
+            ...([]),
+            ...([]),
+            ...([]),
+            ...([]),
+            ...([]),
+            send(handler)
+        );
 
-        this.app.post("/api/expression/resolve", async (req, res) => {
-            const { expression, context } = req.body;
-            const ev = new Expression();
-            res.json(ev.evaluateExpression(
-                expression, context))
-            return;
-        });
-
-        this.app.post("/api/workflow/execute/:id", async (req, res) => {
-            
-        })
-
-        this.app.post("/api/workflow/execute/test/", async (req, res) => {
-            const {node} = req.body;
-            
-        })
+        return router;
     }
 }

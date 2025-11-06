@@ -133,6 +133,9 @@ importers:
       cors:
         specifier: ^2.8.5
         version: 2.8.5
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       nmg8-db:
         specifier: workspace:*
         version: link:../db
@@ -142,6 +145,9 @@ importers:
       nmg8-workflow:
         specifier: workspace:*
         version: link:../workflow
+      p-cancelable:
+        specifier: ^4.0.1
+        version: 4.0.1
     devDependencies:
       '@nmg8/typescript-config':
         specifier: workspace:*
@@ -149,6 +155,12 @@ importers:
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
+      '@types/lodash':
+        specifier: ^4.17.20
+        version: 4.17.20
+      '@types/lodash.get':
+        specifier: ^4.4.9
+        version: 4.4.9
       '@types/socket.io':
         specifier: ^3.0.1
         version: 3.0.2
@@ -174,17 +186,17 @@ importers:
         specifier: ^12.4.1
         version: 12.4.1
       drizzle-kit:
-        specifier: ^0.31.5
+        specifier: ^0.31.6
         version: 0.31.6
       drizzle-orm:
-        specifier: ^0.44.6
+        specifier: ^0.44.7
         version: 0.44.7(@libsql/client@0.15.15)(@types/better-sqlite3@7.6.13)(better-sqlite3@12.4.1)
       nanoid:
         specifier: ^5.1.6
         version: 5.1.6
-      uuid:
-        specifier: ^13.0.0
-        version: 13.0.0
+      nmg8-workflow:
+        specifier: workspace:*
+        version: link:../workflow
     devDependencies:
       '@nmg8/typescript-config':
         specifier: workspace:*
@@ -1804,6 +1816,12 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
 
+  '@types/lodash.get@4.4.9':
+    resolution: {integrity: sha512-J5dvW98sxmGnamqf+/aLP87PYXyrha9xIgc2ZlHl6OHMFR2Ejdxep50QfU0abO1+CH6+ugx+8wEUN1toImAinA==}
+
+  '@types/lodash@4.17.20':
+    resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
+
   '@types/node@24.9.2':
     resolution: {integrity: sha512-uWN8YqxXxqFMX2RqGOrumsKeti4LlmIMIyV0lgut4jx7KQBcBiW6vkDtIBvHnHIquwNfJhk8v2OtmO8zXWHfPA==}
 
@@ -3217,6 +3235,9 @@ packages:
   lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}
 
+  lodash@4.17.21:
+    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
@@ -3427,6 +3448,10 @@ packages:
   own-keys@1.0.1:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
     engines: {node: '>= 0.4'}
+
+  p-cancelable@4.0.1:
+    resolution: {integrity: sha512-wBowNApzd45EIKdO1LaU+LrMBwAcjfPaYtVzV3lmfM3gf8Z4CHZsiIqlM8TZZ8okYvh5A1cP6gTfCRQtwUpaUg==}
+    engines: {node: '>=14.16'}
 
   p-limit@3.1.0:
     resolution: {integrity: sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ==}
@@ -5640,6 +5665,12 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
+  '@types/lodash.get@4.4.9':
+    dependencies:
+      '@types/lodash': 4.17.20
+
+  '@types/lodash@4.17.20': {}
+
   '@types/node@24.9.2':
     dependencies:
       undici-types: 7.16.0
@@ -7215,6 +7246,8 @@ snapshots:
 
   lodash.sortby@4.7.0: {}
 
+  lodash@4.17.21: {}
+
   lru-cache@10.4.3: {}
 
   lru-cache@5.1.1:
@@ -7423,6 +7456,8 @@ snapshots:
       get-intrinsic: 1.3.0
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
+
+  p-cancelable@4.0.1: {}
 
   p-limit@3.1.0:
     dependencies:

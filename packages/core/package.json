@@ -23,20 +23,24 @@
     "./*": "./*"
   },
   "devDependencies": {
+    "@nmg8/typescript-config": "workspace:*",
     "@types/cors": "^2.8.19",
+    "@types/lodash": "^4.17.20",
+    "@types/lodash.get": "^4.4.9",
     "@types/socket.io": "^3.0.1",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.16",
     "tsc-watch": "^7.2.0",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "@nmg8/typescript-config": "workspace:*"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "bullmq": "^5.61.0",
     "cors": "^2.8.5",
+    "lodash": "^4.17.21",
     "nmg8-db": "workspace:*",
     "nmg8-nodes": "workspace:*",
-    "nmg8-workflow": "workspace:*"
+    "nmg8-workflow": "workspace:*",
+    "p-cancelable": "^4.0.1"
   }
 }

@@ -1,3 +1,5 @@
+![Banner image](assets/banner.png)
+
 # nmg8 - Agente de Automação de Monitoramento em Nó
 
 O nmg8 é uma plataforma Agente de automação de monitoramento com nós, para sistemas de energia fotovoltáicas on-grid, off-grid que permite integração e automação de códigos de coleta de dados em dispositivos computadores que podem ficar conectados aos sistemas de energia via cabo ou rede, permitindo maior controle na automação e envio de dados.

@@ -1,54 +1,127 @@
 "use client"
-import { useReactFlow, type FinalConnectionState, type OnConnectStartParams } from "@xyflow/react";
-import { useCallback } from "react";
+import { useReactFlow, type FinalConnectionState } from "@xyflow/react";
+import { useCallback, useRef } from "react";
+import { useInsertNode } from "./use-insert-node";
+import * as uuid from 'uuid';
+import { useShallow } from "zustand/react/shallow";
+import { useAddNodeOnEdgeDropStore } from "@/stores/add-node-on-edge-drop-store";
+import type { INode } from "@/interfaces";
 
-export function useAddOnEdgeDrop() {
-    const { setNodes } = useReactFlow()
-    const updateNodeConnectingState = useCallback(
-        (
-            nodeId: string | null,
-            isConnecting: boolean
-        ) => {
-            setNodes((nds) =>
-                nds.map((n) => {
-                    if (n.id === nodeId) {
-                        return { ...n, data: { ...n.data, isConnecting } };
-                    }
-                    return { ...n, data: { ...n.data } };
-                })
-            );
-        },
-        [setNodes]
+export function useAddNodeOnEdgeDrop() {
+    const [
+        dropPosition,
+        incomingNodeMetadetails,
+        setAnchorPosition,
+        setDropPosition,
+        setShowMenu,
+        setIncomingNodeMetadetails,
+    ] = useAddNodeOnEdgeDropStore(
+        useShallow((s) => [
+            s.dropPosition,
+            s.incomingNodeMetadetails,
+            s.actions.setAnchorPosition,
+            s.actions.setDropPosition,
+            s.actions.setShowMenu,
+            s.actions.setIncomingNodeMetadetails,
+        ])
     );
 
-    const handleOnEdgeConnectedStart = useCallback(
-        (
-            event: MouseEvent | TouchEvent,
-            params: OnConnectStartParams
-        ) => {
-            updateNodeConnectingState(
-                params.nodeId,
-                true
-            );
+    const { screenToFlowPosition, addEdges } = useReactFlow();
+
+    const insertNode = useInsertNode();
+
+    const floatingMenuWrapperRef = useRef<HTMLDivElement>(null);
+
+    const handleAddConnectedNode = useCallback(
+        async (name: string) => {
+            let newNode: INode | undefined;
+            if (
+                !incomingNodeMetadetails ||
+                !incomingNodeMetadetails.fromHandle ||
+                !incomingNodeMetadetails.fromNode
+            ) {
+                newNode = await insertNode(name);
+                return;
+            }
+            newNode = await insertNode(name, dropPosition);
+
+            const id = uuid.v4();
+            const id2 = uuid.v4();
+
+            if (incomingNodeMetadetails.fromHandle.type === "source") {
+                addEdges({
+                    id,
+                    type: "deletable",
+                    target: newNode.id,
+                    sourceHandle: incomingNodeMetadetails.fromHandle.id,
+                    source: incomingNodeMetadetails.fromNode.id,
+                });
+            } else if (incomingNodeMetadetails.fromHandle.type === "target") {
+                addEdges({
+                    id: id2,
+                    type: "deletable",
+                    target: incomingNodeMetadetails.fromNode.id,
+                    targetHandle: incomingNodeMetadetails.fromHandle.id,
+                    source: newNode.id,
+                });
+            }
+
+            setShowMenu(false);
+            setIncomingNodeMetadetails(null);
         },
-        [updateNodeConnectingState]
+        [
+            insertNode,
+            addEdges,
+            setShowMenu,
+            setIncomingNodeMetadetails,
+            incomingNodeMetadetails,
+            dropPosition,
+        ]
     );
 
-    const handleOnEdgeDropConnectedEnd = useCallback(
-        (
-            event: MouseEvent | TouchEvent,
-            connectionState: FinalConnectionState
-        ) => {
-            updateNodeConnectingState(
-                connectionState.fromNode?.id ?? null,
-                !!connectionState.toNode?.id
-            );
+    const onConnectEnd = useCallback(
+        (e: MouseEvent | TouchEvent, connectionState: FinalConnectionState) => {
+            if (!connectionState.isValid && floatingMenuWrapperRef.current) {
+                const { clientX, clientY } =
+                "changedTouches" in e ? e.changedTouches[0] : e;
+
+                const _anchorPositionPadding = 20;
+                const _floatingMenuWrapperRect =
+                floatingMenuWrapperRef.current.getBoundingClientRect();
+                const _addNodeFloatingMenuAnchorPosition = {
+                x:
+                    (clientX > _floatingMenuWrapperRect.width + _anchorPositionPadding
+                    ? _floatingMenuWrapperRect.width - _anchorPositionPadding
+                    : clientX < _anchorPositionPadding
+                    ? _anchorPositionPadding
+                    : clientX) - _floatingMenuWrapperRect.x,
+                y:
+                    clientY > _floatingMenuWrapperRect.height + _anchorPositionPadding
+                    ? _floatingMenuWrapperRect.height - _anchorPositionPadding
+                    : clientY < _anchorPositionPadding
+                    ? _anchorPositionPadding
+                    : clientY - _floatingMenuWrapperRect.y,
+                };
+
+                setAnchorPosition(_addNodeFloatingMenuAnchorPosition);
+                setShowMenu(true);
+                setIncomingNodeMetadetails(connectionState);
+                setDropPosition(screenToFlowPosition({ x: clientX, y: clientY }));
+            }
         },
-        [updateNodeConnectingState]
+        [
+            setAnchorPosition,
+            setShowMenu,
+            setIncomingNodeMetadetails,
+            screenToFlowPosition,
+            floatingMenuWrapperRef,
+            setDropPosition,
+        ]
     );
 
     return {
-        handleOnEdgeDropConnectedEnd,
-        handleOnEdgeConnectedStart
-    }
+        handleOnEdgeDropConnectEnd: onConnectEnd,
+        floatingMenuWrapperRef,
+        handleAddConnectedNode,
+    };
 }

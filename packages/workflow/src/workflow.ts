@@ -1,16 +1,14 @@
 import type { IDataObject } from "./interfaces/data";
-import { IEdge } from "./interfaces/edge";
+import type { IEdge } from "./interfaces/edge";
+import { Graph } from "./interfaces/graph";
 import type { INode, INodeTypes } from "./interfaces/node";
-import type { IWorkflowSettings } from "./interfaces/workflow";
+import type { IWorkflowBase, IWorkflowSettings } from "./interfaces/workflow";
 
-export interface WorkflowParameters {
-	id: string;
-	name: string;
-	nodes: INode[];
-	edges: IEdge[];
-	active?: boolean;
-	settings?: IWorkflowSettings;
-	nodeTypes: INodeTypes;
+export type WorkflowParameters = IWorkflowBase;
+
+export class WorkflowTest {
+	constructor() { }
+	getWorkflow() { return {data: 'workflow'} }
 }
 
 export class Workflow {
@@ -19,22 +17,43 @@ export class Workflow {
     nodes: INode[] = [];
     edges: IEdge[] = [];
     active: boolean;
-
-	nodeTypes: INodeTypes;
-
     settings: IWorkflowSettings = {};
 	testStaticData: IDataObject | undefined;
 
     constructor(parameters: WorkflowParameters) {
         this.id = parameters.id;
         this.name = parameters.name;
-
-		this.nodeTypes = parameters.nodeTypes;
-
         this.settings = parameters.settings || {};
-
 		this.active = parameters.active || false;
+		this.nodes = parameters.nodes;
+		this.edges = parameters.edges;
     }
+
+	getStartNode(){
+		return this.buildGraph().findRoot()?.data;
+	}
+
+	getDestinationNode(destinationNode: string) {
+		const graph = this.buildGraph();
+		for (const node of graph._iterableNodeValues()) {
+			if (node.data.id === destinationNode){
+				return node.data;
+			}
+		}	
+		return null;
+	}
+
+	getParentNodes(destinationNode: string) {
+		const graph = this.buildGraph();
+		const dNode = this.getDestinationNode(destinationNode);
+		if (!dNode) return [];
+
+		return graph.getParentNodes(dNode);
+	}
+
+	getStaticData(type: string, node: INode): IDataObject {
+		return {};
+	}
 
     setSettings(settings: IWorkflowSettings) {
 		this.settings = settings;
@@ -48,17 +67,23 @@ export class Workflow {
 		this.edges = edges;
 	}
 
-	buildGraph(this: Workflow) {
-		const graph: Record<string, string[]> = {};
 
-		// Inicializa todos os nós
+	buildGraph() {
+		const graph = new Graph<INode>((a, b) => a.id.localeCompare(b.id));
+
+		const nodeSet = new Map<string, INode>();
+
 		for (const node of this.nodes) {
-			graph[node.id] = [];
+			nodeSet.set(node.id, node);
+			graph.addNewNode(node);
 		}
 
-		// Adiciona conexões (arestas)
 		for (const edge of this.edges) {
-			graph[edge.source].push(edge.target);
+			const source = nodeSet.get(edge.source);
+			const target = nodeSet.get(edge.target);
+			if (source && target) {
+				graph.addEdge(source, target);
+			}
 		}
 
 		return graph;
@@ -71,8 +96,7 @@ export class Workflow {
 			id: this.id,
 			name: this.name,
 			active: this.active,
-			settings: this.settings,
-			nodeTypes: this.nodeTypes
+			settings: this.settings
 		});
 	}
 }

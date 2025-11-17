@@ -1,4 +1,4 @@
-import { Tables } from '../schema';
+import { Tables } from '../entity';
 
 export type ServerTypeUpsertValues = typeof Tables.ServerTypesTable.$inferInsert;
 export type ServerUpsertValues = typeof Tables.ServersTable.$inferInsert;
@@ -11,3 +11,6 @@ export type ServerReturningValues = typeof Tables.ServersTable.$inferSelect;
 export type DeviceReturningValues = typeof Tables.DeviceTable.$inferSelect;
 export type ServerEndpointsReturningValues = typeof Tables.ServerEndpointsTable.$inferSelect;
 export type CodeInstanceReturningValues = typeof Tables.CodeInstance.$inferSelect;
+
+export type WorkflowUpsertValues = typeof Tables.Workflow.$inferInsert;
+export type WorkflowReturningValues = typeof Tables.Workflow.$inferSelect;

@@ -1,40 +1,52 @@
-import {
-  type Connection,
-  type Edge,
-  type Node,
-  getOutgoers,
-} from "@xyflow/react";
-import { useCallback } from "react";
+import { useCallback } from 'react';
+import { type Connection, type Edge, getOutgoers, type Node } from '@xyflow/react';
+import { useWorkflowStore } from '@/stores/workflow-store';
+import { useShallow } from 'zustand/react/shallow';
 
-function findTargetNode(nodes: Node[], connection: Edge | Connection) {
-  return nodes.find((node) => node.id === connection.target);
-}
-
-function hasCycle(
-  node: Node,
-  connection: Edge | Connection,
+const hasPath = (
+  currentNodeId: string,
+  targetNodeId: string,
   nodes: Node[],
   edges: Edge[],
   visited: Set<string> = new Set<string>()
-) {
-  if (visited.has(node.id)) return false;
-
-  visited.add(node.id);
-
-  for (const outgoer of getOutgoers(node, nodes, edges)) {
-    if (outgoer.id === connection.source) return true;
-    if (hasCycle(outgoer, connection, nodes, edges, visited)) return true;
+): boolean => {
+  if (currentNodeId === targetNodeId) {
+    return true;
   }
-}
+  if (visited.has(currentNodeId)) {
+    return false;
+  }
+  visited.add(currentNodeId);
 
-export function useIsValidConnection(nodes: Node[], edges: Edge[]) {
+  const currentNode = nodes.find(n => n.id === currentNodeId);
+  if (!currentNode) return false;
+
+  const outgoers = getOutgoers(currentNode, nodes, edges);
+  for (const outgoer of outgoers) {
+    if (hasPath(outgoer.id, targetNodeId, nodes, edges, visited)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+
+export function useIsValidConnection() {
+  const [ nodes, edges ] = useWorkflowStore(useShallow(state => [ state.workflow.nodes, state.workflow.edges ]));
+
   return useCallback(
-    (connection: Edge | Connection) => {
-      const target = findTargetNode(nodes, connection);
-
-      if (target?.id === connection.source) return false;
-      return target ? !hasCycle(target, connection, nodes, edges) : true;
+    (connection: Connection | Edge): boolean => {
+      if (connection.source === connection.target) {
+        return false;
+      }
+      
+      const targetNode = nodes.find(n => n.id === connection.target);
+      if (!targetNode) return false;
+      const createsCycle = hasPath(connection.target!, connection.source!, nodes, edges);
+      
+      return !createsCycle;
     },
-    [nodes, edges]
+    [nodes, edges],
   );
 }

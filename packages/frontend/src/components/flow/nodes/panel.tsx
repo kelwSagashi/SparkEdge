@@ -5,23 +5,24 @@ import type { Node } from "@xyflow/react";
 import { ArrowLeft } from "lucide-react";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import type { BaseNodeData } from "./types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { INodeProperties, INodeTypeDescription } from "@nmg8/workflow/src";
-import ScriptSelector from "./panel/script-selector";
+import NodeOptionSelector from "./properties/options-selector";
 import { api } from "@/server/server.service";
+import type { INode } from "@/interfaces";
+import type { INodeProperties, INodeTypeDescription } from "nmg8-workflow";
 
 interface INodePanelProps {
     isDialogOpen: boolean;
     setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    node: Node<BaseNodeData, string> | undefined;
+    node: INode | undefined;
     onClose: () => void;
 }
 
 const RenderParam = memo(({ property }: { property: INodeProperties }) => {
     switch (property.type) {
-        case "scriptSelector":
-            return <ScriptSelector />
+        case "options":
+            // return <NodeOptionSelector />
+            
         default:
             return null;
     }
@@ -49,7 +50,7 @@ export const NodePanel: React.FC<INodePanelProps> = React.memo(({
 
     const handleLoadDescription = useCallback(async () => {
         if (!node) return;
-        const _description = (await api.getNodeDescription({type: node.data.parameters.type})).data;
+        const _description = (await api.getNodeDescription({name: node.data.parameters.type})).data;
         setDescription(_description);
     }, [node?.data.parameters.type]);
 

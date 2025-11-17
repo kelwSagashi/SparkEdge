@@ -4,13 +4,24 @@ import { type INodeData, type BuilderNodeTypes } from 'nmg8-workflow/src/index.t
 import { useReactFlow, type XYPosition } from "@xyflow/react";
 import { useCallback } from "react";
 import * as uuid from 'uuid';
+import { useWorkflowStore } from "@/stores/workflow-store";
+import { useShallow } from "zustand/react/shallow";
 
 export function useInsertNode() {
-    const { addNodes, screenToFlowPosition, getNodes, updateNode } =
+    const [
+        addNode,
+        getNodes
+    ] = useWorkflowStore(
+        useShallow(s => [
+            s.addNode,
+            s.getNodes,
+        ])
+    );
+    const { screenToFlowPosition, updateNode } =
         useReactFlow();
 
     return useCallback(
-        async (builderType: BuilderNodeTypes, pos?: XYPosition) => {
+        async (name: string, pos?: XYPosition) => {
             const _pos =
                 pos ||
                 screenToFlowPosition({
@@ -27,35 +38,34 @@ export function useInsertNode() {
             const id = uuid.v4();
 
 
-            const description = (await api.getNodeDescription({type: builderType})).data;
-            const type = `${description.group}.${builderType}`;
+            const description = (await api.getNodeDescription({name: name})).data;
             const data: INodeData = {
                 name: description.displayName,
                 inputs: description.inputs,
                 outputs: description.outputs,
-                inputNames: description.inputNames,
-                outputNames: description.outputNames,
-                requiredInputs: description.requiredInputs,
                 parameters: {},
                 id,
-                type: builderType,
-                group: description.group,
-                version: description.version
+                type: description.type,
+                version: description.version,
             }
 
             const newNode: INode = {
                 id,
-                type,
+                type: 'base',
                 position: _pos,
                 selected: true,
                 data,
                 deletable: true,
+                measured: {
+                    height: 100,
+                    width: 200
+                },
             };
 
-            addNodes(newNode);
+            addNode(newNode);
 
             return newNode;
         },
-        [screenToFlowPosition, getNodes, addNodes, updateNode]
+        [screenToFlowPosition, getNodes, addNode, updateNode]
     );
 }

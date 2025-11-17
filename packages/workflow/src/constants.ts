@@ -30,7 +30,7 @@ export const NodeConnectionTypes = {
     Main: 'main',
 } as const;
 
-export const NodeGroupTypes = {
+export const BuilderNodes = {
     INPUT: 'input',
     OUTPUT: 'output',
     ORG: 'organization',
@@ -41,12 +41,6 @@ export const NodeGroupTypes = {
     BASE: 'base'
 } as const;
 
-export const BuilderNodes = {
-    SCRIPT: 'script',
-    SERVER: 'server'
-} as const;
-
 export const BuilderNodeValues = Object.values(BuilderNodes);
 
 export type BuilderNodeTypes = (typeof BuilderNodes)[keyof typeof BuilderNodes];
-export type BuilderNodeGroupTypes = (typeof NodeGroupTypes)[keyof typeof NodeGroupTypes];

@@ -1,9 +1,9 @@
 import { Service } from "@nmg8/di";
-import { NodeRegistry } from "nmg8-nodes";
 import { INodeTypeData, Types } from "nmg8-workflow";
+import { NodeRegistry } from "./node-registry";
 
 @Service()
-export class LoadNodes{
+export class LoadNodes {
     // private known: KnownNodesAndCredentials = { nodes: {} };
 
     registry: INodeTypeData;
@@ -15,11 +15,24 @@ export class LoadNodes{
     constructor(
         private readonly nodeRegistry: NodeRegistry
     ) {
-        this.registry = this.nodeRegistry.getLoaded();
+        this.registry = this.nodeRegistry.getNodes();
     }
 
     getLoaded() {
         return this.registry;
+    }
+
+    getLoadedNames() {
+        const loadedClasses = [];
+        for (const node of this.registry.values()) {
+            loadedClasses.push({
+                name: node.type.description.name,
+                displayName: node.type.description.displayName,
+                description: node.type.description.description,
+                version: node.type.description.version
+            });
+        }
+        return {nodes: loadedClasses};
     }
 
     getNode(name: string) {

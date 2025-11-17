@@ -18,10 +18,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useDrop } from 'react-dnd';
 import { ItemTypes } from '@/lib/constants';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { DeviceConnectionMethods } from 'nmg8-db/src/schema/constants.ts';
-import type { ServerEndpointsReturningValues, ServerReturningValues } from 'nmg8-db/src/types/index.ts';
 import { JsonViewMain } from './json-view/json-view';
 import { api } from '@/server/server.service';
+import type { ServerEndpointsReturningValues, ServerReturningValues } from 'nmg8-db/src/types/types.js';
+import { DeviceConnectionMethods } from 'nmg8-db/src/entity/constants.js';
 
 export type ServiceType = 'rest' | 'google_drive' | null;
 
@@ -209,13 +209,13 @@ function GetPath({ serverSelected }: { serverSelected: ServerReturningValues | u
         params?: Record<string, string>
         ) => {
         if (path && serverSelected) {
-            const response = await api.execute({
-                server: serverSelected, 
-                endpoint: path, 
-                params, 
-                body: null
-                });
-            handleResponseChange(endpointUniqueKey, response.data)
+            // const response = await api.execute({
+            //     server: serverSelected, 
+            //     endpoint: path, 
+            //     params, 
+            //     body: null
+            //     });
+            // handleResponseChange(endpointUniqueKey, response.data)
             setCurrentRTab("outputs");
         }
     }, []

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Play, Trash2 } from "lucide-react";
 
 interface IBaseNodeActionsProps {
-    handleRun: () => void;
+    handleRun: () => Promise<void>;
     deleteNode: () => void;
 }
 export default function BaseNodeActions({

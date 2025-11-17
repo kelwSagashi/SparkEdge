@@ -37,6 +37,7 @@
   "dependencies": {
     "bullmq": "^5.61.0",
     "cors": "^2.8.5",
+    "fast-glob": "^3.3.3",
     "lodash": "^4.17.21",
     "nmg8-db": "workspace:*",
     "nmg8-nodes": "workspace:*",

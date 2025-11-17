@@ -1,121 +1,53 @@
-import { ContextType, IContextObject } from "./context";
-import { ICredentialDataDecryptedObject } from "./credential";
-import { ExecuteWorkflowData, IDataObject, IExecuteData, IExecuteResponsePromiseData, IRunExecutionData, ISourceData } from "./data";
-import { ExecutionError, RelatedExecution } from "./execution";
-import { ChunkType } from "./http";
-import { Logger } from "./logs";
-import { IGetNodeParameterOptions, INodeData, INodeExecutionData, INodeInputConfiguration, INodeOutputConfiguration, INodeParameters, INodeProperties, NodeConnectionType, NodeExecutionHint, NodeParameterValueType, NodeTypeAndVersion } from "./node";
-import { Result } from "./result";
-import { ITaskMetadata } from "./task";
-import { IExecuteWorkflowInfo, IWorkflowMetadata, WorkflowActivateMode, WorkflowExecuteMode } from "./workflow";
+import type { ContextType, IContextObject } from "./context";
+import type { ExecuteWorkflowData, IDataObject, IExecuteData, IExecuteResponsePromiseData, IRunExecutionData, ISourceData } from "./data";
+import type { ExecutionError, RelatedExecution } from "./execution";
+import type { ChunkType } from "./http";
+import type { IGetNodeParameterOptions, INode, INodeData, INodeTypeExecutionContext, INodeExecutionData, INodeInputConfiguration, INodeOutputConfiguration, INodeParameters, INodeProperties, NodeConnectionType, NodeExecutionHint, NodeParameterValueType, NodeTypeAndVersion } from "./node";
+import type { Result } from "./result";
+import type { ITaskMetadata } from "./task";
+import type { IExecuteWorkflowInfo, IWorkflowMetadata, WorkflowActivateMode, WorkflowExecuteMode } from "./workflow";
 
 export namespace ExecuteFunctions {
-	namespace StringReturning {
-		export type NodeParameter =
-			| 'binaryProperty'
-			| 'binaryPropertyName'
-			| 'binaryPropertyOutput'
-			| 'dataPropertyName'
-			| 'dataBinaryProperty'
-			| 'resource'
-			| 'operation'
-			| 'filePath'
-			| 'encodingType';
-	}
-
-	namespace NumberReturning {
-		export type NodeParameter = 'limit';
-	}
-
-	namespace BooleanReturning {
-		export type NodeParameter =
-			| 'binaryData'
-			| 'download'
-			| 'jsonParameters'
-			| 'returnAll'
-			| 'rawData'
-			| 'resolveData';
-	}
-
-	namespace RecordReturning {
-		export type NodeParameter = 'additionalFields' | 'filters' | 'options' | 'updateFields';
-	}
-
-	export type GetNodeParameterFn = {
-		// @TECH_DEBT: Refactor to remove this barely used overload - N8N-5632
-		getNodeParameter<T extends { resource: string }>(
-			parameterName: 'resource',
-			itemIndex?: number,
-		): T['resource'];
-
-		getNodeParameter(
-			parameterName: StringReturning.NodeParameter,
-			itemIndex: number,
-			fallbackValue?: string,
-			options?: IGetNodeParameterOptions,
-		): string;
-		getNodeParameter(
-			parameterName: RecordReturning.NodeParameter,
-			itemIndex: number,
-			fallbackValue?: IDataObject,
-			options?: IGetNodeParameterOptions,
-		): IDataObject;
-		getNodeParameter(
-			parameterName: BooleanReturning.NodeParameter,
-			itemIndex: number,
-			fallbackValue?: boolean,
-			options?: IGetNodeParameterOptions,
-		): boolean;
-		getNodeParameter(
-			parameterName: NumberReturning.NodeParameter,
-			itemIndex: number,
-			fallbackValue?: number,
-			options?: IGetNodeParameterOptions,
-		): number;
-		getNodeParameter(
-			parameterName: string,
-			itemIndex: number,
-			fallbackValue?: any,
-			options?: IGetNodeParameterOptions,
-		): NodeParameterValueType | object;
+	export type GetNodeInstances = {
+		nodeContext: INodeTypeExecutionContext
 	};
 }
 
 export interface FunctionsBase {
-	logger: Logger;
-	getCredentials<T extends object = ICredentialDataDecryptedObject>(
-		type: string,
-		itemIndex?: number,
-	): Promise<T>;
-	getCredentialsProperties(type: string): INodeProperties[];
+	// logger: Logger;
+	// getCredentials<T extends object = ICredentialDataDecryptedObject>(
+	// 	type: string,
+	// 	itemIndex?: number,
+	// ): Promise<T>;
+	// getCredentialsProperties(type: string): INodeProperties[];
 	getExecutionId(): string;
-	getNode(): INodeData;
+	getNode(): INode;
 	getWorkflow(): IWorkflowMetadata;
 	getWorkflowStaticData(type: string): IDataObject;
-	getTimezone(): string;
-	getRestApiUrl(): string;
-	getInstanceBaseUrl(): string;
-	getInstanceId(): string;
+	// getTimezone(): string;
+	// getRestApiUrl(): string;
+	// getInstanceBaseUrl(): string;
+	// getInstanceId(): string;
 	/** Get the waiting resume url signed with the signature token */
-	getSignedResumeUrl(parameters?: Record<string, string>): string;
+	// getSignedResumeUrl(parameters?: Record<string, string>): string;
 	/** Set requirement in the execution for signature token validation */
-	setSignatureValidationRequired(): void;
-	getChildNodes(
-		nodeName: string,
-		options?: { includeNodeParameters?: boolean },
-	): NodeTypeAndVersion[];
-	getParentNodes(
-		nodeName: string,
-		options?: {
-			includeNodeParameters?: boolean;
-			connectionType?: NodeConnectionType;
-			depth?: number;
-		},
-	): NodeTypeAndVersion[];
-	getKnownNodeTypes(): IDataObject;
+	// setSignatureValidationRequired(): void;
+	// getChildNodes(
+	// 	nodeName: string,
+	// 	options?: { includeNodeParameters?: boolean },
+	// ): NodeTypeAndVersion[];
+	// getParentNodes(
+	// 	nodeName: string,
+	// 	options?: {
+	// 		includeNodeParameters?: boolean;
+	// 		connectionType?: NodeConnectionType;
+	// 		depth?: number;
+	// 	},
+	// ): NodeTypeAndVersion[];
+	// getKnownNodeTypes(): IDataObject;
 	getMode?: () => WorkflowExecuteMode;
 	getActivationMode?: () => WorkflowActivateMode;
-	getChatTrigger: () => INodeData | null;
+	// getChatTrigger: () => INodeData | null;
 	prepareOutputData(outputData: INodeExecutionData[]): Promise<INodeExecutionData[][]>;
 }
 
@@ -135,7 +67,7 @@ export type BaseExecutionFunctions = FunctionsBaseWithRequiredKeys<'getMode'> & 
 };
 
 // TODO: Create later own type only for Config-Nodes
-export type IExecuteFunctions = ExecuteFunctions.GetNodeParameterFn &
+export type IExecuteFunctions = ExecuteFunctions.GetNodeInstances &
 	BaseExecutionFunctions & {
 		executeWorkflow(
 			workflowInfo: IExecuteWorkflowInfo,
@@ -176,32 +108,6 @@ export type IExecuteFunctions = ExecuteFunctions.GetNodeParameterFn &
 		): void;
 
 		addExecutionHints(...hints: NodeExecutionHint[]): void;
-
-		// nodeHelpers: NodeHelperFunctions;
-
-		// helpers: RequestHelperFunctions &
-		// 	BaseHelperFunctions &
-		// 	BinaryHelperFunctions &
-		// 	DeduplicationHelperFunctions &
-		// 	FileSystemHelperFunctions &
-		// 	SSHTunnelFunctions &
-		// 	DataTableProxyFunctions & {
-		// 		normalizeItems(items: INodeExecutionData | INodeExecutionData[]): INodeExecutionData[];
-		// 		constructExecutionMetaData(
-		// 			inputData: INodeExecutionData[],
-		// 			options: { itemData: IPairedItemData | IPairedItemData[] },
-		// 		): NodeExecutionWithMetadata[];
-		// 		assertBinaryData(itemIndex: number, parameterData: string | IBinaryData): IBinaryData;
-		// 		getBinaryDataBuffer(
-		// 			itemIndex: number,
-		// 			parameterData: string | IBinaryData,
-		// 		): Promise<Buffer>;
-		// 		detectBinaryEncoding(buffer: Buffer): string;
-		// 		copyInputItems(items: INodeExecutionData[], properties: string[]): IDataObject[];
-		// 	};
-
-		// getParentCallbackManager(): CallbackManager | undefined;
-
 		startJob<T = unknown, E = unknown>(
 			jobType: string,
 			settings: unknown,
@@ -228,7 +134,7 @@ export interface IExecuteSingleFunctions extends BaseExecutionFunctions {
 }
 
 
-export type ISupplyDataFunctions = ExecuteFunctions.GetNodeParameterFn &
+export type ISupplyDataFunctions = ExecuteFunctions.GetNodeInstances &
 	FunctionsBaseWithRequiredKeys<'getMode'> &
 	Pick<
 		IExecuteFunctions,
@@ -267,7 +173,7 @@ export interface ILoadOptionsFunctions extends FunctionsBase {
 	// helpers: RequestHelperFunctions & SSHTunnelFunctions & DataTableProxyFunctions;
 }
 
-export type IWorkflowNodeContext = ExecuteFunctions.GetNodeParameterFn &
+export type IWorkflowNodeContext = ExecuteFunctions.GetNodeInstances &
 	Pick<FunctionsBase, 'getNode' | 'getWorkflow'>;
 	
 export interface ILocalLoadOptionsFunctions {

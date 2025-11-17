@@ -11,7 +11,7 @@ export type LoadingDetails = {
 
 export type NodeLoadingDetails = LoadingDetails;
 
-export type KnownNodesAndCredentials = {
+export type KnownNodes = {
 	nodes: Record<string, NodeLoadingDetails>;
 	// credentials: Record<string, CredentialLoadingDetails>;
 };

@@ -1,6 +1,6 @@
 import type { Node, NodeProps } from "@xyflow/react";
 import type { ComponentType } from "react";
-import type { INodeData, BuilderNodeGroupTypes, BuilderNodeTypes } from 'nmg8-workflow/src/index.ts';
+import type { INodeData, BuilderNodeTypes } from 'nmg8-workflow/src/index.ts';
 
 export type INode = Node<INodeData, string>;
 
@@ -9,7 +9,6 @@ export type IBaseNodeProps = NodeProps<
 >;
 
 export interface RegisterNodeMetadata<T = Record<string, unknown>> {
-    group: BuilderNodeGroupTypes,
     types: BuilderNodeTypes[];
     defaultData?: T;
     selected: boolean;

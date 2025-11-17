@@ -1,31 +1,35 @@
 {
   "extends": "@nmg8/typescript-config/modern/tsconfig.json",
+
   "compilerOptions": {
-    "tsBuildInfoFile": "dist/typecheck.tsbuildinfo",
+    	"tsBuildInfoFile": "dist/typecheck.tsbuildinfo",
+		"baseUrl": ".",
+			"paths": {
+			"@/*": [
+				"./src/*"
+			],
+		},
 
-		// "emitDecoratorMetadata": true,
-		// "experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
 
-		// "module": "commonjs",
-    
-		// "moduleResolution": "node",
-		// "noImplicitReturns": false,
-		// "useUnknownInCatchVariables": false,
-		// "isolatedModules": false,
-		// "verbatimModuleSyntax": false,
-		// "noUncheckedIndexedAccess": false,
-		// "noImplicitOverride": false,
+		// TODO: remove all options below this line to align with the modern config
+		// TODO: "module" to be removed when we migrate to vitest
+		"module": "commonjs",
+		// TODO: "moduleResolution" to be removed when we migrate to vitest
+		"moduleResolution": "node",
+		"noImplicitReturns": false,
+		"useUnknownInCatchVariables": false,
+		"isolatedModules": false,
+		"verbatimModuleSyntax": false,
+		"noUncheckedIndexedAccess": false,
+		"noImplicitOverride": false,
 
 		// "noImplicitAny": true,
 		// "noUnusedLocals": true,
 		// "noUnusedParameters": true,
-		// "strictNullChecks": true,
-		// "preserveConstEnums": true,
-
-    "rootDir": ".",
-    "noUncheckedIndexedAccess": false,
-    "verbatimModuleSyntax": false,
-    "downlevelIteration": true,
+		"strictNullChecks": true,
+		"preserveConstEnums": true
   },
   "references": [
     {
@@ -35,6 +39,6 @@
       "path": "../core/tsconfig.build.json"
     }
   ],
-  "include": ["src/**/*.ts", "src/**/*.svg", "src/**/*.json"],
+  "include": ["src/nodes/**/*.ts", "src/**/*.svg", "src/**/*.json", "src/type/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

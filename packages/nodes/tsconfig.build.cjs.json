@@ -1,9 +1,9 @@
 {
 	"extends": ["./tsconfig.json", "@nmg8/typescript-config/modern/tsconfig.cjs.json"],
 	"compilerOptions": {
-		"rootDir": "src",
-		"outDir": "dist/cjs",
-		"tsBuildInfoFile": "dist/cjs/typecheck.tsbuildinfo"
+		"outDir": "dist",
+		"module": "commonjs",
+		"tsBuildInfoFile": "dist/typecheck.tsbuildinfo"
 	},
 	"include": [
 		"src/**/*.ts",

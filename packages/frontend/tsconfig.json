@@ -16,6 +16,8 @@
     {
       "path": "./tsconfig.node.json"
     },
-    { "path": "../workflow/tsconfig.build.esm.json" },
+    { 
+      "path": "../workflow/tsconfig.build.esm.json"
+    },
   ],
 }

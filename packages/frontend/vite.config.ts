@@ -18,4 +18,13 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["react-resizable-panels"],
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    }
+  }
 })

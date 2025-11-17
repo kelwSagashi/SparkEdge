@@ -2,10 +2,11 @@
   "name": "nmg8-nodes",
   "version": "1.0.0",
   "description": "",
+  "main": "index.js",
   "scripts": {
     "test": "vitest run",
-    "build": "pnpm run copy && tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json",
-    "watch": "pnpm run copy && tsc --build tsconfig.build.esm.json tsconfig.build.cjs.json --watch",
+    "build": "tsc --build tsconfig.build.cjs.json && tsc-alias -p tsconfig.build.cjs.json && pnpm run copy",
+    "watch": "tsc-watch -p tsconfig.build.cjs.json --onCompilationComplete \"tsc-alias -p tsconfig.build.cjs.json && pnpm run copy\"",
     "dev": "pnpm watch",
     "start": "node dist/cjs/index.js",
     "copy": "copyfiles -u 1 \"src/**/*.svg\" dist/"
@@ -22,18 +23,7 @@
     "tsup": "^8.5.0",
     "typescript": "^5.9.3"
   },
-  "types": "dist/esm/index.d.ts",
-  "module": "dist/esm/index.js",
-  "main": "dist/cjs/index.js",
-  "exports": {
-    ".": {
-      "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
-    },
-    "./*": "./*"
-  },
   "files": [
-    "dist/**/*"
+    "dist"
   ]
 }

@@ -3,7 +3,12 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "dist/esm",
-		"tsBuildInfoFile": "dist/esm/typecheck.tsbuildinfo"
+		"tsBuildInfoFile": "dist/esm/typecheck.tsbuildinfo",
+		
+		// "declaration": true,
+		// "emitDeclarationOnly": false,
+		// "allowJs": false,
+		// "resolveJsonModule": true
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": ["node_modules"]

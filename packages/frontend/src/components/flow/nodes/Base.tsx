@@ -1,16 +1,20 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { useReactFlow, type Node, type NodeProps } from "@xyflow/react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { NodeResizeControl, NodeResizer, ResizeControlVariant, useReactFlow, type Node, type NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 import { useDeleteNode } from "@/hooks/use-delete-node";
-import { BuilderNodeValues, NodeGroupTypes, type INodeData, type INodeTypeDescription } from "nmg8-workflow";
+import { BuilderNodes, type IDataObject, type INodeData, type INodeInputConfiguration, type INodeOutputConfiguration, type INodeProperties, type INodeTypeDescription } from "nmg8-workflow";
 import BaseNodeActions from "./Node-Actions";
 import BaseInputHandle from "./base-input-handle";
 import BaseOutputHandle from "./base-output-handle";
 import { api } from "@/server/server.service";
-import type { IBaseNodeProps, RegisterNodeMetadata } from "@/interfaces/nodes";
+import type { IBaseNodeProps, INode, RegisterNodeMetadata } from "@/interfaces/nodes";
+import NodeOptionSelector from "./properties/options-selector";
+import { useWorkflowStore } from "@/stores/workflow-store";
+import { useShallow } from "zustand/react/shallow";
+import NodeTextOption from "./properties/string-type";
 
-const NODE_HANDLE_SIZE_GAP = 2;
-const NODE_HANDLE_SIZE = 4;
+const NODE_HANDLE_SIZE_GAP = 3;
+const NODE_HANDLE_SIZE = 3;
 const NODE_BASE_SIZE_MULTIPLIER = 3;
 const calc_node_base_size = (
     size: number,
@@ -24,11 +28,18 @@ export default function BaseNode({
     selected
 }: IBaseNodeProps) {
     const [isHovered, setIsHovered] = useState(false);
-    const [isEditingLabel, setIsEditingLabel] = useState(false);
-    const [label, setLabel] = useState(data.name);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [description, setDescription] = useState<INodeTypeDescription>();
-    const { getNode } = useReactFlow();
+    const [
+        updateNodeParameters,
+        updateNodeData,
+        getNode,
+    ] = useWorkflowStore(
+        useShallow((s) => [
+            s.updateNodeParameters,
+            s.updateNodeData,
+            s.getNode
+        ])
+    )
     const deleteNode = useDeleteNode();
     const nodeSize = useMemo(() => {
         let size = calc_node_base_size(NODE_HANDLE_SIZE, NODE_BASE_SIZE_MULTIPLIER, NODE_HANDLE_SIZE_GAP);
@@ -36,6 +47,8 @@ export default function BaseNode({
             return {
                 w: `calc(var(--spacing) * ${size})`,
                 h: `calc(var(--spacing) * ${size})`,
+                width: size,
+                height: size
             }
         }
 
@@ -51,27 +64,67 @@ export default function BaseNode({
         return {
             w: `calc(var(--spacing) * ${size})`,
             h: `calc(var(--spacing) * ${size})`,
+            width: size,
+            height: size
         }
 
-    }, [description])
+    }, [description]);
 
-    const handleRun = useCallback(() => {
-        console.log(getNode(id));
-    }, [id, data]);
+    const handleRun = useCallback(async () => {
+        const node = getNode(id) as INode;
+        console.log(node);
+    }, [id]);
 
-    const handleLabelBlur = useCallback(() => {
-        setIsEditingLabel(false);
-    }, []);
+    const handleOptionsSelect = useCallback(
+        async (
+            value: IDataObject, 
+            property: Extract<INodeProperties, { type: 'options' }>
+            ) => {
+            updateNodeParameters(id, value);
 
-    const handleLabelChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            setLabel(e.target.value);
-        },
-        []
+            const node = getNode(id);
+
+            if (!node) return;
+
+            for (const onSel of property.onSelect ?? []) {
+                const onSelUpdateNodeData = onSel.updateNodeData;
+
+                if (onSelUpdateNodeData?.routing.request) {
+
+                    onSelUpdateNodeData.routing.request.body = { node };
+
+                    const response = await api.execute({
+                        request: onSelUpdateNodeData.routing.request
+                    });
+
+                    const data = response.data;
+                    
+                    Object.keys(data).map(key => {
+                        if (Object.hasOwn(node.data, key)) {
+                            const newData = {[key]: data[key]};
+                            updateNodeData(id, newData);
+                        }
+                    })
+                }
+            }
+        }, [
+            id
+        ]
     );
 
+    const handleChangeText = useCallback(
+        async (
+            value: IDataObject, 
+            _: Extract<INodeProperties, { type: 'string' }>
+            ) => {
+            updateNodeParameters(id, value);
+        }, [
+            id
+        ]
+    );
+    
     const handleLoadDescription = useCallback(async () => {
-        const _description = (await api.getNodeDescription({type: data.type})).data;
+        const _description = (await api.getNodeDescription({name: data.name})).data;
         setDescription(_description);
     }, [data.type]);
 
@@ -79,60 +132,59 @@ export default function BaseNode({
         handleLoadDescription();
     }, [handleLoadDescription]);
 
-    const getIconUrl = useCallback((icon: string = "", type: string = "") => {
-        if (icon.startsWith("file:")) {
-            const fileName = icon.replace("file:", "");
-            return `http://localhost:3000/icons/${type}/${fileName}`;
-        }
-        return icon;
-    }, []);
+    const minHeight = 140 + nodeSize.height;
 
     return (
-        <div className="relative">
-            <div
+            <NodeCard
+                style={{
+                    minWidth: 200,
+                    minHeight
+                }}
+                data-selected={selected}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                className="bottom-0 relative"
             >
+                <NodeResizeControl minWidth={200} position="right" variant={ResizeControlVariant.Line} color="transparent"/>
+                <NodeResizeControl minWidth={200} position="left" variant={ResizeControlVariant.Line} color="transparent"/>
                 {isHovered && description?.defaults.handleActions && <BaseNodeActions deleteNode={() => deleteNode(id)} handleRun={handleRun} />}
 
-                <div
-                    className={cn("relative shadow-md",
-                        "border-primary/80 rounded-xl bg-foreground flex",
-                        "items-center justify-center cursor-pointer border-2",
-                        selected ? "ring-8" : "")}
-                    style={{
-                        width: nodeSize.w,
-                        height: nodeSize.h
-                    }}
-                    onDoubleClick={() => setIsDialogOpen(true)}
-                >
+                <NodeHeader>
+                    {description?.displayName ?? "Node"}
+                </NodeHeader>
 
-                    {/* Handle de entrada */}
-                    <BaseInputHandle
-                        gap={NODE_HANDLE_SIZE_GAP}
-                        size={NODE_HANDLE_SIZE}
-                        inputs={data.inputs}
-                    />
-
-                    {/* Handle de saída */}
-                    <BaseOutputHandle 
-                        data={data}
-                        outputs={data.outputs}
-                        gap={NODE_HANDLE_SIZE_GAP}
-                        size={NODE_HANDLE_SIZE}
-                    />
-
-                    {/* Ícone central */}
-                    <img
-                        src={getIconUrl(description?.icon as string, description?.name)}
-                        alt={description?.displayName}
-                        className="size-6"
-                    />
+                <div>
+                    <div className="relative w-full h-full">
+                        <BaseOutputHandle 
+                            data={data}
+                            outputs={data.outputs}
+                            gap={NODE_HANDLE_SIZE_GAP}
+                            size={NODE_HANDLE_SIZE}
+                        />
                     </div>
+                    <div className="relative p-2">
+                        {description?.properties.map(property => {
+                            switch (property.type) {
+                                case 'options':
+                                    return <NodeOptionSelector key={`${property.type}.${property.name}`} property={property} handleSelect={handleOptionsSelect}/>
+                                case 'string':
+                                    return <NodeTextOption key={`${property.type}.${property.name}`} property={property} handleChangeText={handleChangeText}/>
+                                default:
+                                    return <></>
+                            }
+                        }
+                        )}
+                    </div>
+                    <div className="relative w-full h-full">
+                        <BaseInputHandle
+                            gap={NODE_HANDLE_SIZE_GAP}
+                            size={NODE_HANDLE_SIZE}
+                            inputs={data.inputs}
+                        />
+                    </div>
+                </div>
 
-                {/* === LABEL FORA DO NÓ === */}
-                <div className="relative text-center mt-2">
+                {/*
+                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-center mt-2">
                     {isEditingLabel ? (
                         <input
                             value={label}
@@ -149,17 +201,54 @@ export default function BaseNode({
                             {label}
                         </span>
                     )}
-                </div>
-            </div>
-        </div>
+                </div> */}
+            </NodeCard>
+        
     );
 }
 
 export const BaseNodeMetadata: RegisterNodeMetadata<INodeData> = {
-    group: NodeGroupTypes.BASE,
-    types: BuilderNodeValues,
+    types: ["base"],
     node: memo(BaseNode),
     selected: false,
     deletable: true,
     available: true,
 };
+
+const NodeCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+        "rounded-sm shadow-lg !h-full h-min-0 w-full ",
+        "text-white border border-black/60",
+        "data-[selected=true]:ring-1 !bg-neutral-900",
+        className
+    )}
+    {...props}
+  />
+));
+NodeCard.displayName = "NodeCard";
+
+const NodeHeader = React.forwardRef<
+  HTMLDivElement ,
+  React.HTMLAttributes<HTMLDivElement> & {text?: string}
+>(({ className, text, children, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+        "bg-emerald-700 text-white px-3 py-1 flex items-center",
+        "justify-between cursor-pointer select-none rounded-t-sm",
+        className
+    )}
+    {...props}
+  >
+    <span className="font-semibold text-sm truncate">
+        {children}
+        {text}
+    </span>
+  </div>
+));
+NodeHeader.displayName = "NodeHeadder";

@@ -1,4 +1,4 @@
-import { db, Tables, type DBType } from "../schema";
+import { db, Tables, type DBType } from "../entity";
 import type { 
     CodeInstanceReturningValues, 
     DeviceReturningValues, 
@@ -6,7 +6,9 @@ import type {
     ServerEndpointsReturningValues, 
     ServerEndpointsUpsertValues, 
     ServerReturningValues, 
-    ServerUpsertValues 
+    ServerUpsertValues, 
+    WorkflowReturningValues, 
+    WorkflowUpsertValues
     } from '../types';
 import { eq } from "drizzle-orm";
 
@@ -32,6 +34,24 @@ export class DatabaseService {
     }
 
     public getDb() { return this.db }
+
+    upsertWorkflow(values: WorkflowUpsertValues): ReturningQueries<WorkflowReturningValues | null> {
+        try {
+            return {
+                data: this.db.insert(Tables.Workflow)
+                    .values(values)
+                    .onConflictDoUpdate({
+                        target: Tables.Workflow.id,
+                        set: values
+                    }).returning().get()
+            }
+        } catch (error: unknown) {
+            return {
+                error: error,
+                data: null
+            };
+        }
+    }
 
     upsertServer(values: ServerUpsertValues): ReturningQueries<ServerReturningValues | null> {
         try {
@@ -144,5 +164,4 @@ export class DatabaseService {
         }
     }
 }
-const DatabaseInstance = DatabaseService.getInstance(db);
-export default DatabaseInstance;
+export const dbManager = DatabaseService.getInstance(db);

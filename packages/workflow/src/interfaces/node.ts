@@ -1,25 +1,23 @@
-import { BuilderNodeTypes, NodeConnectionTypes, NodeGroupTypes } from "../constants";
-import { GenericError } from "../errors/generic-error";
-import { Icon, Themed, ThemeIconColor } from "./icon";
-import { EngineRequest, EngineResponse } from "./engine";
-import { GenericValue, IBinaryKeyData, IDataObject, IPairedItemData, SupplyData } from "./data";
-import { RelatedExecution } from "./execution";
-import { ITriggerFunctions, ITriggerResponse, TriggerPanelDefinition } from "./trigger";
-import { PostReceiveAction } from "./post";
-import { IHttpRequestOptions, PreSendAction } from "./http";
-import { IExecuteFunctions, IExecuteSingleFunctions, ILoadOptionsFunctions, ILocalLoadOptionsFunctions, ISupplyDataFunctions } from "./functions";
-import { ICredentialsDisplayOptions, IDisplayOptions } from "./display";
-import { FilterTypeOptions, FilterValue } from "./filter";
-import { AssignmentCollectionValue, AssignmentTypeOptions } from "./assignment";
-import { CalloutAction } from "./callout";
-import { FieldType } from "./field";
-import { EnsureTypeOptions, ExpressionString, Optional } from "./utils";
-import { DeclarativeRestApiSettings } from "./restapi";
-import { ICredentialTestFunction } from "./credential";
-import { ResourceMapperFields, ResourceMapperValue } from "./resource-mapper";
-import { IHandle } from "./edge";
-
-export type NodeGroupType = (typeof NodeGroupTypes)[keyof typeof NodeGroupTypes];
+import type { BuilderNodeTypes, NodeConnectionTypes } from "../constants";
+import type { GenericError } from "../errors/generic-error";
+import type { Icon, Themed, ThemeIconColor } from "./icon";
+import type { EngineRequest, EngineResponse } from "./engine";
+import type { GenericValue, IBinaryKeyData, IDataObject, IPairedItemData, SupplyData } from "./data";
+import type { RelatedExecution } from "./execution";
+import type { ITriggerFunctions, ITriggerResponse, TriggerPanelDefinition } from "./trigger";
+import type { PostReceiveAction } from "./post";
+import type { IHttpRequestOptions, PreSendAction } from "./http";
+import type { IExecuteFunctions, IExecuteSingleFunctions, ILoadOptionsFunctions, ILocalLoadOptionsFunctions, ISupplyDataFunctions } from "./functions";
+import type { ICredentialsDisplayOptions, IDisplayOptions } from "./display";
+import type { FilterTypeOptions, FilterValue } from "./filter";
+import type { AssignmentCollectionValue, AssignmentTypeOptions } from "./assignment";
+import type { CalloutAction } from "./callout";
+import type { FieldType } from "./field";
+import type { CloseFunction, EnsureTypeOptions, ExpressionString, Optional } from "./utils";
+import type { DeclarativeRestApiSettings } from "./restapi";
+import type { ICredentialTestFunction } from "./credential";
+import type { ResourceMapperFields, ResourceMapperValue } from "./resource-mapper";
+import type { IHandle } from "./edge";
 
 export interface INodeTypeBaseDescription {
 	type: BuilderNodeTypes;
@@ -29,7 +27,6 @@ export interface INodeTypeBaseDescription {
 	iconColor?: ThemeIconColor;
 	iconUrl?: Themed<string>;
 	badgeIconUrl?: Themed<string>;
-	group: NodeGroupType;
 	description: string;
 	documentationUrl?: string;
 	subtitle?: string;
@@ -49,34 +46,41 @@ export interface INodeInputFilter {
 
 export type NodeConnectionType = (typeof NodeConnectionTypes)[keyof typeof NodeConnectionTypes];
 
-export type INodeOutputConfigurationCategories = 'error' | 'stdout' | 'stderr' | 'success';
+export type INodeIOConfigurationTypes = 
+| 'trigger' 
+| 'error' 
+| 'stdout' 
+| 'stderr' 
+| 'success' 
+| 'arg' 
+| 'output.string' 
+| 'output.number' 
+| 'output.boolean' 
+| 'output.object' 
+| 'output.array' 
+| 'output.json' 
+| 'output.unknown'
+| 'input.string' 
+| 'input.number' 
+| 'input.boolean' 
+| 'input.object' 
+| 'input.array' 
+| 'input.json' 
+| 'input.unknown'
 
-export enum INodeIOPosition {
-    Left = "left",
-    Top = "top",
-    Right = "right",
-    Bottom = "bottom"
+export type INodeIOBaseConfiguration = {
+	id: string;
+	name: string;
+	type: INodeIOConfigurationTypes;
+	position?: string;
+	maxConnections?: number;
 }
 
-export interface INodeOutputConfiguration {
-	id: string;
-	category?: INodeOutputConfigurationCategories;
-	displayName?: string;
-	maxConnections?: number;
-	required?: boolean;
-	type: NodeConnectionType;
-	position: INodeIOPosition;
+export interface INodeOutputConfiguration extends INodeIOBaseConfiguration {
 }
 
-export interface INodeInputConfiguration {
-	id: string;
-	category?: string;
-	displayName?: string;
+export interface INodeInputConfiguration extends INodeIOBaseConfiguration {
 	required?: boolean;
-	type: NodeConnectionType;
-	position: INodeIOPosition;
-	// filter?: INodeInputFilter;
-	maxConnections?: number;
 }
 
 export interface INodePropertyModeTypeOptions {
@@ -162,7 +166,7 @@ export interface INodePropertyRegexValidation extends INodePropertyModeValidatio
 	};
 }
 
-export interface INodePropertyOptions {
+export type INodePropertyOptions  = {
 	name: string;
 	value: string | number | boolean;
 	action?: string;
@@ -182,31 +186,56 @@ export interface INodePropertyCollection {
 	values: INodeProperties[];
 }
 
+
+
 export type NodePropertyTypes =
-	| 'boolean'
-	| 'button'
-	| 'collection'
-	| 'color'
-	| 'dateTime'
-	| 'fixedCollection'
-	| 'hidden'
-	| 'json'
-	| 'callout'
-	| 'notice'
-	| 'multiOptions'
-	| 'number'
-	| 'options'
-	| 'string'
-	| 'credentialsSelect'
-	| 'resourceLocator'
-	| 'curlImport'
-	| 'resourceMapper'
-	| 'filter'
-	| 'assignmentCollection'
-	| 'credentials'
-	| 'workflowSelector'
-	| 'scriptSelector'
-	| 'deviceSelector';
+	| { type: 'boolean'}
+	| { type: 'button' }
+	| { type: 'collection' }
+	| { type: 'color' }
+	| { type: 'dateTime' }
+	| { type: 'fixedCollection' }
+	| { type: 'hidden' }
+	| { type: 'json' }
+	| { type: 'callout' }
+	| { type: 'notice' }
+	| { type: 'multiOptions' }
+	| { type: 'number' }
+	| { type: 'string' }
+	| { type: 'credentialsSelect' }
+	| { type: 'resourceLocator' }
+	| { type: 'curlImport' }
+	| { type: 'resourceMapper' }
+	| { type: 'filter' }
+	| { type: 'assignmentCollection' }
+	| { type: 'credentials' }
+	| NodePropertyTypeOptions;
+
+export interface INodeDisplayFuncions {
+	updateIO: () => void;
+}
+
+export type NodeDisplayFuncions = keyof INodeDisplayFuncions;
+
+export type NodePropertyTypeOptions = { 
+		type: 'options',
+		displayOptions: {
+			replace: {
+				key: DisplayOptionsReplaceItem,
+				id: DisplayOptionsReplaceItem,
+				value: DisplayOptionsReplaceItem,
+				name: DisplayOptionsReplaceItem,
+				description: DisplayOptionsReplaceItem,
+			},
+		},
+		onSelect?: {
+			updateNodeData?: {
+				routing: INodePropertyRouting
+			}
+		}[]
+	}
+
+export type DisplayOptionsReplaceItem = { as: string[], separator?: string };
 
 export type NodePropertyAction = {
 	type: 'askAiCodeGeneration';
@@ -306,53 +335,30 @@ export interface INodeParameterResourceLocator {
 	__regex?: string;
 }
 
-export type NodeParameterValueType =
-	| NodeParameterValue
-	| INodeParameters
-	| INodeParameterResourceLocator
-	| ResourceMapperValue
-	| FilterValue
-	| AssignmentCollectionValue
-	| NodeParameterValue[]
-	| INodeParameters[]
-	| INodeParameterResourceLocator[]
-	| ResourceMapperValue[];
+export type NodeParameterValueType<T = IDataObject> = T;
 
 export interface INodeParameters {
 	[key: string]: NodeParameterValueType;
 }
 
-export interface INodeProperties {
+export type INodeProperties = NodePropertyTypes & {
 	displayName: string;
 	name: string;
-	type: NodePropertyTypes;
-	typeOptions?: INodePropertyTypeOptions;
 	default?: NodeParameterValueType;
 	description?: string;
 	hint?: string;
-	disabledOptions?: IDisplayOptions;
 	displayOptions?: IDisplayOptions;
 	options?: Array<INodePropertyOptions | INodeProperties | INodePropertyCollection>;
 	placeholder?: string;
 	isNodeSetting?: boolean;
+	displayInNode?: boolean;
 	noDataExpression?: boolean;
 	required?: true;
 	routing?: INodePropertyRouting;
-	credentialTypes?: Array<
-		'extends:oAuth2Api' | 'extends:oAuth1Api' | 'has:authenticate' | 'has:genericAuth'
-	>;
-	// extractValue?: INodePropertyValueExtractor;
 	modes?: INodePropertyMode[];
-	requiresDataPath?: 'single' | 'multiple';
 	doNotInherit?: boolean;
-	// set expected type for the value which would be used for validation and type casting
 	validateType?: FieldType;
-	// works only if validateType is set
-	// allows to skip validation during execution or set custom validation/casting logic inside node
-	// inline error messages would still be shown in UI
 	ignoreValidationDuringExecution?: boolean;
-	// for type: options | multiOptions – skip validation of the value (e.g. when value is not in the list and specified via expression)
-	allowArbitraryValues?: boolean;
 }
 
 export interface IGetNodeParameterOptions {
@@ -398,7 +404,6 @@ export interface INodeData extends Record<string, unknown> {
 	name: string;
 	version?: string | number | number[];
 	type: BuilderNodeTypes;
-    group: NodeGroupType;
 	disabled?: boolean;
 	notes?: string;
 	notesInFlow?: boolean;
@@ -409,16 +414,12 @@ export interface INodeData extends Record<string, unknown> {
 	executeOnce?: boolean;
 	onError?: OnError;
 	continueOnFail?: boolean;
-	parameters: INodeParameters;
+	parameters: Record<string, any>;
 	credentials?: INodeCredentials;
 	webhookId?: string;
 
-    inputNames?: string[];
-	inputs: Array<INodeInputConfiguration> | ExpressionString;
-	outputs: Array<INodeOutputConfiguration> | ExpressionString;
-	outputNames?: string[];
-	requiredInputs?: string | number[] | number;
-    // parameters: IBaseNodeTypeDescription;
+	inputs: Array<INodeInputConfiguration>;
+	outputs: Array<INodeOutputConfiguration>;
 }
 
 export interface INodes {
@@ -437,7 +438,7 @@ export interface INodeExecutionData {
 		| string
 		| undefined;
 
-	json: IDataObject;
+	data: IDataObject;
 	binary?: IBinaryKeyData;
 	error?: GenericError;
 	pairedItem?: IPairedItemData | IPairedItemData[] | number;
@@ -462,25 +463,13 @@ export interface INodeTypeDescription extends INodeTypeBaseDescription {
 	eventTriggerDescription?: string;
 	activationMessage?: string;
 	
-	inputNames?: string[];
-	inputs: Array<INodeInputConfiguration> | ExpressionString;
-	outputs: Array<INodeOutputConfiguration> | ExpressionString;
-	outputNames?: string[];
-	requiredInputs?: string | number[] | number;
+	inputs: Array<INodeInputConfiguration>;
+	outputs: Array<INodeOutputConfiguration>;
 
 	properties: INodeProperties[];
 	credentials?: INodeCredentialDescription[];
-	// maxNodes?: number; // How many nodes of that type can be created in a workflow
-	// polling?: true | undefined;
-	// supportsCORS?: true | undefined;
-	// requestDefaults?: DeclarativeRestApiSettings.HttpRequestOptions;
-
-	// translation?: { [key: string]: object };
-	// mockManualExecution?: true;
-	// triggerPanel?: TriggerPanelDefinition | boolean;
-	// extendsCredential?: string;
 	hints?: NodeHint[];
-	// communityNodePackageVersion?: string;
+
 	waitingNodeTooltip?: string;
 }
 
@@ -500,19 +489,24 @@ export interface INodeTypes {
 	// getKnownTypes(): IDataObject;
 }
 
+export type INodeTypeReturns<T> = {
+	[name: string]: T | any;
+}
+
 export interface INodeType {
 	description: INodeTypeDescription;
 	getProperties(): INodeTypeDescription;
-	supplyData?(this: ISupplyDataFunctions, itemIndex: number): Promise<SupplyData>;
-	execute?(this: IExecuteFunctions, response?: EngineResponse): Promise<NodeOutput>;
-	/**
-	 * A function called when a node receives a chat message. Allows it to react
-	 * to the message before it gets executed.
-	 */
+	getInputs(context: INodeTypeExecutionContext): Promise<INodeTypeReturns<Array<INodeInputConfiguration>>>;
+	getOutputs(context: INodeTypeExecutionContext): Promise<INodeTypeReturns<Array<INodeOutputConfiguration>>>;
+	test?(context?: INodeTypeExecutionContext): Promise<INodeTypeReturns<any>>;
+	execute?(context: IExecuteFunctions): Promise<NodeOutput>;
 	onMessage?(context: IExecuteFunctions, data: INodeExecutionData): Promise<NodeOutput>;
 	// poll?(this: IPollFunctions): Promise<INodeExecutionData[][] | null>;
-	trigger?(this: ITriggerFunctions): Promise<ITriggerResponse | undefined>;
-	// webhook?(this: IWebhookFunctions): Promise<IWebhookResponseData>;
+	trigger?(this: ITriggerFunctions): Promise<INodeTypeReturns<ITriggerResponse | undefined>>;
+	callMethod(
+		method: keyof INodeType,
+		context: INodeTypeExecutionContext
+	): Promise<INodeTypeReturns<any>>;
 	methods?: {
 		loadOptions?: {
 			[key: string]: (this: ILoadOptionsFunctions) => Promise<INodePropertyOptions[]>;
@@ -541,34 +535,30 @@ export interface INodeType {
 			) => Promise<NodeParameterValueType>;
 		};
 	};
-	// webhookMethods?: {
-	// 	[name in WebhookType]?: {
-	// 		[method in WebhookSetupMethodNames]: (this: IHookFunctions) => Promise<boolean>;
-	// 	};
-	// };
-	/**
-	 * Defines custom operations for nodes that do not implement an `execute` method, such as declarative nodes.
-	 * This function will be invoked instead of `execute` for a specific resource and operation.
-	 * Should be either `execute` or `customOperations` defined for a node, but not both.
-	 *
-	 * @property customOperations - Maps specific resource and operation to a custom function
-	 */
-	// customOperations?: {
-	// 	[resource: string]: {
-	// 		[operation: string]: (this: IExecuteFunctions) => Promise<NodeOutput>;
-	// 	};
-	// };
+}
+
+export interface INodeTypeExecutionContext {
+	node: INode;
+	nodeClazz: INodeType;
+
+	getNode: () => INode;
+	callNodeMethod: (method: keyof INodeType) => Promise<any>;
+	getNodeParameter: <T>(parameterName: string, fallbackValue?: T, options?: IGetNodeParameterOptions) => NodeParameterValueType<T>;
+	_getNodeParameter: <T>(parameterName: string, fallbackValue?: T, options?: IGetNodeParameterOptions) => NodeParameterValueType<T>;
+	prepareOutputData: (outputData: INodeExecutionData[]) => Promise<any>;
+	execute?: () => Promise<NodeOutput>;
+	onMessage: (
+		context: IExecuteFunctions,
+		data: INodeExecutionData
+	) => Promise<NodeOutput>;
+	trigger?: (this: ITriggerFunctions) => Promise<ITriggerResponse | undefined>
 }
 
 export interface NodeExecutionWithMetadata extends INodeExecutionData {
 	pairedItem: IPairedItemData | IPairedItemData[];
 }
 
-export type NodeOutput =
-	| INodeExecutionData[][]
-	| NodeExecutionWithMetadata[][]
-	| EngineRequest
-	| null;
+export type NodeOutput = INodeExecutionData;
 
 export declare enum Position {
     Left = "left",
@@ -626,3 +616,9 @@ export type INodeConstructor<NodeData extends Record<string, unknown> = Record<s
 };
 
 export type INode = INodeConstructor<INodeData, string>;
+
+export interface IRunNodeResponse {
+	data: INodeExecutionData[][] | null | undefined;
+	hints?: NodeExecutionHint[];
+	closeFunction?: CloseFunction;
+}

@@ -3,10 +3,12 @@ import cors from "cors";
 import { Logger } from "./simple-logger";
 import { Container, Service } from "@nmg8/di";
 import { ControllerRegistry } from "./controller.registry";
+import { send } from "./response-helper";
 import path from "node:path";
 
 import '@/nodes/node.controller';
-import { send } from "./response-helper";
+import '@/scripts/script.controller';
+import '@/workflows/workflow.controller'
 
 @Service()
 export class Server {

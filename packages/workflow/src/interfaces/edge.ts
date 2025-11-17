@@ -1,4 +1,4 @@
-import { Position } from "./node";
+import type { Position } from "./node";
 
 export type IEdgeBase<EdgeData extends Record<string, unknown> = Record<string, unknown>, EdgeType extends string | undefined = string | undefined> = {
     id: string;

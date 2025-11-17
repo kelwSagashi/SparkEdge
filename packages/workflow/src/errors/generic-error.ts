@@ -1,4 +1,4 @@
-import { INodeData } from "../interfaces/node";
+import type { INodeData } from "../interfaces/node";
 
 export class GenericError extends Error {
     declare type: string | undefined;

@@ -1,5 +1,5 @@
 import { ensureError } from "./ensure-error";
-import { Result, ResultError, ResultOk } from "./interfaces/result";
+import type { Result, ResultError, ResultOk } from "./interfaces/result";
 
 export const createResultOk = <T>(data: T): ResultOk<T> => ({
 	ok: true,

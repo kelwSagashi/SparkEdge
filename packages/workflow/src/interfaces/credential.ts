@@ -1,5 +1,5 @@
-import { IDataObject } from "./data";
-import { Logger } from "./logs";
+import type { IDataObject } from "./data";
+import type { Logger } from "./logs";
 
 export type CredentialInformation =
 	| string

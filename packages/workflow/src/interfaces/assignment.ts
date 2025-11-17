@@ -1,5 +1,5 @@
-import { FieldType } from "./field";
-import { NodeParameterValue } from "./node";
+import type { FieldType } from "./field";
+import type { NodeParameterValue } from "./node";
 
 export type AssignmentCollectionValue = {
 	assignments: AssignmentValue[];

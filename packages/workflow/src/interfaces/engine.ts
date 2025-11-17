@@ -1,6 +1,6 @@
-import { IDataObject } from "./data";
-import { NodeConnectionType } from "./node";
-import { ITaskData } from "./task";
+import type { IDataObject } from "./data";
+import type { NodeConnectionType } from "./node";
+import type { ITaskData } from "./task";
 
 /**
  * Represents a request to execute a specific node and receive the result back.

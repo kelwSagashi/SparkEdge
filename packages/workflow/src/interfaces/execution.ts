@@ -1,7 +1,7 @@
 import { ExecutionStatusList } from "../constants";
 import { GenericError } from "../errors/generic-error";
-import { INodeData, INodeExecutionData } from "./node";
-import { ITaskDataConnections, ITaskDataConnectionsSource, ITaskMetadata } from "./task";
+import type { INodeData, INodeExecutionData } from "./node";
+import type { ITaskDataConnections, ITaskDataConnectionsSource, ITaskMetadata } from "./task";
 
 export type ExecutionStatus = (typeof ExecutionStatusList)[number];
 

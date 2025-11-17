@@ -1,9 +1,9 @@
-import { IExecuteResponsePromiseData } from "./data";
-import { IDeferredPromise } from "./deferred-promise";
-import { FunctionsBaseWithRequiredKeys } from "./functions";
-import { IGetNodeParameterOptions, INodeExecutionData, NodeParameterValueType } from "./node";
-import { IRun } from "./run";
-import { CloseFunction } from "./utils";
+import type { IExecuteResponsePromiseData } from "./data";
+import type { IDeferredPromise } from "./deferred-promise";
+import type { FunctionsBaseWithRequiredKeys } from "./functions";
+import type { IGetNodeParameterOptions, INodeExecutionData, NodeParameterValueType } from "./node";
+import type { IRun } from "./run";
+import type { CloseFunction } from "./utils";
 
 export type TriggerPanelDefinition = {
 	hideContent?: boolean | string;

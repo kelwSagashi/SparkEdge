@@ -1,5 +1,5 @@
-import { NodeParameterValue } from "./node";
-import { NonEmptyArray } from "./utils";
+import type { NodeParameterValue } from "./node";
+import type { NonEmptyArray } from "./utils";
 
 export type FilterOperatorType =
 	| 'string'

@@ -1,4 +1,4 @@
-import { NodeConnectionType } from "./node";
+import type { NodeConnectionType } from "./node";
 
 export interface IConnection {
 	// The node the connection is to

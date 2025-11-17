@@ -1,4 +1,4 @@
-import { NodeParameterValue } from "./node";
+import type { NodeParameterValue } from "./node";
 
 export type DisplayCondition =
 	| { _cnd: { eq: NodeParameterValue } }

@@ -1,4 +1,4 @@
-import { IDeferredPromise } from "./interfaces/deferred-promise";
+import type { IDeferredPromise } from "./interfaces/deferred-promise";
 
 export function createDeferredPromise<T = void>(): IDeferredPromise<T> {
 	const deferred: Partial<IDeferredPromise<T>> = {};

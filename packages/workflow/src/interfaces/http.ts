@@ -1,6 +1,6 @@
-import { GenericAbortSignal } from "axios";
-import { GenericValue, IDataObject } from "./data";
-import { IExecuteSingleFunctions } from "./functions";
+import type { GenericAbortSignal } from "axios";
+import type { GenericValue, IDataObject } from "./data";
+import type { IExecuteSingleFunctions } from "./functions";
 
 export type IHttpRequestMethods = 'DELETE' | 'GET' | 'HEAD' | 'PATCH' | 'POST' | 'PUT';
 export type ChunkType = 'begin' | 'item' | 'end' | 'error';

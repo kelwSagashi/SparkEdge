@@ -1,6 +1,6 @@
-import { IRunExecutionData } from "./data";
-import { ExecutionStatus } from "./execution";
-import { WorkflowExecuteMode } from "./workflow";
+import type { IRunExecutionData } from "./data";
+import type { ExecutionStatus } from "./execution";
+import type { WorkflowExecuteMode } from "./workflow";
 
 export interface IRun {
 	data: IRunExecutionData;

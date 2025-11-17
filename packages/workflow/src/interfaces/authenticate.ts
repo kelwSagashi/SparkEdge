@@ -1,4 +1,4 @@
-import { DeclarativeRestApiSettings } from "./restapi";
+import type { DeclarativeRestApiSettings } from "./restapi";
 
 
 export interface IAuthenticateRuleBase {

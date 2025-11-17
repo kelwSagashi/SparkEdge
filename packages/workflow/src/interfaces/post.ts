@@ -1,6 +1,6 @@
-import { IDataObject } from "./data";
-import { IExecuteSingleFunctions } from "./functions";
-import { INodeExecutionData } from "./node";
+import type { IDataObject } from "./data";
+import type { IExecuteSingleFunctions } from "./functions";
+import type { INodeExecutionData } from "./node";
 
 export interface IPostReceiveBase {
 	type: string;

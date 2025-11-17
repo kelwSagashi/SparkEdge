@@ -1,6 +1,6 @@
-import { ISourceData } from "./data";
-import { ExecutionError, ExecutionStatus, RelatedExecution } from "./execution";
-import { INodeExecutionData, NodeExecutionHint, SubNodeExecutionDataAction } from "./node";
+import type { ISourceData } from "./data";
+import type { ExecutionError, ExecutionStatus, RelatedExecution } from "./execution";
+import type { INodeExecutionData, NodeExecutionHint, SubNodeExecutionDataAction } from "./node";
 
 export interface ITaskStartedData {
 	startTime: number;

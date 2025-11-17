@@ -1,5 +1,5 @@
-import { FieldType } from "./field";
-import { INodePropertyOptions } from "./node";
+import type { FieldType } from "./field";
+import type { INodePropertyOptions } from "./node";
 
 export interface ResourceMapperField {
 	id: string;

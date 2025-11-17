@@ -1,14 +1,14 @@
-import { IDataObject } from "./data";
-import { IHttpRequestOptions, PreSendAction } from "./http";
-import { PostReceiveAction } from "./post";
-import { Override } from "./utils";
+import type { IDataObject } from "./data";
+import type { IHttpRequestOptions, PreSendAction } from "./http";
+import type { PostReceiveAction } from "./post";
+import type { Override } from "./utils";
 
 export namespace DeclarativeRestApiSettings {
 	// The type below might be extended
 	// with new options that need to be parsed as expressions
 	export type HttpRequestOptions = Override<
 		IHttpRequestOptions,
-		{ skipSslCertificateValidation?: string | boolean; url?: string }
+		{ skipSslCertificateValidation?: string | boolean; }
 	>;
 
 	export type ResultOptions = {

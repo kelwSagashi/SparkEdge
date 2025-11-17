@@ -1,17 +1,34 @@
 import type { IContextObject } from "./context";
 import type { ExecutionError, RelatedExecution } from "./execution";
-import type { INodeData, INodeExecutionData } from "./node";
+import type { INode, INodeData, INodeExecutionData } from "./node";
 import type { ITaskData, ITaskDataConnections, ITaskDataConnectionsSource, ITaskMetadata, IWaitingForExecution, IWaitingForExecutionSource } from "./task";
 import type { CloseFunction } from "./utils";
 import type { IWorkflowExecutionDataProcess } from "./workflow";
 
 export type GenericValue = string | object | number | boolean | undefined | null;
 
-export interface IDataObject {
-	[key: string]: GenericValue | IDataObject | GenericValue[] | IDataObject[];
+export type IDataObject = Record<string, any>;
+
+type ScriptSDKIOBaseSchema = {
+	name: string;
+	type: string;
 }
 
+export type ScriptSDKInputSchema = ScriptSDKIOBaseSchema & {
+	required: boolean;
+}
 
+export type ScriptSDKOutputSchema = ScriptSDKIOBaseSchema & {
+}
+
+export type ScriptSDKIOSchema = {
+	inputs: Array<ScriptSDKInputSchema>;
+	outputs: Array<ScriptSDKOutputSchema>;
+}
+
+export type ScriptSDKSchema = {
+	schema: ScriptSDKIOSchema;
+}
 export interface ISourceData {
 	previousNode: string;
 	previousNodeOutput?: number; // If undefined "0" gets used
@@ -74,7 +91,7 @@ export interface IExecuteContextData {
 export interface IExecuteData {
 	data: ITaskDataConnections;
 	metadata?: ITaskMetadata;
-	node: INodeData;
+	node: INode;
 	source: ITaskDataConnectionsSource | null;
 	runIndex?: number;
 }

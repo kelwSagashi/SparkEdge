@@ -1,40 +1,52 @@
 import { LoadNodes } from "@/load-nodes";
-import { Logger } from "@/simple-logger";
 import { Container, Get, Post, RestController } from "@nmg8/di";
 import { Request, Response } from "express";
-import { Expression } from "nmg8-core";
-import path from "node:path";
+import { Expression, NodeExecutionContext } from "nmg8-core";
+import { INode } from "nmg8-workflow";
+import { NodeRequest } from "./node.request";
 
 @RestController('/nodes')
 export class NodeControler {
     constructor(
-        private readonly logger: Logger,
-    ) {
-
-    }
+        private readonly loadNodes: LoadNodes
+    ) {}
     
     // const server = http.createServer(this.app);
         // const io = new Server(server, { cors: { origin: "*" } });
 
         // const queue = new Queue("scripts", { connection: { host: "localhost", port: 6379 } });
 
-        // Rota de exemplo
-        @Get('/run')
-        async run(req: Request, res: Response){
-            // const job = await queue.add("runScript", req.body);
+        @Get('/')
+        async getNodes(_req: Request, _res: Response) {
+            return this.loadNodes.getLoadedNames();
+        }
+        
+        @Post('/run/test')
+        async runTest(
+            req: Request<{}, {}, { node: INode }>,
+            _res: Response
+        ){
             return new Promise((resolve, reject) => {
-                resolve({
-                    jobId: 'id'
-                })
+                try {
+                    const loadedNode = this.loadNodes.getNode(req.body.node.data.name);
+                    const type = loadedNode.type;
+                    
+                    resolve({
+                        properties: type.getProperties()
+                    });
+
+                } catch (error) {
+                    reject(error);
+                }
             });
         }
 
         // Serve arquivos SVG com rota /icons/<arquivo>
         // this.app.use("/icons", express.static(nodesIconsPath));
 
-        @Get("/:type/description")
+        @Get("/:name/description")
         async getNodeDescripton(req: Request, res: Response) {
-            const type = req.params.type;
+            const type = req.params.name;
 
             const Node = Container.get(LoadNodes).getNode(type);
 
@@ -45,6 +57,29 @@ export class NodeControler {
             }
 
             return Node.type.getProperties()
+        }
+        
+        @Post("/invoke/:name/:method")
+        async invokeNode(req: NodeRequest.InvokeNodeClass, _res: Response) {
+            const name = req.params.name;
+            const method = req.params.method;
+            const node = req.body.node;
+            
+            const LoadedNode = Container.get(LoadNodes).getNode(name);
+
+            if (!LoadedNode?.type) {
+                return {
+                    message: "not found!"
+                };
+            }
+
+            console.log('invoke node', node);
+
+            const context = new NodeExecutionContext(node, LoadedNode.type);
+
+            const response = await context.callNodeMethod(method);
+
+            return response;
         }
 
         @Post("/expression/resolve")

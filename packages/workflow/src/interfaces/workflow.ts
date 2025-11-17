@@ -1,7 +1,12 @@
-import { IConnections } from "./connection";
-import { IDataObject, IPinData, IRunData, IRunExecutionData, StartNodeData } from "./data";
-import { INodeData } from "./node";
-import { ITaskData } from "./task";
+import type { Workflow } from "../workflow";
+import type { IConnections } from "./connection";
+import type { ExecuteWorkflowData, IDataObject, IExecuteData, IPinData, IRunData, IRunExecutionData, StartNodeData } from "./data";
+import type { IEdge } from "./edge";
+import type { ExecutionStatus, RelatedExecution } from "./execution";
+import type { IExecuteFunctions } from "./functions";
+import type { INode, INodeData, INodeExecutionData, INodeParameters, INodeTypes } from "./node";
+import type { Result } from "./result";
+import type { ITaskData, ITaskDataConnections } from "./task";
 import type * as express from 'express';
 
 export interface IWorkflowMetadata {
@@ -41,35 +46,17 @@ export namespace WorkflowSettings {
 }
 
 export interface IWorkflowSettings {
-	timezone?: 'DEFAULT' | string;
-	errorWorkflow?: string;
-	callerIds?: string;
-	callerPolicy?: WorkflowSettings.CallerPolicy;
-	saveDataErrorExecution?: WorkflowSettings.SaveDataExecution;
-	saveDataSuccessExecution?: WorkflowSettings.SaveDataExecution;
-	saveManualExecutions?: 'DEFAULT' | boolean;
-	saveExecutionProgress?: 'DEFAULT' | boolean;
-	executionTimeout?: number;
-	executionOrder?: 'v0' | 'v1';
-	timeSavedPerExecution?: number;
-	availableInMCP?: boolean;
 }
 
 
-export interface IWorkflowBase {
+export type IWorkflowBase<Nodes = INode[], Edges = IEdge[]> = {
 	id: string;
 	name: string;
-	active: boolean;
-	isArchived: boolean;
-	createdAt: Date;
-	startedAt?: Date;
-	updatedAt: Date;
-	nodes: INodeData[];
-	connections: IConnections;
+	nodes: Nodes;
+	edges: Edges;
+	active?: boolean;
+	isArchived?: boolean;
 	settings?: IWorkflowSettings;
-	staticData?: IDataObject;
-	pinData?: IPinData;
-	versionId?: string;
 }
 
 export interface IWorkflowExecutionDataProcess {
@@ -97,4 +84,62 @@ export interface IWorkflowExecutionDataProcess {
 	httpResponse?: express.Response; // Used for streaming responses
 	streamingEnabled?: boolean;
 	startedAt?: Date;
+}
+
+export interface ExecuteWorkflowOptions {
+	node?: INode;
+	parentWorkflowId: string;
+	inputData?: INodeExecutionData[];
+	loadedWorkflowData?: IWorkflowBase;
+	loadedRunData?: IWorkflowExecutionDataProcess;
+	parentWorkflowSettings?: IWorkflowSettings;
+	// parentCallbackManager?: CallbackManager;
+	doNotWaitToFinish?: boolean;
+	parentExecution?: RelatedExecution;
+}
+
+export interface IWorkflowExecuteAdditionalData {
+	executeWorkflow: (
+		workflowInfo: IExecuteWorkflowInfo,
+		additionalData: IWorkflowExecuteAdditionalData,
+		options: ExecuteWorkflowOptions,
+	) => Promise<ExecuteWorkflowData>;
+	getRunExecutionData: (executionId: string) => Promise<IRunExecutionData | undefined>;
+	executionId?: string;
+	restartExecutionId?: string;
+	currentNodeExecutionIndex: number;
+	httpResponse?: express.Response;
+	httpRequest?: express.Request;
+	streamingEnabled?: boolean;
+	restApiUrl: string;
+	instanceBaseUrl: string;
+	setExecutionStatus?: (status: ExecutionStatus) => void;
+	sendDataToUI?: (type: string, data: IDataObject | IDataObject[]) => void;
+	formWaitingBaseUrl: string;
+	webhookBaseUrl: string;
+	webhookWaitingBaseUrl: string;
+	webhookTestBaseUrl: string;
+	currentNodeParameters?: INodeParameters;
+	executionTimeoutTimestamp?: number;
+	userId?: string;
+	variables: IDataObject;
+	// parentCallbackManager?: CallbackManager;
+	startRunnerTask<T, E = unknown>(
+		additionalData: IWorkflowExecuteAdditionalData,
+		jobType: string,
+		settings: unknown,
+		executeFunctions: IExecuteFunctions,
+		inputData: ITaskDataConnections,
+		node: INode,
+		workflow: Workflow,
+		runExecutionData: IRunExecutionData,
+		runIndex: number,
+		itemIndex: number,
+		activeNodeName: string,
+		connectionInputData: INodeExecutionData[],
+		siblingParameters: INodeParameters,
+		mode: WorkflowExecuteMode,
+		// envProviderState: EnvProviderState,
+		executeData?: IExecuteData,
+	): Promise<Result<T, E>>;
 }

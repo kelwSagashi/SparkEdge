@@ -9,6 +9,6 @@ export class WorkflowService {
     ) {}
 
     async runTest(workflow: IWorkflowBase, destinationNode?: string) {
-        return this.workflowRunner.runTest(workflow, destinationNode)
+        return await this.workflowRunner.runTest(workflow, destinationNode)
     }
 }

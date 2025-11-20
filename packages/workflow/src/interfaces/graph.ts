@@ -1,11 +1,13 @@
 export class GraphNode<T> {
     data: T;
     adjNodes: GraphNode<T>[];
+    predecessors: GraphNode<T>[];
     comparator: (a: T, b: T) => number;
 
     constructor(data: T, comparator: (a: T, b: T) => number) {
         this.data = data;
         this.adjNodes = new Array<GraphNode<T>>();
+        this.predecessors = new Array<GraphNode<T>>();
         this.comparator = comparator;
     }
 
@@ -44,7 +46,12 @@ export class Graph<T> {
   addEdge(source: T, destination: T): void {
     const sourceNode = this.addNewNode(source);
     const destNode = this.addNewNode(destination);
+
+    // Adiciona a conexão para frente (adjacência)
     sourceNode.addNewNeighbour(destNode);
+
+    // Adiciona a conexão para trás (predecessor)
+    destNode.predecessors.push(sourceNode);
   }
 
   /** 

@@ -67,52 +67,54 @@ export type BaseExecutionFunctions = FunctionsBaseWithRequiredKeys<'getMode'> & 
 };
 
 // TODO: Create later own type only for Config-Nodes
-export type IExecuteFunctions = ExecuteFunctions.GetNodeInstances &
-	BaseExecutionFunctions & {
-		executeWorkflow(
-			workflowInfo: IExecuteWorkflowInfo,
-			inputData?: INodeExecutionData[],
-			// parentCallbackManager?: CallbackManager,
-			options?: {
-				doNotWaitToFinish?: boolean;
-				parentExecution?: RelatedExecution;
-			},
-		): Promise<ExecuteWorkflowData>;
-		getExecutionDataById(executionId: string): Promise<IRunExecutionData | undefined>;
-		// getInputConnectionData(
-		// 	connectionType: AINodeConnectionType,
+export type IExecuteFunctions = 
+	ExecuteFunctions.GetNodeInstances &
+	// BaseExecutionFunctions & 
+	{
+		// executeWorkflow(
+		// 	workflowInfo: IExecuteWorkflowInfo,
+		// 	inputData?: INodeExecutionData[],
+		// 	// parentCallbackManager?: CallbackManager,
+		// 	options?: {
+		// 		doNotWaitToFinish?: boolean;
+		// 		parentExecution?: RelatedExecution;
+		// 	},
+		// ): Promise<ExecuteWorkflowData>;
+		// getExecutionDataById(executionId: string): Promise<IRunExecutionData | undefined>;
+		// // getInputConnectionData(
+		// // 	connectionType: AINodeConnectionType,
+		// // 	itemIndex: number,
+		// // 	inputIndex?: number,
+		// // ): Promise<unknown>;
+		getInputData(): INodeExecutionData[];
+		// getNodeInputs(): INodeInputConfiguration[];
+		// getNodeOutputs(): INodeOutputConfiguration[];
+		// putExecutionToWait(waitTill: Date): Promise<void>;
+		// sendMessageToUI(message: any): void;
+		// sendResponse(response: IExecuteResponsePromiseData): void;
+		// sendChunk(type: ChunkType, itemIndex: number, content?: IDataObject | string): void;
+		// isStreaming(): boolean;
+
+		// // TODO: Make this one then only available in the new config one
+		// addInputData(
+		// 	connectionType: NodeConnectionType,
+		// 	data: INodeExecutionData[][] | ExecutionError,
+		// 	runIndex?: number,
+		// ): { index: number };
+		// addOutputData(
+		// 	connectionType: NodeConnectionType,
+		// 	currentNodeRunIndex: number,
+		// 	data: INodeExecutionData[][] | ExecutionError,
+		// 	metadata?: ITaskMetadata,
+		// 	sourceNodeRunIndex?: number,
+		// ): void;
+
+		// addExecutionHints(...hints: NodeExecutionHint[]): void;
+		// startJob<T = unknown, E = unknown>(
+		// 	jobType: string,
+		// 	settings: unknown,
 		// 	itemIndex: number,
-		// 	inputIndex?: number,
-		// ): Promise<unknown>;
-		getInputData(inputIndex?: number, connectionType?: NodeConnectionType): INodeExecutionData[];
-		getNodeInputs(): INodeInputConfiguration[];
-		getNodeOutputs(): INodeOutputConfiguration[];
-		putExecutionToWait(waitTill: Date): Promise<void>;
-		sendMessageToUI(message: any): void;
-		sendResponse(response: IExecuteResponsePromiseData): void;
-		sendChunk(type: ChunkType, itemIndex: number, content?: IDataObject | string): void;
-		isStreaming(): boolean;
-
-		// TODO: Make this one then only available in the new config one
-		addInputData(
-			connectionType: NodeConnectionType,
-			data: INodeExecutionData[][] | ExecutionError,
-			runIndex?: number,
-		): { index: number };
-		addOutputData(
-			connectionType: NodeConnectionType,
-			currentNodeRunIndex: number,
-			data: INodeExecutionData[][] | ExecutionError,
-			metadata?: ITaskMetadata,
-			sourceNodeRunIndex?: number,
-		): void;
-
-		addExecutionHints(...hints: NodeExecutionHint[]): void;
-		startJob<T = unknown, E = unknown>(
-			jobType: string,
-			settings: unknown,
-			itemIndex: number,
-		): Promise<Result<T, E>>;
+		// ): Promise<Result<T, E>>;
 	};
 
 export interface IExecuteSingleFunctions extends BaseExecutionFunctions {
@@ -132,31 +134,6 @@ export interface IExecuteSingleFunctions extends BaseExecutionFunctions {
 	// 		detectBinaryEncoding(buffer: Buffer): string;
 	// 	};
 }
-
-
-export type ISupplyDataFunctions = ExecuteFunctions.GetNodeInstances &
-	FunctionsBaseWithRequiredKeys<'getMode'> &
-	Pick<
-		IExecuteFunctions,
-		| 'addInputData'
-		| 'addOutputData'
-		| 'getInputData'
-		| 'getNodeOutputs'
-		| 'executeWorkflow'
-		| 'sendMessageToUI'
-		| 'startJob'
-	> & {
-		getNextRunIndex(): number;
-		continueOnFail(): boolean;
-		evaluateExpression(expression: string, itemIndex: number): NodeParameterValueType;
-		// getWorkflowDataProxy(itemIndex: number): IWorkflowDataProxyData;
-		getExecutionCancelSignal(): AbortSignal | undefined;
-		onExecutionCancellation(handler: () => unknown): void;
-		cloneWith(replacements: {
-			runIndex: number;
-			inputData: INodeExecutionData[][];
-		}): ISupplyDataFunctions;
-	};
 
 export interface ILoadOptionsFunctions extends FunctionsBase {
 	getNodeParameter(

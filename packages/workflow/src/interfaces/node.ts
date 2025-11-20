@@ -7,7 +7,7 @@ import type { RelatedExecution } from "./execution";
 import type { ITriggerFunctions, ITriggerResponse, TriggerPanelDefinition } from "./trigger";
 import type { PostReceiveAction } from "./post";
 import type { IHttpRequestOptions, PreSendAction } from "./http";
-import type { IExecuteFunctions, IExecuteSingleFunctions, ILoadOptionsFunctions, ILocalLoadOptionsFunctions, ISupplyDataFunctions } from "./functions";
+import type { IExecuteFunctions, IExecuteSingleFunctions, ILoadOptionsFunctions, ILocalLoadOptionsFunctions } from "./functions";
 import type { ICredentialsDisplayOptions, IDisplayOptions } from "./display";
 import type { FilterTypeOptions, FilterValue } from "./filter";
 import type { AssignmentCollectionValue, AssignmentTypeOptions } from "./assignment";
@@ -439,13 +439,15 @@ export interface INodeExecutionData {
 		| undefined;
 
 	data: IDataObject;
-	binary?: IBinaryKeyData;
-	error?: GenericError;
+	// binary?: IBinaryKeyData;
+	// error?: GenericError;
 	pairedItem?: IPairedItemData | IPairedItemData[] | number;
-	metadata?: {
-		subExecution: RelatedExecution;
-	};
-	evaluationData?: Record<string, GenericValue>;
+	// metadata?: {
+	// 	subExecution: RelatedExecution;
+	// };
+	// evaluationData?: Record<string, GenericValue>;
+	targetHandle?: string;
+	sourceHandle?: string;
 }
 
 export interface INodeCredentialDescription {
@@ -499,7 +501,7 @@ export interface INodeType {
 	getInputs(context: INodeTypeExecutionContext): Promise<INodeTypeReturns<Array<INodeInputConfiguration>>>;
 	getOutputs(context: INodeTypeExecutionContext): Promise<INodeTypeReturns<Array<INodeOutputConfiguration>>>;
 	test?(context?: INodeTypeExecutionContext): Promise<INodeTypeReturns<any>>;
-	execute?(context: IExecuteFunctions): Promise<NodeOutput>;
+	execute(context: IExecuteFunctions): Promise<NodeOutput>;
 	onMessage?(context: IExecuteFunctions, data: INodeExecutionData): Promise<NodeOutput>;
 	// poll?(this: IPollFunctions): Promise<INodeExecutionData[][] | null>;
 	trigger?(this: ITriggerFunctions): Promise<INodeTypeReturns<ITriggerResponse | undefined>>;

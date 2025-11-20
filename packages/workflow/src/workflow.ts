@@ -4,7 +4,7 @@ import { Graph } from "./interfaces/graph";
 import type { INode, INodeTypes } from "./interfaces/node";
 import type { IWorkflowBase, IWorkflowSettings } from "./interfaces/workflow";
 
-export type WorkflowParameters = IWorkflowBase;
+export type WorkflowParameters = IWorkflowBase & {nodeTypes: INodeTypes;};
 
 export class WorkflowTest {
 	constructor() { }
@@ -19,6 +19,7 @@ export class Workflow {
     active: boolean;
     settings: IWorkflowSettings = {};
 	testStaticData: IDataObject | undefined;
+	nodeTypes: INodeTypes;
 
     constructor(parameters: WorkflowParameters) {
         this.id = parameters.id;
@@ -27,11 +28,8 @@ export class Workflow {
 		this.active = parameters.active || false;
 		this.nodes = parameters.nodes;
 		this.edges = parameters.edges;
+		this.nodeTypes = parameters.nodeTypes;
     }
-
-	getStartNode(){
-		return this.buildGraph().findRoot()?.data;
-	}
 
 	getDestinationNode(destinationNode: string) {
 		const graph = this.buildGraph();
@@ -69,7 +67,13 @@ export class Workflow {
 
 
 	buildGraph() {
-		const graph = new Graph<INode>((a, b) => a.id.localeCompare(b.id));
+		const nodeComparator = (a: INode, b: INode) => {
+            if (a.id < b.id) return -1;
+            if (a.id > b.id) return 1;
+            return 0;
+        };
+
+		const graph = new Graph<INode>(nodeComparator);
 
 		const nodeSet = new Map<string, INode>();
 
@@ -96,7 +100,8 @@ export class Workflow {
 			id: this.id,
 			name: this.name,
 			active: this.active,
-			settings: this.settings
+			settings: this.settings,
+			nodeTypes: this.nodeTypes,
 		});
 	}
 }

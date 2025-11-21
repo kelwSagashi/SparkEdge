@@ -223,7 +223,7 @@ class NodeBase:
         
         # 1. Processa `outputs_def` da classe base
         class_outputs = getattr(self.__class__, "outputs_def", {})
-        print(class_outputs)
+        # print(class_outputs)
         for name, definition in class_outputs.items():
             self.outputs.add(name, definition.get('type', Any))
 
@@ -355,7 +355,7 @@ class NMG8Runtime:
                  args[k] = inputs_data[k]
         
         fn(**args) # Executa
-        final = {"stdout": self.main_output, "stderr": None, "outputs": self.outputs.data}
+        final = {"stdout": self.main_output, "stderr": None} | self.outputs.data
         print(json.dumps(final, indent=2))
     
     def _process_output_methods(self, instance: Any):
@@ -394,7 +394,7 @@ class NMG8Runtime:
         run_fn()
         self._process_output_methods(instance)
 
-        final = {"stdout": self.main_output, "stderr": None, "outputs": instance.outputs.data}
+        final = {"stdout": self.main_output, "stderr": None} | instance.outputs.data
         print(json.dumps(final, indent=2))
 
     # ALTERADO: public run agora tem tratamento de erro
@@ -417,7 +417,7 @@ class NMG8Runtime:
                 "message": str(e),
                 "traceback": traceback.format_exc()
             }
-            error_output = {"stdout": None, "stderr": err_info, "outputs": {}}
+            error_output = {"stdout": None, "stderr": err_info}
             print(json.dumps(error_output, indent=2))
             sys.exit(1) # Sinaliza erro para o sistema operacional
 

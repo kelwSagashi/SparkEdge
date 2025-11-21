@@ -81,7 +81,6 @@ export class WorkflowExecute {
 	{
 		
         let nodeOutputs = new Map<string, INodeExecutionData>();
-        let executionNode: INode;
 
         return new PCancelable(async (resolve, _reject, onCancel) => {
             const startedAt = new Date();
@@ -96,7 +95,6 @@ export class WorkflowExecute {
                     executionQueue.length !== 0
                 ) {
                     const currentNode = executionQueue.shift()!;
-                    executionNode = currentNode.data;
 
                     if (this.status === 'canceled') {
 						return;

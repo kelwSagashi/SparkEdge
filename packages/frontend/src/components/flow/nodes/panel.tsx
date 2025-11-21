@@ -113,7 +113,8 @@ export const NodePanel: React.FC<INodePanelProps> = React.memo(({
                             <ScrollArea className='h-full w-full'>
                                 <JsonViewMain
                                     inputProps={{
-                                        className: "w-auto border-border rounded"
+                                        className: "w-auto border-border rounded",
+                                        disabled: true,
                                     }}
                                     data={nodeIputRunData || {}}
                                 />
@@ -145,8 +146,10 @@ export const NodePanel: React.FC<INodePanelProps> = React.memo(({
                             <ScrollArea className='h-full w-full'>
                                 <JsonViewMain
                                     inputProps={{
-                                        className: "w-auto border-border rounded"
+                                        className: "w-auto border-border rounded",
+                                        disabled: true
                                     }}
+
                                     data={nodeRunData || {}}
                                 />
                             </ScrollArea>

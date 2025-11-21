@@ -24,10 +24,15 @@ export class Device extends NodeType {
             handleActions: true,
         },
         inputs: [
+            {
+                id: 'trigger',
+                type: 'trigger',
+                name: 'trigger',
+            },
         ],
         outputs: [
             {
-                id: 'output_0',
+                id: 'data',
                 name: 'data',
                 type: 'output.json'
             }

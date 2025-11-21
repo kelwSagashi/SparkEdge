@@ -23,8 +23,8 @@ export class String extends NodeType {
         ],
         outputs: [
             {
-                id: 'string_text',
-                name: 'string',
+                id: 'value',
+                name: 'value',
                 type: 'output.string'
             }
         ],
@@ -32,7 +32,7 @@ export class String extends NodeType {
             {
                 type: 'string',
                 displayName: 'Text',
-                name: 'text',
+                name: 'value',
                 displayInNode: true,
                 placeholder: 'adicione algo...',
             },
@@ -56,11 +56,12 @@ export class String extends NodeType {
     }
 
     execute(context: IExecuteFunctions): Promise<NodeOutput> {
-        const text = context.nodeContext.getNodeParameter('text');
+        const value = context.nodeContext.getNodeParameter('value');
         return Promise.resolve({
             data: {
-                text
-            }
+                value
+            },
+            
         })
     }
 }

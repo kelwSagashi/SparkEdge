@@ -44,11 +44,40 @@ export default function BaseOutputHandle({
                                 height: `calc(var(--spacing) * ${size})`
                             }}
                         >
+<<<<<<< Updated upstream
                             <div className="absolute left-[-6px] top-1/2 -translate-y-1/2 flex items-center">
                                 <span className="left-5 bg-background/70 p-0.5 absolute text-xs font-light text-primary">
                                     {output.displayName || output.type}
                                 </span>
                                 <div className="hover:bg-accent-foreground w-4 h-4 bg-muted-foreground rounded-full" />
+=======
+
+                            <div className="absolute right-0">
+                                <Handle
+                                    key={`handle.${output.id}`}
+                                    id={output.id}
+                                    title={output.name}
+                                    type="source"
+                                    position={Position.Right}
+                                    className={cn(
+                                        "!cursor-crosshair",
+                                        "!w-3 !h-3 !bg-pink-700",
+                                        "!hover:!bg-accent-foreground !border !border-black/90"
+                                    )}
+                                    
+                                />
+
+                                <div
+                                    key={`name.${output.id}`}
+                                    id={output.id}
+                                >
+                                    <div className="absolute top-1/2 -translate-y-1/2 flex items-center">
+                                        <span className="right-3 absolute text-xs font-light text-primary">
+                                            {output.name || output.type}
+                                        </span>
+                                    </div>
+                                </div>
+>>>>>>> Stashed changes
                             </div>
                             <div className={cn(
                                 "absolute left-[-6px] top-1/2 -translate-y-1/2 flex items-center",

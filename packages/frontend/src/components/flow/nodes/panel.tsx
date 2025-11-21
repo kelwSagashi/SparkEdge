@@ -10,11 +10,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { INodeProperties, INodeTypeDescription } from "@nmg8/workflow/src";
 import ScriptSelector from "./panel/script-selector";
 import { api } from "@/server/server.service";
+<<<<<<< Updated upstream
+=======
+import type { INode } from "@/interfaces";
+import type { INodeExecutionData, INodeProperties, INodeTypeDescription } from "nmg8-workflow";
+import { useWorkflowStore } from "@/stores/workflow-store";
+import { useShallow } from "zustand/react/shallow";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { JsonViewMain } from "@/components/json-view/json-view";
+>>>>>>> Stashed changes
 
 interface INodePanelProps {
     isDialogOpen: boolean;
     setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+<<<<<<< Updated upstream
     node: Node<BaseNodeData, string> | undefined;
+=======
+>>>>>>> Stashed changes
     onClose: () => void;
 }
 
@@ -31,10 +43,44 @@ const RenderParam = memo(({ property }: { property: INodeProperties }) => {
 export const NodePanel: React.FC<INodePanelProps> = React.memo(({
     isDialogOpen,
     setIsDialogOpen,
-    onClose,
-    node
+    onClose
 }) => {
+    const [
+        getNodeRunDataOutput,
+        nodeClicked,
+        edges,
+        lastRun,
+    ] = useWorkflowStore(useShallow(s => [
+        s.getNodeRunData,
+        s.nodeClicked,
+        s.workflow.edges,
+        s.lastRun
+    ]))
     const [description, setDescription] = useState<INodeTypeDescription>();
+    const [nodeRunData, setNodeRunData] = useState<INodeExecutionData>();
+    const [nodeIputRunData, setNodeIputRunData] = useState<INodeExecutionData[]>();
+
+    useEffect(() => {
+        if (nodeClicked?.id) {
+            console.log(getNodeRunDataOutput(nodeClicked.id))
+            setNodeRunData(getNodeRunDataOutput(nodeClicked.id));
+        }
+    }, [nodeClicked, getNodeRunDataOutput]);
+
+    useEffect(() => {
+        if(nodeClicked) {
+            const connectedEdges = edges.filter(edge => edge.target === nodeClicked.id);
+            console.log(connectedEdges, lastRun)
+            
+            const inputs: INodeExecutionData[]  = [];
+            for (const node of connectedEdges){
+                const data = getNodeRunDataOutput(node.source);
+                if (!data) continue;
+                inputs.push(data);
+            };
+            setNodeIputRunData(inputs);
+        }
+    }, [nodeClicked, edges, lastRun, setNodeIputRunData]);
 
     const renderParams = useCallback(() => {
         if (!description) return null;
@@ -48,10 +94,15 @@ export const NodePanel: React.FC<INodePanelProps> = React.memo(({
     }, [description?.properties]);
 
     const handleLoadDescription = useCallback(async () => {
+<<<<<<< Updated upstream
         if (!node) return;
         const _description = (await api.getNodeDescription({type: node.data.parameters.type})).data;
+=======
+        if (!nodeClicked) return;
+        const _description = (await api.getNodeDescription({name: nodeClicked.data.parameters.type})).data;
+>>>>>>> Stashed changes
         setDescription(_description);
-    }, [node?.data.parameters.type]);
+    }, [nodeClicked?.data.parameters.type]);
 
     useEffect(() => {
         handleLoadDescription();
@@ -71,13 +122,21 @@ export const NodePanel: React.FC<INodePanelProps> = React.memo(({
                     <Panel defaultSize={30} minSize={20}>
                         <div className="bg-background w-full h-full mt-6 p-4 rounded-l-2xl">
                             <h1 className="text-primary">Entrada</h1>
+                            <ScrollArea className='h-full w-full'>
+                                <JsonViewMain
+                                    inputProps={{
+                                        className: "w-auto border-border rounded"
+                                    }}
+                                    data={nodeIputRunData || {}}
+                                />
+                            </ScrollArea>
                         </div>
                     </Panel>
                     <PanelResizeHandle hitAreaMargins={{ coarse: 40, fine: 20 }} className="" />
                     <Panel minSize={30}>
                         <div className="bg-background w-full h-full border-border border rounded-t-2xl">
                             <div className="bg-muted-foreground/30 w-full h-full p-4 rounded-t-2xl">
-                                <h1 className="text-primary">{node?.data.name}</h1>
+                                <h1 className="text-primary">{nodeClicked?.data.name}</h1>
                                 <Tabs defaultValue="a" className="py-2">
                                     <TabsList>
                                         <TabsTrigger value="a">Parâmetros</TabsTrigger>
@@ -95,6 +154,14 @@ export const NodePanel: React.FC<INodePanelProps> = React.memo(({
                     <Panel defaultSize={30} minSize={20}>
                         <div className="bg-background w-full h-full mt-6 p-4 rounded-r-2xl">
                             <h1 className="text-primary">Saída</h1>
+                            <ScrollArea className='h-full w-full'>
+                                <JsonViewMain
+                                    inputProps={{
+                                        className: "w-auto border-border rounded"
+                                    }}
+                                    data={nodeRunData || {}}
+                                />
+                            </ScrollArea>
                         </div>
                     </Panel>
                 </PanelGroup>

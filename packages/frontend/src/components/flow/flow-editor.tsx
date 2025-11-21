@@ -25,12 +25,49 @@ const edgeTypes: EdgeTypes = {
 }
 
 export default function FlowEditor({ id }: { id: string | undefined }) {
+<<<<<<< Updated upstream
     const [open, setOpen] = useState<boolean>(false);
     const [nodes, setNodes] = useState<INode[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
+=======
+    const [
+        workflow,
+        nodes, 
+        edges, 
+        onNodesChangeState, 
+        onEdgesChangeState, 
+        onConnectState, 
+        saveWorkflow, 
+        loadWorkflow,
+        shareWorkflow,
+        duplicateWorkflow,
+        downloadWorkflow,
+        deleteNode,
+        deleteEdge,
+        setNodeClicked,
+        setLastRun,
+    ] = useWorkflowStore(
+        useShallow((state) => [
+            state.workflow,
+            state.workflow.nodes,
+            state.workflow.edges,
+            state.onNodesChange,
+            state.onEdgesChange,
+            state.onConnect,
+            state.saveWorkflow,
+            state.loadWorkflow,
+            state.shareWorkflow,
+            state.duplicateWorkflow,
+            state.downloadWorkflow,
+            state.deleteNode,
+            state.deleteEdge,
+            state.setNodeClicked,
+            state.setLastRun
+        ])
+    );
+>>>>>>> Stashed changes
 
     const [openNodePanel, setOpenNodePanel] = useState(false);
-    const [nodeClicked, setNodeClicked] = useState<INode>();
 
     const { getNodes } = useReactFlow();
 
@@ -127,6 +164,7 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
         console.log("Executando fluxo...");
     };
 
+<<<<<<< Updated upstream
     const handleShare = () => {
         console.log("Compartilhando fluxo...");
     };
@@ -138,6 +176,12 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
     const handleDownload = () => {
         console.log("Baixando projeto...");
     };
+=======
+        const response = await api.runWorkflowTest({workflow});
+
+        setLastRun(response.data);
+    }, [workflow]);
+>>>>>>> Stashed changes
 
     return (
         <>
@@ -217,7 +261,6 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                         setOpenNodePanel(false);
                         setNodeClicked(undefined)
                     }}
-                    node={nodeClicked}
                 />
 
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur-sm shadow-lg rounded-2xl border border-border px-4 py-2 flex items-center gap-3 z-50">

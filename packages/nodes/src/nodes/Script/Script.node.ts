@@ -29,7 +29,7 @@ export class Script extends NodeType {
         },
         inputs: [
             {
-                id: 'script_input_0',
+                id: 'trigger',
                 type: 'trigger',
                 name: 'trigger',
             },
@@ -170,6 +170,9 @@ export class Script extends NodeType {
 
     execute(context: IExecuteFunctions): Promise<NodeOutput> {
         const scriptPath = this.getScriptPath(context.nodeContext);
+        const payload = context.getInputData()
+        console.log('script input data', JSON.stringify(payload))
+
         return new Promise((resolve, reject) => {
             const py = spawn("python", [scriptPath]);
 
@@ -189,6 +192,14 @@ export class Script extends NodeType {
                     reject(new Error("Invalid JSON schema: " + stdout));
                 }
             });
+
+            py.stdin.write(JSON.stringify({ip: 'a', device_id: 'aa'}));
+            py.stdin.end();
+
+            const timer = setTimeout(() => {
+                py.kill("SIGKILL");
+                reject(new Error("Timeout running python script"));
+            }, 10000);
         });
     }
 }

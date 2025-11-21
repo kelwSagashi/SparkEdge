@@ -5,9 +5,9 @@ export const NODES: RegisterNodeMetadata[] = [
   BaseNodeMetadata
 ];
 
-export const NODE_TYPES = NODES.reduce((acc, { types, group, node }) => {
+export const NODE_TYPES = NODES.reduce((acc, { types, node }) => {
   types.forEach((type) => {
-    acc[`${group}.${type}`] = node;
+    acc[`${type}`] = node;
   });
   return acc;
 }, {} as Record<string, any>);

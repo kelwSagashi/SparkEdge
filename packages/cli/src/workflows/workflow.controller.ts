@@ -39,7 +39,6 @@ export class WorkflowController {
         req: WorkflowRequest.ManualRun,
         res: Response
     ) {
-        console.log('run test', req.body.workflow)
         return await this.workflowService.runTest(
             req.body.workflow,
             req.body.destinationNode

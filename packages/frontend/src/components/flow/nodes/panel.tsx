@@ -5,35 +5,28 @@ import type { Node } from "@xyflow/react";
 import { ArrowLeft } from "lucide-react";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import type { BaseNodeData } from "./types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { INodeProperties, INodeTypeDescription } from "@nmg8/workflow/src";
-import ScriptSelector from "./panel/script-selector";
+import NodeOptionSelector from "./properties/options-selector";
 import { api } from "@/server/server.service";
-<<<<<<< Updated upstream
-=======
+import type { INodeProperties } from "nmg8-workflow";
 import type { INode } from "@/interfaces";
-import type { INodeExecutionData, INodeProperties, INodeTypeDescription } from "nmg8-workflow";
+import type { INodeExecutionData, INodeTypeDescription } from "nmg8-workflow";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import { useShallow } from "zustand/react/shallow";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { JsonViewMain } from "@/components/json-view/json-view";
->>>>>>> Stashed changes
 
 interface INodePanelProps {
     isDialogOpen: boolean;
     setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-<<<<<<< Updated upstream
-    node: Node<BaseNodeData, string> | undefined;
-=======
->>>>>>> Stashed changes
     onClose: () => void;
 }
 
 const RenderParam = memo(({ property }: { property: INodeProperties }) => {
     switch (property.type) {
-        case "scriptSelector":
-            return <ScriptSelector />
+        case "options":
+            // return <NodeOptionSelector />
+            
         default:
             return null;
     }
@@ -94,13 +87,8 @@ export const NodePanel: React.FC<INodePanelProps> = React.memo(({
     }, [description?.properties]);
 
     const handleLoadDescription = useCallback(async () => {
-<<<<<<< Updated upstream
-        if (!node) return;
-        const _description = (await api.getNodeDescription({type: node.data.parameters.type})).data;
-=======
         if (!nodeClicked) return;
         const _description = (await api.getNodeDescription({name: nodeClicked.data.parameters.type})).data;
->>>>>>> Stashed changes
         setDescription(_description);
     }, [nodeClicked?.data.parameters.type]);
 

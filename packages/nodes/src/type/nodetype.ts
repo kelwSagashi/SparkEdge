@@ -18,7 +18,9 @@ export abstract class NodeType implements INodeType {
 	test?(context: INodeTypeExecutionContext): Promise<INodeTypeReturns<any>>;
 
 
-	execute?(context: IExecuteFunctions): Promise<NodeOutput>;
+	execute(context: IExecuteFunctions): Promise<NodeOutput> {
+		throw Error("NotImpelemented");	
+	};
 
 	callMethod(
 		method: keyof INodeType,

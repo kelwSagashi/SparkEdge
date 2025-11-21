@@ -12,24 +12,24 @@ import { NodeCommandDialog } from './node-command';
 import { useNodeAutoAdjust } from '@/hooks/use-node-auto-adjust';
 import { FlowContextMenu } from './components/context-menu';
 import CustomDeletableEdge from './edges/custom-deletable-edge';
-import { useAddOnEdgeDrop } from '@/hooks/use-add-on-edge-drop';
 import { useInsertNode } from '@/hooks/use-insert-node';
 import { useDeleteNode } from '@/hooks/use-delete-node';
 import { BuilderNodes } from 'nmg8-workflow';
 import { NODE_TYPES } from './nodes';
 import { NodePanel } from './nodes/panel';
 import type { INode } from '@/interfaces';
+import { useIsValidConnection } from '@/hooks/use-is-valid-connection';
+import { useWorkflowStore } from '@/stores/workflow-store';
+import { useShallow } from 'zustand/react/shallow';
+import { useAddNodeOnEdgeDrop } from '@/hooks/use-add-on-edge-drop';
+import { useAddNodeOnEdgeDropStore } from '@/stores/add-node-on-edge-drop-store';
+import { api } from '@/server/server.service';
 
 const edgeTypes: EdgeTypes = {
     deletable: CustomDeletableEdge
 }
 
 export default function FlowEditor({ id }: { id: string | undefined }) {
-<<<<<<< Updated upstream
-    const [open, setOpen] = useState<boolean>(false);
-    const [nodes, setNodes] = useState<INode[]>([]);
-    const [edges, setEdges] = useState<Edge[]>([]);
-=======
     const [
         workflow,
         nodes, 
@@ -65,17 +65,20 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
             state.setLastRun
         ])
     );
->>>>>>> Stashed changes
 
     const [openNodePanel, setOpenNodePanel] = useState(false);
 
     const { getNodes } = useReactFlow();
 
-    const { handleOnEdgeDropConnectedEnd, handleOnEdgeConnectedStart } = useAddOnEdgeDrop()
+    const { 
+        handleOnEdgeDropConnectEnd,
+        floatingMenuWrapperRef,
+        handleAddConnectedNode,
+    } = useAddNodeOnEdgeDrop();
 
     const autoAdjustNode = useNodeAutoAdjust();
-    const insertNode = useInsertNode();
-    const deleteNode = useDeleteNode();
+
+    const isValidConnection = useIsValidConnection();
 
     const handleAutoAdjustNodeAfterNodeMeasured = useCallback(
         (id: string) => {
@@ -110,78 +113,37 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                     handleAutoAdjustNodeAfterNodeMeasured(change.item.id);
                 }
             });
-            setNodes((nodesSnapshot) => applyNodeChanges<INode>(changes, nodesSnapshot))
+            onNodesChangeState(changes)
         },
-        [],
+        [onNodesChangeState],
     );
     const onEdgesChange = useCallback(
         (changes: EdgeChange<Edge>[]) => {
-            setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot))
+            onEdgesChangeState(changes)
         },
-        [],
+        [onEdgesChangeState],
     );
     const onConnect = useCallback(
-        (params: Edge | Connection) => setEdges((edgesSnapshot) => addEdge({ ...params, type: "deletable" }, edgesSnapshot)),
+        (params: Connection) => onConnectState(params),
         [],
     );
 
-    // const onUpdateNodeData = useCallback((nodeId: string, data: Record<string, unknown>) => {
-    //     setNodes((nds) =>
-    //         nds.map((node) =>
-    //             node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node
-    //         )
-    //     );
-    // }, [setNodes]);
+    const handleDeleteElements = useCallback(() => {
+        const selectedNodes = nodes.filter(
+            (node) => node.selected
+        );
+        const selectedEdges = edges.filter((edge) => edge.selected);
+        
+        selectedNodes.forEach((node) => deleteNode(node.id));
+        selectedEdges.forEach((edge) => deleteEdge(edge.id));
+    }, [])
 
-    const onSaveFlow = useCallback(() => {
-        const flowDefinition = {
-            id: id,
-            nodes,
-            edges,
-            name: `Fluxo`
-        };
-        console.log(`Salvando fluxo:`, JSON.stringify(flowDefinition, null, 2));
-    }, [id, nodes, edges]);
-
-    const addScriptNode = useCallback(() => {
-        insertNode(BuilderNodes.SCRIPT)
-    }, [insertNode]);
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Delete") {
-                const selectedNodes = nodes.filter((n) => n.selected);
-                if (selectedNodes.length > 0) {
-                    selectedNodes.forEach((node) => deleteNode(node.id));
-                }
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [nodes, deleteNode]);
-
-    const handleRun = () => {
+    const handleRun = useCallback(async () => {
         console.log("Executando fluxo...");
-    };
-
-<<<<<<< Updated upstream
-    const handleShare = () => {
-        console.log("Compartilhando fluxo...");
-    };
-
-    const handleDuplicate = () => {
-        console.log("Duplicando projeto...");
-    };
-
-    const handleDownload = () => {
-        console.log("Baixando projeto...");
-    };
-=======
         const response = await api.runWorkflowTest({workflow});
 
         setLastRun(response.data);
     }, [workflow]);
->>>>>>> Stashed changes
 
     return (
         <>
@@ -201,7 +163,9 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                 </SheetContent>
             </Sheet>
 
-            <NodeCommandDialog addNode={addScriptNode} open={open} setOpen={setOpen} />
+            <div ref={floatingMenuWrapperRef}>
+                <NodeCommandDialog addNode={handleAddConnectedNode} />
+            </div>
 
             <div className="flex-grow h-full bg-background relative">
                 <FlowContextMenu>
@@ -215,12 +179,14 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                         onNodesChange={onNodesChange}
                         onEdgesChange={onEdgesChange}
                         onConnect={onConnect}
-                        onConnectStart={handleOnEdgeConnectedStart}
-                        onConnectEnd={handleOnEdgeDropConnectedEnd}
+                        onConnectEnd={(e, c) => {
+                            handleOnEdgeDropConnectEnd(e, c);
+                        }}
                         selectionMode={SelectionMode.Full}
                         multiSelectionKeyCode="Control"
                         selectionOnDrag={true}
-                        selectionKeyCode={null}
+                        selectionKeyCode={["Shift"]}
+                        isValidConnection={isValidConnection}
                         onNodeDragStop={(_, node) => {
                             autoAdjustNode(node);
                         }}
@@ -228,9 +194,11 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                             setOpenNodePanel(true);
                             setNodeClicked(node);
                         }}
+                        onNodesDelete={handleDeleteElements}
                         snapGrid={[16, 16]}
                         snapToGrid
                         fitView
+                        deleteKeyCode={["Delete"]}
                         className="react-flow-dark-theme"
                     >
                         <MiniMap
@@ -268,11 +236,11 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                         <Play className="h-4 w-4 mr-1" />
                         Executar
                     </Button>
-                    <Button size="sm" variant="secondary" onClick={onSaveFlow}>
+                    <Button size="sm" variant="secondary" onClick={() => saveWorkflow(id)}>
                         <Save className="h-4 w-4 mr-1" />
                         Salvar
                     </Button>
-                    <Button size="sm" variant="outline" className='text-primary' onClick={handleShare}>
+                    <Button size="sm" variant="outline" className='text-primary' onClick={() => shareWorkflow(id)}>
                         <Share2 className="h-4 w-4 mr-1" />
                         Compartilhar
                     </Button>
@@ -284,12 +252,12 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-40 text-primary">
-                            <DropdownMenuItem onClick={handleDuplicate}>
+                            <DropdownMenuItem onClick={() => duplicateWorkflow(id)}>
                                 <Copy className="h-4 w-4 mr-2" />
                                 Duplicar projeto
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleDownload}>
+                            <DropdownMenuItem onClick={() => downloadWorkflow(id)}>
                                 <Download className="h-4 w-4 mr-2" />
                                 Baixar projeto
                             </DropdownMenuItem>

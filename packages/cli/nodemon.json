@@ -1,6 +1,12 @@
 {
-	"ignore": ["**/*.spec.ts", ".git", "node_modules"],
-	"watch": ["dist"],
-	"exec": "npm start",
-	"ext": "js"
+  "watch": [
+    "dist",
+    "../core/dist",
+    "../workflow/dist",
+    "../db/dist",
+    "../nodes/dist"
+  ],
+  "ext": "js,json",
+  "exec": "npm start",
+  "delay": "1000"
 }

@@ -1,25 +1,24 @@
 {
   "extends": "@nmg8/typescript-config/tsconfig.common.json",
   "compilerOptions": {
-    "composite": true,
-    "declaration": true,
+    "rootDir": ".",
+		"types": ["node"],
+		"baseUrl": "src",
+    "tsBuildInfoFile": "dist/typecheck.tsbuildinfo",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+
+		// remove all options below this line
+		"strict": false,
+		"strictPropertyInitialization": false,
+
     "paths": {
       "@schema/*": ["./src/schema/*"],
       "@services/*": ["./src/services/*"],
       "@types/*": ["./src/types/*"],
     },
-
-    "lib": ["es2022"],
-
-    "tsBuildInfoFile": "dist/typecheck.tsbuildinfo",
-		"emitDecoratorMetadata": true,
-		"experimentalDecorators": true,
-
-    "useUnknownInCatchVariables": false
-
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../workflow/tsconfig.build.esm.json" },
   ]

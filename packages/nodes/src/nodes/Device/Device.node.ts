@@ -7,7 +7,8 @@ import {
     INodeType, 
     INodeTypeDescription,
     NodeOutput,
-    NodeParameterValueType
+    NodeParameterValueType,
+    IDataObject
 } from 'nmg8-workflow';
 
 export class Device extends NodeType {
@@ -32,35 +33,30 @@ export class Device extends NodeType {
         ],
         outputs: [
             {
-                id: 'data',
-                name: 'data',
-                type: 'output.json'
+                id: 'device',
+                name: 'device',
+                type: 'json'
             }
         ],
         properties: [
             {
                 type: 'options',
-                displayName: 'mode',
-                name: 'mode',
-                options: [
-                    {
-						name: 'Manual',
-						value: 'manual',
-                        description: '',
-					},
-					{
-						name: 'Server',
-						value: 'server',
-                        description: '',
-					},
-                ],
+                displayName: 'device',
+                name: 'device',
+                routing: {
+                    request: {
+                        url: "/devices",
+                        method: "GET"
+                    }
+                },
+                displayInNode: true,
                 displayOptions: {
                     replace: {
                         description: {as: ['description']},
-                        id: {as:['value']},
-                        key: {as: ['value']},
+                        id: {as:['id']},
+                        key: {as: ['id']},
                         name: {as: ['name']},
-                        value: {as: ['value']}
+                        value: {as: ['id']}
                     }
                 }
             }
@@ -84,8 +80,9 @@ export class Device extends NodeType {
     }
 
     execute(context: IExecuteFunctions): Promise<NodeOutput> {
+        const device = context.nodeContext.getNodeParameter<IDataObject>('device', {});
         return Promise.resolve({
-            data: {}
+            data: device
         })
     }
 }

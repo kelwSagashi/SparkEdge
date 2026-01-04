@@ -8,7 +8,8 @@ import {
     NodeOutput,
     NodeParameterValueType,
     ScriptSDKSchema,
-    IDataObject
+    IDataObject,
+    INodeIOConfigurationTypes
 } from 'nmg8-workflow';
 import { spawn } from "child_process";
 import path from 'node:path';
@@ -134,7 +135,7 @@ export class Script extends NodeType {
             const inputs: Array<INodeInputConfiguration> = response.
                 schema.inputs.map(item => ({
                     id: item.name,
-                    type: 'input.unknown',
+                    type: item.type as INodeIOConfigurationTypes,
                     name: item.name,
                     position: 'left',
                     required: item.required
@@ -156,7 +157,7 @@ export class Script extends NodeType {
             const outputs: Array<INodeOutputConfiguration> = response.
                 schema.outputs.map(item => ({
                     id: item.name,
-                    type: 'input.unknown',
+                    type: item.type as INodeIOConfigurationTypes,
                     name: item.name,
             }));
             return {
@@ -193,7 +194,7 @@ export class Script extends NodeType {
                 }
             });
 
-            py.stdin.write(JSON.stringify({ip: 'a', device_id: 'aa'}));
+            py.stdin.write(JSON.stringify({ip: 'a', device_id: 'aa', host: 'google.com', protocol: 'https'}));
             py.stdin.end();
 
             const timer = setTimeout(() => {

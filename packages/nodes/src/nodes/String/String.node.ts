@@ -25,7 +25,7 @@ export class String extends NodeType {
             {
                 id: 'value',
                 name: 'value',
-                type: 'output.string'
+                type: 'string'
             }
         ],
         properties: [

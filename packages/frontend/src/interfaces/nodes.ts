@@ -1,6 +1,6 @@
 import type { Node, NodeProps } from "@xyflow/react";
 import type { ComponentType } from "react";
-import type { INodeData, BuilderNodeTypes } from 'nmg8-workflow/src/index.ts';
+import type { INodeData, BuilderNodeTypes } from 'nmg8-workflow';
 
 export type INode = Node<INodeData, string>;
 

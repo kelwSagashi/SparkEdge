@@ -1,4 +1,4 @@
-import type { DeviceReturningValues } from "nmg8-db/src/types/index.ts";
+import type { DeviceReturningValues } from "nmg8-db/src/types";
 
 export const Devices: DeviceReturningValues[] = [
     {

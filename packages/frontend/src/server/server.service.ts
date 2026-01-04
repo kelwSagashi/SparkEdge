@@ -1,10 +1,11 @@
-import type { ServerEndpointsReturningValues, ServerReturningValues } from "nmg8-db/src/types/index.ts";
-import type { INodeTypeDescription } from 'nmg8-workflow/src/index.ts';
+
+import type { INodeTypeDescription } from 'nmg8-workflow';
 import axios from "axios";
 import { interpolate } from "./executor/server-executor";
 import type { INode } from "@/interfaces/nodes";
 import type { DeclarativeRestApiSettings, IDataObject, INodeInputConfiguration, INodeOutputConfiguration, IWorkflowBase } from "nmg8-workflow";
 import type { Edge } from "@xyflow/react";
+import type { ServerEndpointsReturningValues, ServerReturningValues } from 'nmg8-db/src/types'
 
 const baseURL = "http://localhost:3000/api";
 

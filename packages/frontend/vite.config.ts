@@ -20,12 +20,12 @@ export default defineConfig({
   },
   server: {
     watch: {
-      ignored: [
-        '!**/node_modules/nmg8-workflow/**',
-        '!**/node_modules/nmg8-db/**',
-        '!**/node_modules/nmg8-nodes/**',
-        '!**/node_modules/nmg8-core/**',
-      ]
+      // ignored: [
+      //   '!**/node_modules/nmg8-workflow/**',
+      //   '!**/node_modules/nmg8-db/**',
+      //   '!**/node_modules/nmg8-nodes/**',
+      //   '!**/node_modules/nmg8-core/**',
+      // ]
     },
     proxy: {
       '/api': {

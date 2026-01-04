@@ -1,8 +1,8 @@
 
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { AuthorizationTypes, DeviceConnectionMethods, ServerEndpointMethods } from './constants';
+import { AuthorizationTypes, DeviceConnectionMethods, ServerEndpointMethods } from '../types';
 import { nanoid } from 'nanoid';
-import { INode, IEdge, IWorkflowSettings } from 'nmg8-workflow'
+import type { INode, IEdge, IWorkflowSettings } from 'nmg8-workflow'
 
 export const ServerTypesTable = sqliteTable('server-types', {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),

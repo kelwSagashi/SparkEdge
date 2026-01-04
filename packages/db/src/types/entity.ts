@@ -1,5 +1,5 @@
-import { INode, IEdge, IWorkflowSettings } from "nmg8-workflow";
-import { WorkflowReturningValues } from "./types";
+import type { INode, IEdge, IWorkflowSettings } from "nmg8-workflow";
+import type { WorkflowReturningValues } from "./types";
 
 interface Entity extends Omit<WorkflowReturningValues, 'id' | 'isArchived'> {
     id?: string | undefined;

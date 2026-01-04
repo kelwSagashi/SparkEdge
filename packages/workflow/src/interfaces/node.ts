@@ -53,20 +53,13 @@ export type INodeIOConfigurationTypes =
 | 'stderr' 
 | 'success' 
 | 'arg' 
-| 'output.string' 
-| 'output.number' 
-| 'output.boolean' 
-| 'output.object' 
-| 'output.array' 
-| 'output.json' 
-| 'output.unknown'
-| 'input.string' 
-| 'input.number' 
-| 'input.boolean' 
-| 'input.object' 
-| 'input.array' 
-| 'input.json' 
-| 'input.unknown'
+| 'string' 
+| 'number' 
+| 'boolean' 
+| 'object' 
+| 'array' 
+| 'json' 
+| 'unknown';
 
 export type INodeIOBaseConfiguration = {
 	id: string;

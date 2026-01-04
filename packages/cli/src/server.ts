@@ -8,6 +8,7 @@ import path from "node:path";
 
 import '@/nodes/node.controller';
 import '@/scripts/script.controller';
+import '@/devices/device.controller';
 import '@/workflows/workflow.controller'
 
 @Service()

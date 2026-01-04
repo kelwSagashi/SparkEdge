@@ -58,7 +58,7 @@
           {
             "id": "data",
             "name": "data",
-            "type": "output.json"
+            "type": "json"
           }
         ],
         "parameters": {
@@ -98,14 +98,14 @@
           },
           {
             "id": "ip",
-            "type": "input.unknown",
+            "type": "unknown",
             "name": "ip",
             "position": "left",
             "required": true
           },
           {
             "id": "device_id",
-            "type": "input.unknown",
+            "type": "unknown",
             "name": "device_id",
             "position": "left",
             "required": false
@@ -124,12 +124,12 @@
           },
           {
             "id": "meta",
-            "type": "input.unknown",
+            "type": "unknown",
             "name": "meta"
           },
           {
             "id": "main",
-            "type": "input.unknown",
+            "type": "unknown",
             "name": "main"
           }
         ],
@@ -177,7 +177,7 @@
           {
             "id": "string_text",
             "name": "string",
-            "type": "output.string"
+            "type": "string"
           }
         ],
         "parameters": {},

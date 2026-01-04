@@ -12,22 +12,63 @@ from __future__ import annotations
 import sys, json, inspect, traceback
 from typing import get_type_hints, get_origin, get_args, Any, Dict, List, Union, Optional
 
+# | 'trigger' 
+# | 'error' 
+# | 'stdout' 
+# | 'stderr' 
+# | 'success' 
+# | 'arg' 
+# | 'string' 
+# | 'number' 
+# | 'boolean' 
+# | 'object' 
+# | 'array' 
+# | 'json' 
+# | 'unknown'
+TYPE_NAME_MAP = {
+    str: "string",
+    int: "number",
+    float: "number",
+    bool: "boolean",
+    list: "array",
+    dict: "json",
+    object: "object",
+}
+
 def type_to_str(tp: Any) -> str:
+    """Mapeia qualquer tipo Python para um nome simples do dicionário TYPE_NAME_MAP."""
     try:
+        # Se é um tipo direto
+        if tp in TYPE_NAME_MAP:
+            return TYPE_NAME_MAP[tp]
+
         origin = get_origin(tp)
         args = get_args(tp)
-        if origin is None:
-            if hasattr(tp, "__name__"): return tp.__name__
-            return str(tp)
-        if origin in (list, List): return f"List[{type_to_str(args[0]) if args else 'Any'}]"
+
+        # Se é uma lista, independente do tipo interno
+        if origin in (list, List):
+            return "array"
+
+        # Se é um dicionário
         if origin in (dict, Dict):
-            k = type_to_str(args[0]) if args else 'Any'
-            v = type_to_str(args[1]) if len(args) > 1 else 'Any'
-            return f"Dict[{k},{v}]"
-        if origin is Union: return " | ".join(type_to_str(a) for a in args)
-        return str(tp)
+            return "json"
+
+        # Se é Union, pega o primeiro tipo válido
+        if origin is Union:
+            for a in args:
+                mapped = type_to_str(a)
+                if mapped != "unknown":
+                    return mapped
+            return "unknown"
+
+        # Caso básico: verificar se existe no mapa
+        if hasattr(tp, "__name__"):
+            return TYPE_NAME_MAP.get(tp, "unknown")
+
+        return "unknown"
+
     except Exception:
-        return str(tp)
+        return "unknown"
 
 
 # ---------- registries / small classes ----------

@@ -20,8 +20,8 @@ import { ItemTypes } from '@/lib/constants';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { JsonViewMain } from './json-view/json-view';
 import { api } from '@/server/server.service';
-import type { ServerEndpointsReturningValues, ServerReturningValues } from 'nmg8-db/src/types/types.js';
-import { DeviceConnectionMethods } from 'nmg8-db/src/entity/constants.js';
+import type { ServerEndpointsReturningValues, ServerReturningValues } from 'nmg8-db/src/types';
+import { DeviceConnectionMethods } from 'nmg8-db/src/types';
 
 export type ServiceType = 'rest' | 'google_drive' | null;
 

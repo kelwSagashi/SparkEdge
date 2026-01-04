@@ -1,4 +1,5 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { INode } from "@/interfaces";
 import { api } from "@/server/server.service";
 import type { DisplayOptionsReplaceItem, IDataObject, INodeProperties } from "nmg8-workflow";
 import { useCallback, useEffect, useState } from "react";
@@ -8,11 +9,13 @@ type NodePropertiesOptionsType = Extract<INodeProperties, { type: 'options' }>;
 export interface NodeOptionSelectorProps {
     handleSelect: (value: IDataObject, property: NodePropertiesOptionsType) => void;
     property: NodePropertiesOptionsType;
+    node: INode;
 }
 
-export default function NodeOptionSelector({
+export default function NodeOptionsProperty({
     handleSelect,
-    property
+    property,
+    node
 }: NodeOptionSelectorProps) {
     const [selection, setSelection] = useState<IDataObject>();
     const [selectItems, setSelectItems] = useState<IDataObject[]>(() => {
@@ -47,7 +50,7 @@ export default function NodeOptionSelector({
     return (
         <div className='w-full'>
             <span className="text-sm text-muted-foreground">{property.displayName}</span>
-            <Select onValueChange={(val) => {
+            <Select value={node.data.parameters[property.name]?.[property.displayOptions.replace.value.as[0]]} onValueChange={(val) => {
                 const selectedItem = selectItems.find(
                     s => s[property.displayOptions.replace.value.as[0]] === val
                 );

@@ -12,9 +12,6 @@ import { NodeCommandDialog } from './node-command';
 import { useNodeAutoAdjust } from '@/hooks/use-node-auto-adjust';
 import { FlowContextMenu } from './components/context-menu';
 import CustomDeletableEdge from './edges/custom-deletable-edge';
-import { useInsertNode } from '@/hooks/use-insert-node';
-import { useDeleteNode } from '@/hooks/use-delete-node';
-import { BuilderNodes } from 'nmg8-workflow';
 import { NODE_TYPES } from './nodes';
 import { NodePanel } from './nodes/panel';
 import type { INode } from '@/interfaces';
@@ -22,7 +19,6 @@ import { useIsValidConnection } from '@/hooks/use-is-valid-connection';
 import { useWorkflowStore } from '@/stores/workflow-store';
 import { useShallow } from 'zustand/react/shallow';
 import { useAddNodeOnEdgeDrop } from '@/hooks/use-add-on-edge-drop';
-import { useAddNodeOnEdgeDropStore } from '@/stores/add-node-on-edge-drop-store';
 import { api } from '@/server/server.service';
 
 const edgeTypes: EdgeTypes = {
@@ -147,7 +143,7 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
 
     return (
         <>
-            <Sheet> {/* open e defaultOpen para ele iniciar sempre aberto */}
+            <Sheet>
                 <SheetContent side="left" className="w-64 sm:w-[300px] bg-background border-r border-border p-4 pt-8 z-50">
                     <SheetHeader>
                         <SheetTitle className="text-foreground text-xl">Nôs Disponíveis</SheetTitle>
@@ -167,7 +163,7 @@ export default function FlowEditor({ id }: { id: string | undefined }) {
                 <NodeCommandDialog addNode={handleAddConnectedNode} />
             </div>
 
-            <div className="flex-grow h-full bg-background relative">
+            <div className="grow h-full bg-background relative">
                 <FlowContextMenu>
                     <ReactFlow
                         proOptions={{ hideAttribution: true }}

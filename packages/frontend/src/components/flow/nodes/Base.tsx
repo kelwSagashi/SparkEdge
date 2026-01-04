@@ -8,10 +8,12 @@ import BaseInputHandle from "./base-input-handle";
 import BaseOutputHandle from "./base-output-handle";
 import { api } from "@/server/server.service";
 import type { IBaseNodeProps, INode, RegisterNodeMetadata } from "@/interfaces/nodes";
-import NodeOptionSelector from "./properties/options-selector";
+import NodeOptionsProperty from "./properties/options-selector";
 import { useWorkflowStore } from "@/stores/workflow-store";
 import { useShallow } from "zustand/react/shallow";
-import NodeTextOption from "./properties/string-type";
+import NodeStringProperty from "./properties/string-type";
+import NodeResourceMapperProperty from "./properties/resource-mapper";
+import { NodeProperty, RenderProperties } from "./properties/properties";
 
 const NODE_HANDLE_SIZE_GAP = 3;
 const NODE_HANDLE_SIZE = 3;
@@ -30,16 +32,13 @@ export default function BaseNode({
     const [isHovered, setIsHovered] = useState(false);
     const [description, setDescription] = useState<INodeTypeDescription>();
     const [
-        updateNodeParameters,
-        updateNodeData,
         getNode,
     ] = useWorkflowStore(
         useShallow((s) => [
-            s.updateNodeParameters,
-            s.updateNodeData,
             s.getNode
         ])
     )
+    const node = useMemo(() => getNode(id), [id]);
     const deleteNode = useDeleteNode();
     const nodeSize = useMemo(() => {
         let size = calc_node_base_size(NODE_HANDLE_SIZE, NODE_BASE_SIZE_MULTIPLIER, NODE_HANDLE_SIZE_GAP);
@@ -74,59 +73,11 @@ export default function BaseNode({
         const node = getNode(id) as INode;
         console.log(node);
     }, [id]);
-
-    const handleOptionsSelect = useCallback(
-        async (
-            value: IDataObject, 
-            property: Extract<INodeProperties, { type: 'options' }>
-            ) => {
-            updateNodeParameters(id, value);
-
-            const node = getNode(id);
-
-            if (!node) return;
-
-            for (const onSel of property.onSelect ?? []) {
-                const onSelUpdateNodeData = onSel.updateNodeData;
-
-                if (onSelUpdateNodeData?.routing.request) {
-
-                    onSelUpdateNodeData.routing.request.body = { node };
-
-                    const response = await api.execute({
-                        request: onSelUpdateNodeData.routing.request
-                    });
-
-                    const data = response.data;
-                    
-                    Object.keys(data).map(key => {
-                        if (Object.hasOwn(node.data, key)) {
-                            const newData = {[key]: data[key]};
-                            updateNodeData(id, newData);
-                        }
-                    })
-                }
-            }
-        }, [
-            id
-        ]
-    );
-
-    const handleChangeText = useCallback(
-        async (
-            value: IDataObject, 
-            _: Extract<INodeProperties, { type: 'string' }>
-            ) => {
-            updateNodeParameters(id, value);
-        }, [
-            id
-        ]
-    );
     
     const handleLoadDescription = useCallback(async () => {
         const _description = (await api.getNodeDescription({name: data.name})).data;
         setDescription(_description);
-    }, [data.type]);
+    }, [data.name]);
 
     useEffect(() => {
         handleLoadDescription();
@@ -162,17 +113,7 @@ export default function BaseNode({
                         />
                     </div>
                     <div className="relative p-2">
-                        {description?.properties.map(property => {
-                            switch (property.type) {
-                                case 'options':
-                                    return <NodeOptionSelector key={`${property.type}.${property.name}`} property={property} handleSelect={handleOptionsSelect}/>
-                                case 'string':
-                                    return <NodeTextOption key={`${property.type}.${property.name}`} property={property} handleChangeText={handleChangeText}/>
-                                default:
-                                    return <></>
-                            }
-                        }
-                        )}
+                        {description && node && <NodeProperty mode="node" properties={description.properties} node={node}/>}
                     </div>
                     <div className="relative w-full h-full">
                         <BaseInputHandle

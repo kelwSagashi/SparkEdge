@@ -9,7 +9,7 @@ export interface NodeTextOptionProps {
     property: NodePropertiesOptionsType;
 }
 
-export default function NodeTextOption({
+export default function NodeStringProperty({
     handleChangeText,
     property
 }: NodeTextOptionProps) {

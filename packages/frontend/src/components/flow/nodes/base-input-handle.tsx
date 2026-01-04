@@ -34,7 +34,7 @@ export default function BaseInputHandle({
                                     id={input.id}
                                     position={Position.Left}
                                     className={`!w-3 !h-3 !bg-green-500 !rounded-full !border !border-black/90`}
-                                    
+                                    datatype={input.type}
                                 />
 
                                 <div

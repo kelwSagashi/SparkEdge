@@ -8,6 +8,7 @@ import { ItemTypes } from '@/lib/constants';
 
 export function JsonViewMain({
     className,
+    mainClassName,
     data,
     onParamChange,
     inputProps,
@@ -19,6 +20,7 @@ export function JsonViewMain({
     filter,
     ...props
 }: React.ComponentProps<"div"> & {
+    mainClassName?: string,
     data: Record<string, any>,
     onParamChange?: (name: string, param: string, value: string) => void;
     inputProps?: React.ComponentProps<"input">;
@@ -56,7 +58,7 @@ export function JsonViewMain({
     }, [data, filter]);
 
     return (
-        <div className='flex flex-col'>
+        <div className={cn('flex flex-col')}>
             <div className='flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden'>
                 <div className='relative flex w-full min-w-0 flex-col p-2'>
                     <div className='w-full text-sm'>

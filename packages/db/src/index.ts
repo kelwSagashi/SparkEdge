@@ -1,4 +1,4 @@
-import {db, Tables} from './entity';
+import {db, Tables} from './db';
 export * from './services';
 export * from './types'
 

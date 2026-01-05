@@ -2,6 +2,8 @@ import SearchGlobal from './search_global';
 import { Button } from './ui/button';
 import {Settings, Bell} from 'lucide-react'
 import { Separator } from './ui/separator'  ;
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/auth-store';
 
 export default function Header() {
     return (
@@ -18,10 +20,31 @@ export default function Header() {
                     <span className='text-primary'>Compartilhar</span>
                 </Button>
                 <Separator orientation='vertical'/>
-                <Button className='bg-white' variant={"default"}>
-                    <span className='text-primary-foreground'>Sign In</span>
-                </Button>
+                {/* Auth button */}
+                <AuthButton />
             </div>
         </header>
     );
 };
+
+function AuthButton() {
+    const navigate = useNavigate();
+    const { user, logout } = useAuthStore();
+
+    if (!user) {
+        return (
+            <Button className='bg-white' variant={"default"} onClick={() => navigate('/login')}>
+                <span className='text-primary-foreground'>Sign In</span>
+            </Button>
+        );
+    }
+
+    return (
+        <div className='flex items-center gap-2'>
+            <span className='text-sm text-white'>{user.first_name ?? user.email}</span>
+            <Button className='bg-background/0' variant={'outline'} onClick={async () => { await logout(); navigate('/login'); }}>
+                Logout
+            </Button>
+        </div>
+    );
+}

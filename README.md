@@ -16,6 +16,12 @@ pnpm install
 ```
 Esse comando percorre todo o monorepo e instala tudo.
 
+Database notes
+Running `pnpm dev` will automatically run DB migrations and seeds (via workspace predev scripts). You can also run the DB commands manually:
+	- `pnpm -w run db:generate` — generate SQL migration(s) based on the current schema
+	- `pnpm -w run db:migrate` — apply pending migrations and create the database file (`packages/db/monitor.db`)
+	- `pnpm -w run db:seed` — run the basic seeding script
+
 Em seguida execute:
 
 ```bash

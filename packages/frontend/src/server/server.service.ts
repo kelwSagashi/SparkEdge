@@ -12,6 +12,7 @@ const baseURL = "http://localhost:3000/api";
 const axios_api_instance = axios.create({
     baseURL
 });
+axios_api_instance.defaults.withCredentials = true;
 
 export type APIBaseRequest<T = unknown> = {
     server: ServerReturningValues,

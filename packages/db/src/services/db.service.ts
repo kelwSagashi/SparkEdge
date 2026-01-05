@@ -1,4 +1,4 @@
-import { db, Tables, type DBType } from "../entity";
+import { db, Tables, type DBType } from "../db";
 import type { 
     CodeInstanceReturningValues, 
     DeviceReturningValues, 
@@ -10,7 +10,17 @@ import type {
     WorkflowReturningValues, 
     WorkflowUpsertValues
     } from '../types';
-import { eq } from "drizzle-orm";
+import { UsersRepository } from '../repositories/users.repository';
+import { ProjectsRepository } from '../repositories/projects.repository';
+import { ProjectMembersRepository } from '../repositories/projectMembers.repository';
+import { WorkflowVersionsRepository } from '../repositories/workflowVersions.repository';
+import { ServersRepository } from '../repositories/servers.repository';
+import { ServerEndpointsRepository } from '../repositories/serverEndpoints.repository';
+import { DevicesRepository } from '../repositories/devices.repository';
+import { CodeInstancesRepository } from '../repositories/codeInstances.repository';
+import { WorkflowsRepository } from '../repositories/workflows.repository';
+import { eq } from 'drizzle-orm';
+ 
 
 type ReturningQueries<T> = {
     error?: unknown,
@@ -20,6 +30,15 @@ type ReturningQueries<T> = {
 export class DatabaseService {
     private static instance: DatabaseService;
     private db: DBType | undefined;
+    private usersRepo?: UsersRepository;
+    private projectsRepo?: ProjectsRepository;
+    private projectMembersRepo?: ProjectMembersRepository;
+    private workflowVersionsRepo?: WorkflowVersionsRepository;
+    private serversRepo?: ServersRepository;
+    private serverEndpointsRepo?: ServerEndpointsRepository;
+    private devicesRepo?: DevicesRepository;
+    private codeInstancesRepo?: CodeInstancesRepository;
+    private workflowsRepo?: WorkflowsRepository;
 
     private constructor(db: DBType | undefined) {
         this.db = db;
@@ -35,6 +54,60 @@ export class DatabaseService {
     }
 
     public getDb() { return this.db }
+
+    public get users() {
+        if (!this.db) throw Error('The database has not been instantiated.');
+        if (!this.usersRepo) this.usersRepo = new UsersRepository(this.db);
+        return this.usersRepo;
+    }
+
+    public get projects() {
+        if (!this.db) throw Error('The database has not been instantiated.');
+        if (!this.projectsRepo) this.projectsRepo = new ProjectsRepository(this.db);
+        return this.projectsRepo;
+    }
+
+    public get projectMembers() {
+        if (!this.db) throw Error('The database has not been instantiated.');
+        if (!this.projectMembersRepo) this.projectMembersRepo = new ProjectMembersRepository(this.db);
+        return this.projectMembersRepo;
+    }
+
+    public get workflowVersions() {
+        if (!this.db) throw Error('The database has not been instantiated.');
+        if (!this.workflowVersionsRepo) this.workflowVersionsRepo = new WorkflowVersionsRepository(this.db);
+        return this.workflowVersionsRepo;
+    }
+
+    public get servers() {
+        if (!this.db) throw Error('The database has not been instantiated.');
+        if (!this.serversRepo) this.serversRepo = new ServersRepository(this.db);
+        return this.serversRepo;
+    }
+
+    public get serverEndpoints() {
+        if (!this.db) throw Error('The database has not been instantiated.');
+        if (!this.serverEndpointsRepo) this.serverEndpointsRepo = new ServerEndpointsRepository(this.db);
+        return this.serverEndpointsRepo;
+    }
+
+    public get devices() {
+        if (!this.db) throw Error('The database has not been instantiated.');
+        if (!this.devicesRepo) this.devicesRepo = new DevicesRepository(this.db);
+        return this.devicesRepo;
+    }
+
+    public get codeInstances() {
+        if (!this.db) throw Error('The database has not been instantiated.');
+        if (!this.codeInstancesRepo) this.codeInstancesRepo = new CodeInstancesRepository(this.db);
+        return this.codeInstancesRepo;
+    }
+
+    public get workflows() {
+        if (!this.db) throw Error('The database has not been instantiated.');
+        if (!this.workflowsRepo) this.workflowsRepo = new WorkflowsRepository(this.db);
+        return this.workflowsRepo;
+    }
 
     upsertWorkflow(values: WorkflowUpsertValues): ReturningQueries<WorkflowReturningValues | null> {
         try {

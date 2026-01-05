@@ -14,6 +14,8 @@ export class WorkflowEntity implements Entity {
     active: boolean | null;
     isArchived?: boolean;
     settings: IWorkflowSettings;
+    
+    project_id: string | null;
 
     constructor(values: Entity) {
         this.id = values.id;
@@ -23,5 +25,6 @@ export class WorkflowEntity implements Entity {
         this.active = values.active;
         this.isArchived = values.isArchived;
         this.settings = values;
+        this.project_id = values.project_id;
     }
 }

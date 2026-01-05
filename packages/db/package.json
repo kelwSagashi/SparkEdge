@@ -9,6 +9,9 @@
     "build": "tsc -p tsconfig.json",
     "generate": "drizzle-kit generate:sqlite",
     "migrate": "drizzle-kit migrate:sqlite",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx src/db/seed.ts",
     "start": "node dist/index.js"
   },
   "main": "dist/index.js",

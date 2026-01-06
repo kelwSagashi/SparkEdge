@@ -2,12 +2,12 @@
 
 # nmg8 - Agente de Automação de Monitoramento em Nó
 
-O nmg8 é uma plataforma Agente de automação de monitoramento com nós, para sistemas de energia fotovoltáicas on-grid, off-grid que permite integração e automação de códigos de coleta de dados em dispositivos computadores que podem ficar conectados aos sistemas de energia via cabo ou rede, permitindo maior controle na automação e envio de dados.
+O nmg8 é uma plataforma baseada em workflows de automação para monitoramento com nós, visando sistemas de energia fotovoltáicos on-grid e off-grid. A plataforma oferece e permite integração, automação e execução de código de baixo nível que fazem coleta de dados em dispositivos computadores conectados diretamente à sistemas de energia, seja por cabo ou rede, permitindo maior controle na automação de armazenamento e envio de dados.
 
 # Principais capacidades
-- **Integração com Código Python**: escreva código em python para coleta de dados e adicione como um nó executável.
+- **Integração com Código Python**: É possivel escrever código em python para coleta de dados e adicionar como um nó executável.
 - **Controle Total**: Você define o que fazer com os dados de monitoramento que foram coletados.
-- **Serviço local**: permite rodar em sistemas mais criticos tendo flexibilidade em conseguir armazenar dados e enviar quando houver conexão.
+- **Serviço local**: Permite rodar em sistemas mais criticos tendo flexibilidade em conseguir armazenar dados e enviar quando houver conexão.
 
 # Como rodar (Versão desenvolvimento)
 Primeiro você deve instalar o pnpm e depois instalar todas as dependencias com 

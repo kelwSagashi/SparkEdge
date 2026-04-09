@@ -1,13 +1,17 @@
 import { create } from 'zustand';
-import type { UserReturningValues } from 'nmg8-db/src/types';
+import type { ProjectReturningValues, UserReturningValues } from 'nmg8-db/src/types';
 import { authApi } from '@/rest-api-client/auth.service';
+import { api } from '@/server/server.service';
 
 type AuthState = {
   user: UserReturningValues | null;
+  project: ProjectReturningValues | null;
   loading: boolean;
   error?: string | null;
   setUser: (u: UserReturningValues | null) => void;
+  setProject: (p: ProjectReturningValues | null) => void;
   loadMe: () => Promise<void>;
+  loadProject: (projectName: string) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, name?: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -15,19 +19,38 @@ type AuthState = {
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
+  project: null,
   loading: false,
   error: null,
   setUser: (u) => set({ user: u, error: null }),
+  setProject: (p) => set({ project: p }),
   loadMe: async () => {
     set({ loading: true, error: null });
     try {
       const res = await authApi.me();
       set({ user: res.data?.data ?? null });
-      console.log('Loaded user:', res.data);
+
+      get().loadProject('PERSONAL');
+      
     } catch (err: any) {
       set({ user: null });
     } finally {
       set({ loading: false });
+    }
+  },
+  loadProject: async (projectName: string = 'PERSONAL') => {
+    try {
+      const user = get().user;
+      if (!user) {
+        set({ project: null });
+        return;
+      }
+      const project = await api.getProject(user.id, projectName);
+      // console.log('Loaded project:', project.data?.data);
+      set({ project: project.data?.data?.project ?? null });
+      
+    } catch (err: any) {
+      set({ project: null });
     }
   },
   login: async (email, password) => {
@@ -35,6 +58,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await authApi.login({ email, password });
       await get().loadMe();
+      await get().loadProject('PERSONAL');
       return true;
     } catch (err: any) {
       set({ error: err?.response?.data?.message ?? 'Login failed' });

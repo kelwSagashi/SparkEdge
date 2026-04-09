@@ -21,6 +21,12 @@ export class ServersController {
     return this.serverService.create(request.body);
   }
 
+  @Post('/register')
+  async register(request: ServerRequest.Register) {
+    const userId = request.user?.id;
+    return this.serverService.register(userId, request.body);
+  }
+
   @Put('/:id')
   async update(request: ServerRequest.Update) {
     return this.serverService.update(request.params.id, request.body);

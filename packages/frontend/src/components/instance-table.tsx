@@ -1,54 +1,19 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, type ColumnDef, type ColumnFiltersState, type SortingState, type VisibilityState } from "@tanstack/react-table";
 import React from "react";
+import { useWorkflowExecutionsStore } from '@/stores/workflow-executions-store';
 import { Button } from "./ui/button";
+import { Spinner } from './ui/spinner';
 import { ArrowUpDown, ChevronDown, MoreVertical, Pause, RotateCcw, SquareStopIcon, Trash } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 import Search from "./search";
 import { useNavigate } from "react-router-dom";
+import type { WorkflowExecutionReturningValues } from "nmg8-db/src/types";
+import { useShallow } from "zustand/react/shallow";
 
-
-type InstanceType = {
-    status: string;
-    name: string;
-    id: string;
-    interval: string;
-    local: string;
-    device: string;
-    space: string;
-    sends: number;
-    lastStart: string;
-    connection: string;
-}
-
-const data: InstanceType[] = [
-    {
-        status: "active",
-        name: "instancia_01",
-        id: "c5632bb3e00aa",
-        interval: "300 segundos",
-        local: "arapiuns_01",
-        device: "intelbras",
-        sends: 5,
-        space: "708KB/-",
-        lastStart: "7 dias atrás",
-        connection: "serial"
-    },
-    {
-        status: "inactive",
-        name: "instancia_02",
-        id: "c5632bb3e00ab",
-        interval: "300 segundos",
-        local: "arapiuns_01",
-        device: "intelbras",
-        sends: 5,
-        space: "708KB/-",
-        lastStart: "7 dias atrás",
-        connection: "serial"
-    }
-]
+type InstanceType = WorkflowExecutionReturningValues;
 
 const HeaderColumn = ({
     title,
@@ -115,22 +80,22 @@ const columns: ColumnDef<InstanceType>[] = [
             return <></>
         },
         cell: ({ row }) => {
-            const active = row.getValue("status") == "active";
+            const status = row.getValue("status");
+            const active = status === 'running' || status === 'idle';
             return (
                 <div className="p-2">
-
                     <div className={`w-3 h-3 rounded-full ${active ? "bg-green-900" : "border border-primary-foreground"}`} />
                 </div>
             )
         },
     },
     {
-        accessorKey: "name",
+        accessorKey: "workflow_id",
         header: ({ column }) => {
-            return <HeaderColumn title="Nome" column={column} />
+            return <HeaderColumn title="Workflow" column={column} />
         },
         cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("name")}</div>
+            <div className="capitalize">{row.getValue("workflow_id")}</div>
         ),
     },
     {
@@ -143,57 +108,39 @@ const columns: ColumnDef<InstanceType>[] = [
         ),
     },
     {
-        accessorKey: "interval",
+        accessorKey: "mode",
         header: () => {
-            return <div className="text-primary font-medium">Intervalo</div>
+            return <div className="text-primary font-medium">Mode</div>
         },
         cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("interval")}</div>
+            <div className="capitalize">{row.getValue("mode")}</div>
         ),
     },
-    // {
-    //     accessorKey: "device",
-    //     header: () => {
-    //         return <div className="text-primary font-medium">Dispositivo</div>
-    //     },
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">{row.getValue("device")}</div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "connection",
-    //     header: () => {
-    //         return <div className="text-primary font-medium">Conexão</div>
-    //     },
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">{row.getValue("connection")}</div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "space",
-    //     header: () => {
-    //         return <div className="text-primary font-medium">Espaço em Uso/limite</div>
-    //     },
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">{row.getValue("space")}</div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "sends",
-    //     header: () => {
-    //         return <div className="text-primary font-medium">Envios</div>
-    //     },
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">{row.getValue("sends")}</div>
-    //     ),
-    // },
     {
-        accessorKey: "lastStart",
+        accessorKey: "wait_till",
         header: () => {
-            return <div className="text-primary font-medium">Último Início</div>
+            return <div className="text-primary font-medium">Scheduled</div>
         },
         cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("lastStart")}</div>
+            <div className="capitalize">{row.getValue("wait_till") ?? '—'}</div>
+        ),
+    },
+    {
+        accessorKey: "started_at",
+        header: () => {
+            return <div className="text-primary font-medium">Last start</div>
+        },
+        cell: ({ row }) => (
+            <div className="capitalize">{row.getValue("started_at") ?? '—'}</div>
+        ),
+    },
+    {
+        accessorKey: "enabled",
+        header: () => {
+            return <div className="text-primary font-medium">Enabled</div>
+        },
+        cell: ({ row }) => (
+            <div className="capitalize">{row.getValue("enabled") ? 'Yes' : 'No'}</div>
         ),
     },
 ];
@@ -201,6 +148,23 @@ const columns: ColumnDef<InstanceType>[] = [
 
 export default function InstanceTable() {
     const navigate = useNavigate();
+    const [ 
+        executions,
+        loadAll,
+        trigger,
+        setEnabled,
+        remove,
+        loading
+    ] = useWorkflowExecutionsStore(
+        useShallow((s) => [
+            s.executions,
+            s.loadAll,
+            s.trigger,
+            s.setEnabled,
+            s.remove,
+            s.loading
+        ])
+    );
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
@@ -208,8 +172,20 @@ export default function InstanceTable() {
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
+
+    const handleNavigateToEditor = (id: string) => {
+        navigate(`/workflow/${id}`);
+    };
+
+    React.useEffect(() => {
+        loadAll();
+    }, [loadAll]);
+
+    const showPauseButton = React.useMemo(() => { return Object.entries(rowSelection).length > 0 }, [rowSelection]);
+
+    // override data used by table
     const table = useReactTable({
-        data,
+        data: executions,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -227,23 +203,15 @@ export default function InstanceTable() {
         },
     })
 
-
-    const handleNavigateToEditor = (id: string) => {
-        navigate(`/workflow/${id}`);
-    };
-
-
-    const showPauseButton = React.useMemo(() => { return Object.entries(rowSelection).length > 0 }, [rowSelection]);
-
     return (
         <section className="mt-4">
 
             <div className="flex flex-row justify-between items-stretch">
                 <div className="flex gap-2">
                     <Search
-                        value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+                        value={(table.getColumn("id")?.getFilterValue() as string) ?? ""}
                         onChange={(event) => {
-                            table.getColumn("name")?.setFilterValue(event.target.value)
+                            table.getColumn("id")?.setFilterValue(event.target.value)
                         }}
                     />
                     <DropdownMenu>
@@ -365,8 +333,8 @@ export default function InstanceTable() {
                                                     className="border-b-primary-foreground data-[state=selected]:bg-primary-foreground/40 hover:bg-secondary-foreground"
                                                 >
                                                     <TableCell key={"action"} className="h-14 hover:bg-transparent">
-                                                        <Button className="bg-transparent hover:bg-background/95 rounded-full">
-                                                            <SquareStopIcon color="white" />
+                                                        <Button disabled={loading} className="bg-transparent hover:bg-background/95 rounded-full" onClick={(e) => { e.stopPropagation(); trigger(row.getValue("id")) }}>
+                                                            {loading ? <Spinner /> : <RotateCcw color="white" />}
                                                         </Button>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
@@ -377,26 +345,27 @@ export default function InstanceTable() {
                                                             <DropdownMenuContent align="start" side="left" className="bg-secondary-foreground">
                                                                 <DropdownMenuItem
                                                                     className="text-primary focus:bg-primary-foreground"
-                                                                    onClick={() => {
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
                                                                         navigator.clipboard.writeText(row.getValue("id"))
                                                                     }}
                                                                 >
                                                                     Copiar ID
                                                                 </DropdownMenuItem>
                                                                 <DropdownMenuSeparator />
-                                                                <DropdownMenuItem className="text-primary focus:bg-primary-foreground">
+                                                                <DropdownMenuItem className="text-primary focus:bg-primary-foreground" onClick={(e) => { e.stopPropagation(); trigger(row.getValue("id")) }} disabled={loading}>
                                                                     <RotateCcw color="white" />
                                                                     Reiniciar
                                                                 </DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-primary focus:bg-primary-foreground">
+                                                                <DropdownMenuItem className="text-primary focus:bg-primary-foreground" onClick={(e) => { e.stopPropagation(); setEnabled(row.getValue("id"), !row.getValue("enabled")) }} disabled={loading}>
                                                                     <Pause color="white" />
-                                                                    Pausar
+                                                                    {row.getValue("enabled") ? 'Desabilitar' : 'Habilitar'}
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
                                                         <AlertDialog>
                                                             <AlertDialogTrigger asChild>
-                                                                <Button className="bg-transparent hover:bg-background/95 rounded-full">
+                                                                <Button className="bg-transparent hover:bg-background/95 rounded-full" onClick={(e) => e.stopPropagation()}>
                                                                     <Trash color="white" />
                                                                 </Button>
                                                             </AlertDialogTrigger>
@@ -410,7 +379,7 @@ export default function InstanceTable() {
                                                                 </AlertDialogHeader>
                                                                 <AlertDialogFooter>
                                                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                                    <AlertDialogAction>Continuar</AlertDialogAction>
+                                                                    <AlertDialogAction onClick={(e) => { e.stopPropagation(); remove(row.getValue("id")) }} disabled={loading}>Continuar</AlertDialogAction>
                                                                 </AlertDialogFooter>
                                                             </AlertDialogContent>
                                                         </AlertDialog>

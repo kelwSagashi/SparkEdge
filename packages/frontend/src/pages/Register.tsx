@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import { useForm } from 'react-hook-form';
 import {
@@ -12,7 +12,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 
 type FormValues = {
   first_name?: string;
@@ -27,6 +30,7 @@ const Register: React.FC = () => {
   const form = useForm<FormValues>({
     defaultValues: { first_name: '', email: '', password: '' },
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   React.useEffect(() => {
     if (user) navigate('/workflow');
@@ -39,9 +43,9 @@ const Register: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-4">
-      <Card className="w-full max-w-md">
+      <Card className="max-w-md bg-secondary-foreground rounded w-90">
         <CardHeader>
-          <CardTitle>Create account</CardTitle>
+          <CardTitle className='text-primary'>Create account</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -51,9 +55,9 @@ const Register: React.FC = () => {
                 name="first_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel className='text-primary'>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your full name" {...field} />
+                      <Input className='text-muted-foreground' placeholder="Your full name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -66,7 +70,7 @@ const Register: React.FC = () => {
                 rules={{ required: 'Email is required' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className='text-primary'>Email</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="you@example.com" {...field} />
                     </FormControl>
@@ -81,9 +85,14 @@ const Register: React.FC = () => {
                 rules={{ required: 'Password is required', minLength: { value: 6, message: 'Password must be at least 6 characters' } }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className='text-primary'>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Choose a password" {...field} />
+                      <div className="relative">
+                        <Input type={showPassword ? 'text' : 'password'} placeholder="Choose a password" {...field} className="pr-10" />
+                        <button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(s => !s)}>
+                          {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -93,14 +102,14 @@ const Register: React.FC = () => {
               {error && <div className="text-destructive text-sm">{error}</div>}
 
               <div className="flex items-center justify-end">
-                <Button type="submit" disabled={loading}>{loading ? 'Registering...' : 'Create account'}</Button>
+                <Button type="submit" disabled={loading} className='flex items-center gap-2'>{loading && <Spinner />} {loading ? 'Registering...' : 'Create account'}</Button>
               </div>
             </form>
           </Form>
         </CardContent>
         <CardFooter>
           <div className="w-full text-sm text-muted-foreground">
-            Already have an account? <a href="/login" className="text-primary">Sign in</a>
+            Already have an account? <Link to="/login" className="text-primary">SignIn</Link>
           </div>
         </CardFooter>
       </Card>

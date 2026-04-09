@@ -15,16 +15,19 @@ export interface IWorkflowMetadata {
 	active: boolean;
 }
 
-export type WorkflowExecuteMode =
-	| 'cli'
-	| 'error'
-	| 'integrated'
-	| 'internal'
-	| 'manual'
-	| 'retry'
-	| 'trigger'
-	| 'webhook'
-	| 'evaluation';
+export const WorkflowExecuteModeValues = [
+	'cli',
+	'error',
+	'integrated',
+	'internal',
+	'manual',
+	'retry',
+	'trigger',
+	'webhook',
+	'evaluation'
+] as const;
+
+export type WorkflowExecuteMode = (typeof WorkflowExecuteModeValues)[keyof typeof WorkflowExecuteModeValues];
 
 export type WorkflowActivateMode =
 	| 'init'

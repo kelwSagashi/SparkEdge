@@ -1,43 +1,78 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Service } from '@nmg8/di';
-import { dbManager } from 'nmg8-db';
+import { dbManager, UserUpsertValues } from 'nmg8-db';
+import AuthRequest from './auth.request';
+import AuthResponse from './auth.response';
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret';
-const COOKIE_NAME = 'nmg8_token';
 
 @Service()
 export class AuthService {
-  async register(payload: { email: string; password: string; first_name?: string; last_name?: string }) {
+  async register(payload: AuthRequest.UserRegister) {
     const existing = dbManager.users.findByEmail(payload.email);
     if (existing.data) return { error: 'User already exists', data: null };
 
     const password_hash = await bcrypt.hash(payload.password, 10);
-    const user = {
+
+    const user: UserUpsertValues = {
       email: payload.email,
       first_name: payload.first_name ?? null,
       last_name: payload.last_name ?? null,
       password_hash,
-      role: 'viewer',
+      role: 'admin',
       is_active: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    } as any;
+    };
 
     const result = dbManager.users.create(user);
+
+    if (result.data) {
+      dbManager.projects.create({
+        name: 'PERSONAL',
+        key: 'PERSONAL',
+        description: 'Personal project',
+        visibility: 'private',
+        owner_id: result.data.id
+      });
+    }
     return result;
   }
 
-  async login(payload: { email: string; password: string }) {
+  async login(payload: AuthRequest.UserLogin) {
     const found = dbManager.users.findByEmail(payload.email);
     const user = found.data;
-    if (!user) return { error: 'Invalid credentials', data: null };
+
+    const result: AuthResponse.Login = {
+      data: {
+        token: null,
+        user: null,
+      },
+      error: 'Invalid credentials'
+    };
+
+    if (!user) return result;
 
     const ok = await bcrypt.compare(payload.password, user.password_hash ?? '');
-    if (!ok) return { error: 'Invalid credentials', data: null };
+
+    if (!ok) return result
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-    return { data: { token, user } };
+
+    result.error = undefined;
+    result.data.token = token;
+    result.data.user = user;
+
+    if (result.data.user) {
+      dbManager.projects.upsert({
+        name: 'PERSONAL',
+        key: 'PERSONAL',
+        description: 'Personal project',
+        visibility: 'private',
+        owner_id: result.data.user.id
+      });
+    }
+
+    return result;
   }
 
   async verifyToken(token: string) {

@@ -1,7 +1,7 @@
 import type { DBType } from "../db";
 import { Tables } from "../db";
-import { eq } from 'drizzle-orm';
-import type { UserUpsertValues, UserReturningValues, ReturningQueries } from '../types';
+import { and, eq } from 'drizzle-orm';
+import type { UserUpsertValues, UserReturningValues, ReturningQueries, ProjectReturningValues } from '../types';
 
 export class UsersRepository {
   constructor(private db: DBType) {}
@@ -31,6 +31,32 @@ export class UsersRepository {
   findById(id: string): ReturningQueries<UserReturningValues | null> {
     try {
       const data = this.db.select().from(Tables.UsersTable).where(eq(Tables.UsersTable.id, id)).get() ?? null;
+      return { data };
+    } catch (error: unknown) {
+      return { error, data: null };
+    }
+  }
+  
+  findProjectUserByName(
+    id: string, project: string
+  ): ReturningQueries<
+    {
+      user: UserReturningValues, 
+      project: ProjectReturningValues
+    } | null
+  > {
+    try {
+      const data = this.db.select({
+          user: Tables.UsersTable,
+          project: Tables.ProjectsTable
+        }).from(Tables.UsersTable)
+        .where(eq(Tables.UsersTable.id, id))
+        .innerJoin(Tables.ProjectsTable, 
+          and(
+            eq(Tables.ProjectsTable.owner_id, Tables.UsersTable.id),
+            eq(Tables.ProjectsTable.name, project)
+          )
+        ).get() ?? null;
       return { data };
     } catch (error: unknown) {
       return { error, data: null };

@@ -4,8 +4,8 @@ import ServerTypeSelection from './add-server-steps/server-selection';
 import ServerStepForm from './add-server-steps/server-form';
 import GdriveForm from './add-server-steps/gdrive-form';
 import { Separator } from './ui/separator';
-import type { ServerTypeReturningValues } from '@nmg8/db/src/services';
 import { Button } from './ui/button';
+import type { ServerTypeReturningValues } from 'nmg8-db/src/types';
 
 type Props = {
   isOpen: boolean;
@@ -16,7 +16,7 @@ export default function AddServerDialog({ isOpen, onOpenChange }: Props) {
   const [step, setStep] = useState(1);
   const [serverType, setServerType] = useState<ServerTypeReturningValues>();
 
-  const handleServiceSelect = useCallback((type: ServerTypeReturningValues | undefined) => {
+  const handleServiceTypeSelect = useCallback((type: ServerTypeReturningValues | undefined) => {
     setServerType(type);
   }, []);
 
@@ -55,11 +55,11 @@ export default function AddServerDialog({ isOpen, onOpenChange }: Props) {
         <Separator />
 
         <div className="flex min-h-0 py-2">
-          {step === 1 && <ServerTypeSelection onSelect={handleServiceSelect} />}
+          {step === 1 && <ServerTypeSelection onSelect={handleServiceTypeSelect} />}
 
           {step === 2 && serverType && <ServerStepForm serverTypeId={serverType.id} />}
 
-          {step === 2 && serverType?.type === 'google_drive' && <GdriveForm onBack={handlePreviousStep} onClose={handleClose} />}
+          {step === 2 && serverType?.key === 'google_drive' && <GdriveForm onBack={handlePreviousStep} onClose={handleClose} />}
         </div>
 
         <DialogFooter>

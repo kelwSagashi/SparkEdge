@@ -12,13 +12,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import AddServerDialog from "./add-server-dialog";
-import AddDeviceDialog from "./add-device-dialog";
 import { useNavigate } from "react-router-dom";
 
-export function AddInstanceButtonGroup() {
-  const [isServerDialogOpen, setIsServerDialogOpen] = useState(false);
-  const [isDeviceDialogOpen, setIsDeviceDialogOpen] = useState(false);
+export function AddInstanceButtonGroup({
+  setIsServerDialogOpen,
+  setIsDeviceDialogOpen
+}: {
+  setIsServerDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setIsDeviceDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+}) {
   const navigate = useNavigate();
 
   const handleNavigateToEditor = () => {
@@ -36,7 +38,7 @@ export function AddInstanceButtonGroup() {
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="!pl-2 bg-accent-foreground border-border/30 rounded text-primary hover:bg-accent-foreground/70 hover:text-primary">
+          <Button variant="outline" className="pl-2! bg-accent-foreground border-border/30 rounded text-primary hover:bg-accent-foreground/70 hover:text-primary">
             <ChevronDownIcon />
           </Button>
         </DropdownMenuTrigger>
@@ -60,8 +62,7 @@ export function AddInstanceButtonGroup() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AddServerDialog isOpen={isServerDialogOpen} onOpenChange={setIsServerDialogOpen} />
-      <AddDeviceDialog isOpen={isDeviceDialogOpen} onOpenChange={setIsDeviceDialogOpen} />
+
     </ButtonGroup>
   )
 }

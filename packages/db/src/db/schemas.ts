@@ -2,23 +2,41 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { AuthorizationTypes, DeviceConnectionMethods, ServerEndpointMethods } from '../types';
 import { nanoid } from 'nanoid';
-import type { INode, IEdge, IWorkflowSettings } from 'nmg8-workflow'
+import { type INode, type IEdge, type IWorkflowSettings, WorkflowExecuteModeValues } from 'nmg8-workflow'
 
-export const ServerTypesTable = sqliteTable('server-types', {
+export const ServerTypesTable = sqliteTable('server_types', {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
+  key: text('key').notNull().unique(),
   name: text('name').notNull(),
-  type: text('type').notNull(),
   description: text('description')
 });
+
+export const CredentialsTable = sqliteTable('credentials', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  name: text('name').notNull(),
+  type: text("type", { enum: AuthorizationTypes }).notNull(),
+  data: text('data', { mode: 'json' }).notNull(),
+  owner_id: text('owner_id').references(() => UsersTable.id),
+  project_id: text('project_id').references(() => ProjectsTable.id),
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
 
 export const ServersTable = sqliteTable('servers', {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
   name: text('name').notNull(),
   type: text('type').notNull().references(() => ServerTypesTable.id, { onDelete: 'cascade' }),
   base_url: text("base_url").notNull(),
-  auth_type: text("auth_type", { enum: AuthorizationTypes }),
-  authorization: text('authorization', { mode: 'json' }),
+  credential_id: text('credential_id').references(() => CredentialsTable.id, { onDelete: 'set null' }),
   headers: text("headers", { mode: "json" }),
+
+  project_id: text('project_id')
+  .notNull()
+  .references(() => ProjectsTable.id, { onDelete: 'cascade' }),
+
+  created_by: text('created_by')
+    .references(() => UsersTable.id, { onDelete: 'set null' }),
+
   created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
   updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
 });
@@ -53,12 +71,16 @@ export const DeviceTable = sqliteTable('devices', {
   ip_address: text('ip_address'),
   location: text('location'),
   description: text('description'),
-  others: text('others', { mode: 'json' }),
+  others: text('others', { mode: 'json' }).$type<{
+    key: string;
+    value: string;
+    type: "number" | "text";
+  }[]>().$defaultFn(() => []),
   created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
   updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
 });
 
-export const CodeInstance = sqliteTable('code_instances', {
+export const CodeInstanceTable = sqliteTable('code_instances', {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
   name: text('name').notNull(),
   description: text('description'),
@@ -67,7 +89,7 @@ export const CodeInstance = sqliteTable('code_instances', {
   }).notNull(),
   url: text('url'),
   path: text('path').notNull(),
-  main_file_name: text('main_file_name').notNull().default('app.py'),
+  main_file_name: text('main_file_name').notNull(),
   author: text('author').notNull(),
   repo: text('repo'),
   language: text('language').notNull(),
@@ -77,7 +99,7 @@ export const CodeInstance = sqliteTable('code_instances', {
   updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
 });
 
-export const Workflow = sqliteTable('workflows', {
+export const WorkflowTable = sqliteTable('workflows', {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
   name: text('name').notNull(),
   nodes: text('nodes', { mode: 'json' }).notNull().$type<INode[]>().$defaultFn(() => []),
@@ -87,25 +109,6 @@ export const Workflow = sqliteTable('workflows', {
   project_id: text('project_id').references(() => ProjectsTable.id, { onDelete: 'cascade' }),
   settings: text('settings', { mode: 'json' }).$type<IWorkflowSettings>().notNull().$defaultFn(() => ({})),
 });
-
-export const WorkflowHistoryTable = sqliteTable('workflow_history', {
-  id: text("id").primaryKey().$defaultFn(() => nanoid()),
-  name: text('name').notNull(),
-  nodes: text('nodes', { mode: 'json' }).notNull().$type<INode[]>().$defaultFn(() => []),
-  edges: text('edges', { mode: 'json' }).notNull().$type<IEdge[]>().$defaultFn(() => []),
-  active: integer('active', {mode: 'boolean'}).$defaultFn(() => true),
-  isArchived: integer('isArchived', {mode: 'boolean'}).$defaultFn(() => true),
-  settings: text('settings', { mode: 'json' }).$type<IWorkflowSettings>().notNull().$defaultFn(() => ({})),
-  workflow: text('workflow').notNull().references(() => Workflow.id, { onDelete: 'cascade' }),
-});
-
-/**
- * Additional entities inspired by n8n architecture
- * - UsersTable: stores user accounts and basic profile/auth info
- * - ProjectsTable: groups workflows and manages access
- * - ProjectMembersTable: membership/roles for users in projects
- * - WorkflowVersionsTable: versioned snapshots of workflows within projects
- */
 
 export const UsersTable = sqliteTable('users', {
   id: text('id').primaryKey().$defaultFn(() => nanoid()),
@@ -141,7 +144,7 @@ export const ProjectMembersTable = sqliteTable('project_members', {
 
 export const WorkflowVersionsTable = sqliteTable('workflow_versions', {
   id: text('id').primaryKey().$defaultFn(() => nanoid()),
-  workflow_id: text('workflow_id').notNull().references(() => Workflow.id, { onDelete: 'cascade' }),
+  workflow_id: text('workflow_id').notNull().references(() => WorkflowTable.id, { onDelete: 'cascade' }),
   project_id: text('project_id').references(() => ProjectsTable.id, { onDelete: 'cascade' }),
   version: text('version').notNull().default('1.0'),
   name: text('name').notNull(),
@@ -150,4 +153,25 @@ export const WorkflowVersionsTable = sqliteTable('workflow_versions', {
   settings: text('settings', { mode: 'json' }).$type<IWorkflowSettings>().notNull().$defaultFn(() => ({})),
   created_by: text('created_by').references(() => UsersTable.id, { onDelete: 'set null' }),
   created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+export const WorkflowExecutionsTable = sqliteTable('workflow_executions', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  workflow_id: text('workflow_id').notNull().references(() => WorkflowTable.id, { onDelete: 'cascade' }),
+  
+  mode: text('mode', { enum: WorkflowExecuteModeValues }).notNull().default('manual'),
+
+  status: text('status', { enum: ['idle', 'running', 'failed', 'completed', 'stoped'] }).notNull().default('idle'),
+
+  enabled: integer('enabled', { mode: 'boolean' }).$defaultFn(() => true),
+  created_by: text('created_by').references(() => UsersTable.id, { onDelete: 'set null' }),
+  
+  started_at: text('started_at'),
+  stopped_at: text('stopped_at'),
+  deleted_at: text('deleted_at'),
+
+  wait_till: text('wait_till'),
+
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });

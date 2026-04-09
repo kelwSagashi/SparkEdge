@@ -1,4 +1,4 @@
-import { useForm, useFieldArray, type UseFormReturn, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, useFormState, type UseFormReturn, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ScrollArea } from '../ui/scroll-area';
 import { Label } from '../ui/label';
-import { AuthorizationTypes, ServerEndpointMethods } from 'nmg8-db/src/types';
+import { AuthorizationTypes, ServerEndpointMethods, type CredentialUpsertValues, type ServerEndpointsUpsertValues, type ServerUpsertValues } from 'nmg8-db/src/types';
+import { api } from '@/server/server.service';
 import { useCallback, useMemo, useState } from 'react';
 import { ApiKeyAuthForm } from '../auth-forms/APIKeyForm';
 import { BasicAuthForm } from '../auth-forms/BasicAuth';
@@ -15,7 +16,11 @@ import { BearerTokenAuthForm } from '../auth-forms/BearerTokenForm';
 import { DigestAuthForm } from '../auth-forms/DigestAuthForm';
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '../ui/input-group';
 import { cn } from '@/lib/utils';
-import { CodeXml } from 'lucide-react';
+import { CodeXml, Trash } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth-store';
+import { useShallow } from 'zustand/react/shallow';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import DroppableInput from '../device-dialog/droppable-input';
 
 const digestAuthSchema = z.object({
   auth_username: z.string().min(1, "Nome de usuário é obrigatório"),
@@ -67,6 +72,12 @@ const apiKeySchema = z.object({
 export const ApiKeySchema = apiKeySchema;
 export type ApiKeyFormValues = z.infer<typeof apiKeySchema>;
 
+const ServerHeaderSchema = z.object({
+  key: z.string().min(1, "Nome do header é obrigatório"),
+  value: z.string().min(1, "Valor do header é obrigatório"),
+  type: z.enum(["text", "number"])
+});
+
 const ServerEndpointSchema = z.object({
   path: z.string().min(1, "O caminho é obrigatório")
     .regex(/^\//, "O caminho deve começar com '/'")
@@ -96,7 +107,9 @@ const ServerEndpointSchema = z.object({
   description: z.string().optional(),
   payload_schema: z.object().optional(),
   response_schema: z.object().optional(),
-  headers: z.object().optional()
+  headers: z.array(
+    ServerHeaderSchema
+  ).optional(),
 });
 
 const ServerFormSchema = z.object({
@@ -106,12 +119,15 @@ const ServerFormSchema = z.object({
     .refine((val) => !val.endsWith("/"), {
       message: "A URL não deve terminar com '/'",
     }),
-  header: z.object().optional(),
+  header: z.array(
+    ServerHeaderSchema
+  ).optional(),
 });
 
 const FullServerSchema = z.object({
   server: ServerFormSchema,
   authorization: z.object({
+    name: z.string().optional(),
     auth_type: z.enum(AuthorizationTypes),
     authorization: z.union([
       ApiKeySchema,
@@ -126,6 +142,35 @@ const FullServerSchema = z.object({
 
 export type FullServerValues = z.infer<typeof FullServerSchema>;
 
+function parseHeaderValue(
+  value: string,
+  type: z.infer<typeof ServerHeaderSchema.shape.type>
+) {
+  switch (type) {
+    case "text":
+      return String(value);
+
+    case "number": {
+      const num = Number(value);
+      if (Number.isNaN(num)) {
+        throw new Error(`Valor inválido para number: ${value}`);
+      }
+      return num;
+    }
+    default:
+      return String(value);
+  }
+}
+function headersArrayToRecord(
+  headers?: z.infer<typeof ServerHeaderSchema>[]
+) {
+  if (!headers || headers.length === 0) return {};
+
+  return headers.reduce<Record<string, unknown>>((acc, cur) => {
+    acc[cur.key] = parseHeaderValue(cur.value, cur.type);
+    return acc;
+  }, {});
+}
 type Props = {
   previous: () => void;
   next: () => void;
@@ -135,27 +180,92 @@ type Props = {
 };
 
 export default function ServerStepForm({ serverTypeId }: Pick<Props, "serverTypeId">) {
+  const [
+    user,
+    project
+  ] = useAuthStore(
+    useShallow(s => [
+      s.user,
+      s.project
+    ])
+  );
+
   const form = useForm<FullServerValues>({
     resolver: zodResolver(FullServerSchema),
     defaultValues: {
-      server: { name: '', type: serverTypeId, base_url: '' },
-      authorization: { auth_type: 'No Auth', authorization: {} },
+      server: { name: '', type: serverTypeId, base_url: '', header: [] },
+      authorization: { auth_type: 'No Auth', authorization: {}, name: '' },
       endpoints: [],
     },
     mode: "onBlur",
   });
 
-  const onSubmit = (data: FullServerValues) => {
-    console.log("📡 Dados finais:", data);
-  };
+  const onSubmit = useCallback(async (data: FullServerValues) => {
+    try {
+      const credentials: CredentialUpsertValues = {
+        name: data.authorization?.name ?? `${data.server.name} Credential`,
+        type: data.authorization?.auth_type ?? "No Auth",
+        data: data.authorization?.authorization ?? {},
+        owner_id: user?.id,
+        project_id: project?.id,
+      };
+
+      const serverHeader = headersArrayToRecord(data.server.header);
+
+      const serverData: ServerUpsertValues = {
+        credential_id: undefined,
+        base_url: data.server.base_url,
+        name: data.server.name,
+        type: data.server.type,
+        headers: serverHeader,
+        project_id: project?.id ?? "",
+        created_by: user?.id,
+      };
+
+      
+      const endpointsPayload: ServerEndpointsUpsertValues[] = data.endpoints.map(eps => {
+        const serverEndpointHeader = headersArrayToRecord(eps.headers); 
+        return {
+          server_id: "",
+          method: eps.method,
+          name: eps.name,
+          path: eps.path,
+          description: eps.description,
+          headers: serverEndpointHeader,
+          payload_schema: JSON.stringify(eps.payload_schema ?? {}),
+          response_schema: JSON.stringify(eps.response_schema ?? {}),
+        }
+      });
+
+      const payload = {
+        server: serverData,
+        authorization: credentials,
+        endpoints: endpointsPayload,
+      };
+
+      const response = await api.registerServer(payload);
+      console.log('Server registered successfully:', response.data.data);
+    } catch (error) {
+      console.log(error)
+    }
+  }, []);
 
   return (
-    <form id="server_form" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full w-full">
+    <form id="server_form" onSubmit={form.handleSubmit(onSubmit, (e) => {
+      console.log(e.root?.message)
+      console.log('enddpoints', e.endpoints)
+      console.log('e', e)
+    })} className="flex flex-col h-full w-full">
       <div className="min-w-full">
         <div className="flex min-h-0 h-full">
           <Tabs className='flex flex-col w-full h-full overflow-hidden' defaultValue="server">
             <TabsList>
-              <TabsTrigger value="server">Configurar Servidor</TabsTrigger>
+              <TabsTrigger value="server">
+                Configurar Servidor
+              </TabsTrigger>
+              <TabsTrigger value="header">
+                Cabeçalho
+              </TabsTrigger>
               <TabsTrigger value="auth">
                 Autorização
               </TabsTrigger>
@@ -166,6 +276,11 @@ export default function ServerStepForm({ serverTypeId }: Pick<Props, "serverType
             <TabsContent value="server" className='flex-1 overflow-hidden min-h-0'>
               <ScrollArea className='h-full w-full'>
                 <ServerFirstForm form={form} />
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="header" className='flex-1 overflow-hidden min-h-0'>
+              <ScrollArea className='h-full w-full'>
+                <ServerHeaderForm form={form} />
               </ScrollArea>
             </TabsContent>
             <TabsContent value="auth" className='flex-1 overflow-hidden min-h-0'>
@@ -183,6 +298,91 @@ export default function ServerStepForm({ serverTypeId }: Pick<Props, "serverType
   )
 }
 
+function ServerHeaderForm({ form }: {form: UseFormReturn<FullServerValues> }) {
+  const {
+    append,
+    remove,
+    fields
+  } = useFieldArray({
+    control: form.control,
+    name: 'server.header',
+  });
+
+  return (
+    <div className="gap-6 pt-4">
+      <div className="col-span-3 space-y-4">
+        <div className="space-y-4">
+          <h3 className="text-muted-foreground text-lg font-medium">Configurar Endpoints</h3>
+            {fields.map((field, index) => (
+              <div key={field.id} className="flex flex-col gap-2 p-3 border border-border rounded-md relative">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+                    onClick={() => remove(index)}
+                >
+                    <Trash className="h-4 w-4" />
+                </Button>
+                <div>
+                    <div className='flex flex-row gap-2 w-full justify-between'>
+                        <div className='w-full'>
+                            <div className='h-9'>
+                                <Tooltip open={(!!form.formState.errors.server?.header?.[index]?.key)}>
+                                    <TooltipTrigger asChild>
+                                        <Input
+                                            id={`server-header-${index}-key`}
+                                            placeholder="Nome do campo"
+                                            {...form.register(`server.header.${index}.key`)}
+                                            className={cn(
+                                                form.formState.errors.server?.header?.[index]?.key ? "border-destructive" : "",
+                                                "text-primary border-none focus-visible:ring-0 px-0"
+                                            )}
+                                        />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        {form.formState.errors.server?.header?.[index]?.key && <p className="text-destructive text-sm mt-1">{form.formState.errors.server?.header[index]?.key?.message}</p>}
+                                    </TooltipContent>
+                                </Tooltip>
+                            </div>
+                            <Input
+                                id={`server-header-${index}-value`}
+                                placeholder="Valor do campo"
+                                {...form.register(`server.header.${index}.value`)}
+                                className={cn(
+                                    form.formState.errors.server?.header?.[index]?.value ? "border-destructive" : "",
+                                    "text-primary"
+                                )}
+                            />
+                            {form.formState.errors.server?.header?.[index]?.value && <p className="text-destructive text-sm mt-1">{form.formState.errors.server?.header[index]?.value?.message}</p>}
+                        </div>
+                        <div>
+                            <div className='h-9 py-1'>
+                                <label className="text-muted-foreground text-sm" htmlFor={`server-header-${index}-type`}>Tipo</label>
+                            </div>
+                            <Select onValueChange={(val: "text" | "number") => form.setValue(`server.header.${index}.type`, val)} defaultValue={form.watch(`server.header.${index}.type`)}>
+                                <SelectTrigger className="w-30 text-primary">
+                                    <SelectValue placeholder="Selecionar tipo" />
+                                </SelectTrigger>
+                                <SelectContent className='text-primary'>
+                                    <SelectItem value="text">Texto</SelectItem>
+                                    <SelectItem value="number">Numérico</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {form.formState.errors.server?.header?.[index]?.type && <p className="text-destructive text-sm mt-1">{form.formState.errors.server?.header?.[index]?.type?.message}</p>}
+                        </div>
+                    </div>
+                </div>
+              </div>
+            ))}
+            <Button type="button" variant="outline" onClick={() => append({ key: "", value: "", type: "text" })}>
+              Adicionar
+            </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 function AuthorizationSettings({ form }: { form: UseFormReturn<FullServerValues> }) {
   const { setValue, watch } = form;
   const selected = watch("authorization.auth_type");
@@ -211,6 +411,21 @@ function AuthorizationSettings({ form }: { form: UseFormReturn<FullServerValues>
           <p className='text-xs'>O cabeçalho de autorização será gerado automaticamente quando você enviar a solicitação.</p>
         </div>
         <div className='w-full space-y-2'>
+          <Controller
+            control={form.control}
+            name='authorization.name'
+            render={({ field, fieldState }) => (
+              <div className='space-y-2'>
+                  <Label htmlFor="name" className='text-primary'>Nome</Label>
+                  <Input
+                      placeholder="Ex: Authorization API X"
+                      {...field}
+                      className={cn(fieldState.error && "border-destructive", "w-full text-primary")}
+                  />
+                  {fieldState.error && <p className="text-destructive text-sm mt-1">{fieldState.error.message}</p>}
+              </div>
+            )}
+          />
           {selected === "API Key" && (
             <ApiKeyAuthForm form={form} />
           )}
@@ -378,7 +593,7 @@ function ServerEndpointForm({ form }: { form: UseFormReturn<FullServerValues> })
                       id={`endpoint-input-${index}`}
                       {...register(`endpoints.${index}.path`)}
                       placeholder="/"
-                      className="text-primary flex-grow"
+                      className="text-primary grow"
                     />
                     <EndpointInsertVariable index={index} onClick={(value) => {
                       setValue(`endpoints.${index}.path`, value)

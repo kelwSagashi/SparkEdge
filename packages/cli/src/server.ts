@@ -14,7 +14,10 @@ import '@/scripts/script.controller';
 import '@/servers/server.controller';
 import '@/users/user.controller';
 import '@/workflows/workflow.controller';
+import '@/workflows/workflow-executions.controller';
 import '@/auth/auth.controller';
+import '@/servers/server-types.controller';
+import '@/credentials/credentials.controller';
 
 
 @Service()
@@ -54,7 +57,7 @@ export class Server {
             const openPrefixes = ['/api/auth', '/api/health', '/api/nodes'];
             if (openPrefixes.some(p => req.path.startsWith(p))) return next();
 
-            const protectedPrefixes = ['/api/workflows', '/api/scripts', '/api/devices', '/api/servers', '/api/users'];
+            const protectedPrefixes = ['/api/workflows', '/api/workflow-executions', '/api/scripts', '/api/devices', '/api/servers', '/api/users', '/api/server-types', '/api/credentials'];
             if (protectedPrefixes.some(p => req.path.startsWith(p)) && !(req as any).user) {
                 return res.status(401).json({ message: 'Unauthorized' });
             }
@@ -63,7 +66,7 @@ export class Server {
         });
     }
 
-    public async start(port: number = 3000) {
+    public async start(port: number = 3009) {
 
         this.setupMiddlewares();
         const nodesIconsPath = path.resolve(__dirname, "../../nodes/dist/nodes")

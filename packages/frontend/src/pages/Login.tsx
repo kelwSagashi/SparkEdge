@@ -11,8 +11,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 
 type FormValues = {
   email: string;
@@ -26,6 +28,7 @@ const Login = () => {
   const form = useForm<FormValues>({
     defaultValues: { email: '', password: '' },
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (user) navigate('/workflow');
@@ -38,9 +41,9 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-4">
-      <Card className="w-full max-w-md">
+      <Card className="max-w-md bg-secondary-foreground rounded w-90">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle className='text-primary'>Login</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -51,9 +54,9 @@ const Login = () => {
                 rules={{ required: 'Email is required' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className='text-primary'>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="you@example.com" {...field} />
+                      <Input className='text-muted-foreground' type="email" placeholder="you@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -66,9 +69,14 @@ const Login = () => {
                 rules={{ required: 'Password is required', minLength: { value: 6, message: 'Password must be at least 6 characters' } }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className='text-primary'>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Your password" {...field} />
+                      <div className="relative">
+                        <Input className='text-muted-foreground pr-10' type={showPassword ? 'text' : 'password'} placeholder="Your password" {...field} />
+                        <button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(s => !s)}>
+                          {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -78,8 +86,12 @@ const Login = () => {
               {error && <div className="text-destructive text-sm">{error}</div>}
 
               <div className="flex items-center justify-between">
-                <div />
-                <Button type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</Button>
+                <div className="text-sm">
+                  <Link to="/#" className="text-muted-foreground">Forgot my password</Link>
+                </div>
+                <Button type="submit" className='bg-accent-foreground text-primary flex items-center gap-2' disabled={loading}>
+                  {loading && <Spinner />} {loading ? 'Logging in...' : 'Login'}
+                </Button>
               </div>
             </form>
           </Form>

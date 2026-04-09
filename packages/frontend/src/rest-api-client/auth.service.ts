@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { UserReturningValues } from 'nmg8-db/src/types';
 
-const baseURL = 'http://localhost:3000/api';
+const baseURL = 'http://localhost:3009/api';
 const axiosInstance = axios.create({ baseURL, withCredentials: true });
 
 type APIResponse<T> = { data: T; error: string | null };

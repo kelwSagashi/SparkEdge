@@ -2,20 +2,31 @@ import { useEffect, useState } from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '../ui/select';
 import { DefaultServerTypes } from 'nmg8-db/src/types';
 import type { ServerTypeReturningValues } from 'nmg8-db/src/types';
+import { api } from '@/server/server.service';
 
 type Props = {
   onSelect: (type: ServerTypeReturningValues | undefined) => void;
 };
 
 export default function ServerTypeSelection({ onSelect }: Props) {
+  const [serverTypes, setServerTypes] = useState<ServerTypeReturningValues[]>([]);
   const [selected, setSelected] = useState<ServerTypeReturningValues>();
+
+  useEffect(() => {
+    const load = async () => {
+      const response = await api.listServersTypes();
+      setServerTypes(response.data.data); 
+    };
+
+    load();
+  }, []);
   useEffect(() => { onSelect(selected) }, [onSelect, selected]);
   return (
     <div className="flex flex-col space-y-4 pt-4 min-w-0 w-full">
       <div>
         <span className="font-medium text-muted-foreground">Escolha o tipo de serviço</span>
         <Select onValueChange={(val) => {
-          const selectedType = DefaultServerTypes.find(item => item.id === val);
+          const selectedType = serverTypes.find(item => item.id === val);
           setSelected(selectedType);
         }}>
           <SelectTrigger className="w-full p-6">
@@ -33,7 +44,7 @@ export default function ServerTypeSelection({ onSelect }: Props) {
                 >
                   <div className="text-left">
                     <p className="font-semibold text-primary">{item.name}</p>
-                    <p className="text-sm text-muted-foreground break-words">{item.description}</p>
+                    <p className="text-sm text-muted-foreground wrap-normalbreak-words">{item.description}</p>
                   </div>
                 </SelectItem>
               ))}

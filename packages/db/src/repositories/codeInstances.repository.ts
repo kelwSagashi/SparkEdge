@@ -8,7 +8,7 @@ export class CodeInstancesRepository {
 
   create(values: CodeInstanceUpsertValues): ReturningQueries<CodeInstanceReturningValues | null >{
     try {
-      const data = this.db.insert(Tables.CodeInstance).values(values).returning().get();
+      const data = this.db.insert(Tables.CodeInstanceTable).values(values).returning().get();
       return { data };
     } catch (error: unknown) {
       return { error, data: null };
@@ -17,9 +17,9 @@ export class CodeInstancesRepository {
 
   upsert(values: CodeInstanceUpsertValues): ReturningQueries<CodeInstanceReturningValues | null >{
     try { 
-      const data = this.db.insert(Tables.CodeInstance)
+      const data = this.db.insert(Tables.CodeInstanceTable)
         .values(values)
-        .onConflictDoUpdate({ target: Tables.CodeInstance.id, set: values })
+        .onConflictDoUpdate({ target: Tables.CodeInstanceTable.id, set: values })
         .returning()
         .get();
       return { data };
@@ -30,7 +30,7 @@ export class CodeInstancesRepository {
 
   findById(id: string): ReturningQueries<CodeInstanceReturningValues | null> {
     try {
-      const data = this.db.select().from(Tables.CodeInstance).where(eq(Tables.CodeInstance.id, id)).get() ?? null;
+      const data = this.db.select().from(Tables.CodeInstanceTable).where(eq(Tables.CodeInstanceTable.id, id)).get() ?? null;
       return { data };
     } catch (error: unknown) {
       return { error, data: null };
@@ -39,7 +39,7 @@ export class CodeInstancesRepository {
 
   listAll(): ReturningQueries<CodeInstanceReturningValues[]> {
     try {
-      const data = this.db.select().from(Tables.CodeInstance).all();
+      const data = this.db.select().from(Tables.CodeInstanceTable).all();
       return { data };
     } catch (error: unknown) {
       return { error, data: [] };
@@ -48,7 +48,7 @@ export class CodeInstancesRepository {
 
   delete(id: string): ReturningQueries<unknown> {
     try {
-      const data = this.db.delete(Tables.CodeInstance).where(eq(Tables.CodeInstance.id, id)).run();
+      const data = this.db.delete(Tables.CodeInstanceTable).where(eq(Tables.CodeInstanceTable.id, id)).run();
       return { data };
     } catch (error: unknown) {
       return { error, data: null };

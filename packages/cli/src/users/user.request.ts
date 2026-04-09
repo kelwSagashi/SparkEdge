@@ -7,6 +7,7 @@ export namespace UserRequest {
   export type Update = AuthenticatedRequest<{ id: string }, {}, Partial<UserUpsertValues>>;
 
   export type IdParam = AuthenticatedRequest<{ id: string }>;
+  export type ProjectParam = AuthenticatedRequest<{ id: string, project: string }>;
 }
 
 export default UserRequest;

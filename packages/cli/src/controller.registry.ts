@@ -77,9 +77,9 @@ export class ControllerRegistry {
             );
 			router[route.method](
 				route.path,
-				...(route.rateLimit
-					? [this.createRateLimitMiddleware(route.rateLimit)]
-					: []),
+				// ...(route.rateLimit
+				// 	? [this.createRateLimitMiddleware(route.rateLimit)]
+				// 	: []),
 				...([]), // skip auth
 				...([]), // liscence
 				...([]), // access scope
@@ -99,7 +99,9 @@ export class ControllerRegistry {
         }
     }
 
-    private createRateLimitMiddleware(rateLimit: true | RateLimit): RequestHandler {
+    private createRateLimitMiddleware(rateLimit: true | RateLimit)
+	// : RequestHandler 
+	{
 		if (typeof rateLimit === 'boolean') rateLimit = {};
 		return expressRateLimit({
 			windowMs: rateLimit.windowMs,

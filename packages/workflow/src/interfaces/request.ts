@@ -15,7 +15,9 @@ export type AuthenticatedRequest<
 	RequestBody = {},
 	RequestQuery = {},
 > = Omit<APIRequest<RouteParams, ResponseBody, RequestBody, RequestQuery>, 'user' | 'cookies'> & {
-	user: {};
+	user: {
+		id: string;
+	};
 	cookies: Record<string, string | undefined>;
 	headers: express.Request['headers'];
 };

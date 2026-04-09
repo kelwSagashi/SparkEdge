@@ -1,10 +1,9 @@
 import React from 'react'
 import './App.css'
-import Header from './components/header'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
+import { SidebarInset, SidebarProvider } from './components/ui/sidebar';
 import SideBar from './components/sidebar';
 import { Routes, Route, Navigate, } from 'react-router-dom'
-import Instances from './pages/instances';
+import Overview from './pages/Overview';
 import Hub from './pages/Hub';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -57,17 +56,16 @@ function App() {
           } as React.CSSProperties
         }
       >
-        <div className="flex flex-grow overflow-hidden">
+        <div className="flex grow overflow-hidden">
           <SideBar />
-          <SidebarInset className='flex flex-col flex-grow relative overflow-hidden'>
-            <Header />
-            <div className="flex-grow relative overflow-y-auto">
+          <SidebarInset className='flex flex-col grow relative overflow-hidden'>
+            <div className="grow relative overflow-y-auto">
               <Routes>
                 {/* Rotas para o Editor de Fluxos */}
                 <Route path="/" element={<Navigate to="/workflow" replace />} />
                 <Route path="/workflow/new" element={<ProtectedRoute><FlowBuilderPage /></ProtectedRoute>} />
                 <Route path="/workflow/:id" element={<ProtectedRoute><FlowBuilderPage /></ProtectedRoute>} />
-                <Route path="/workflow" element={<ProtectedRoute><Instances /></ProtectedRoute>} />
+                <Route path="/workflow" element={<ProtectedRoute><Overview /></ProtectedRoute>} />
                 <Route path="/script-hub" element={<ProtectedRoute><Hub /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/workflow" replace />} />
               </Routes>

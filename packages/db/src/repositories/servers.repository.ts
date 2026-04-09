@@ -46,6 +46,17 @@ export class ServersRepository {
     }
   }
 
+  listAllWithDetails() {
+    try {
+      const data = this.db.select().from(Tables.ServersTable)
+        .leftJoin(Tables.ServerEndpointsTable, eq(Tables.ServersTable.id, Tables.ServerEndpointsTable.server_id))
+        .all();
+      return { data };
+    } catch (e: unknown){
+
+    }
+  }
+
   delete(id: string): ReturningQueries<unknown> {
     try {
       const data = this.db.delete(Tables.ServersTable).where(eq(Tables.ServersTable.id, id)).run();

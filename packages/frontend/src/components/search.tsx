@@ -11,7 +11,7 @@ function Search({
     onChange: React.ChangeEventHandler<HTMLInputElement>
     }) {
     return (
-        <div className="flex-grow max-w-xl mx-auto border-2 rounded-sm border-primary-foreground/40">
+        <div className="grow max-w-xl mx-auto border-2 rounded-sm border-primary-foreground/40">
             <div className='relative'>
             <SearchIcon color='white' className='absolute left-2 top-1.5'/>
             </div>

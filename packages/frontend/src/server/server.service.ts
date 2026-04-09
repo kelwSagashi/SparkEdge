@@ -5,9 +5,9 @@ import { interpolate } from "./executor/server-executor";
 import type { INode } from "@/interfaces/nodes";
 import type { DeclarativeRestApiSettings, IDataObject, INodeInputConfiguration, INodeOutputConfiguration, IWorkflowBase } from "nmg8-workflow";
 import type { Edge } from "@xyflow/react";
-import type { ServerEndpointsReturningValues, ServerReturningValues } from 'nmg8-db/src/types'
+import type { CredentialReturningValues, CredentialUpsertValues, DeviceReturningValues, DeviceUpsertValues, ProjectReturningValues, ReturningQueries, ServerEndpointsReturningValues, ServerEndpointsUpsertValues, ServerReturningValues, ServerTypeReturningValues, ServerUpsertValues, UserReturningValues } from 'nmg8-db/src/types'
 
-const baseURL = "http://localhost:3000/api";
+const baseURL = "http://localhost:3009/api";
 
 const axios_api_instance = axios.create({
     baseURL
@@ -109,6 +109,58 @@ export class API {
         });
 
         return response;
+    }
+
+    async listWorkflowExecutions() {
+        return axios_api_instance.get('/workflow-executions');
+    }
+
+    async listServersTypes() {
+        const response = await axios_api_instance.get<ReturningQueries<ServerTypeReturningValues[]>>('/server-types');
+        return response;
+    }
+
+    async listServers() {
+        return axios_api_instance.get<ReturningQueries<ServerReturningValues[]>>('/servers');
+    }
+
+    async registerServer(payload: { 
+        server: ServerUpsertValues; 
+        authorization: CredentialUpsertValues; 
+        endpoints: ServerEndpointsUpsertValues[]
+    }) {
+        const response = await axios_api_instance.post<ReturningQueries<{
+            server: ServerReturningValues; 
+            credential: CredentialReturningValues; 
+            endpoints: ServerEndpointsReturningValues[] 
+        }>>('/servers/register', payload);
+
+        return response;
+    }
+
+    async createDevice(device: DeviceUpsertValues) {
+        const response = await axios_api_instance.post<ReturningQueries<DeviceReturningValues | null>>('/devices', device);
+        return response;
+    }
+    
+    async getProject(userId: string, projectName: string = "PERSONAL") {
+        const response = await axios_api_instance.get<ReturningQueries<{
+            user: UserReturningValues, 
+            project: ProjectReturningValues,
+        } | null>>(`/users/project/${userId}/${projectName}`);
+        return response;
+    }
+
+    async triggerWorkflowExecution(id: string) {
+        return axios_api_instance.post(`/workflow-executions/${id}/trigger`);
+    }
+
+    async setWorkflowExecutionEnabled(id: string, enabled: boolean) {
+        return axios_api_instance.put(`/workflow-executions/${id}/enable`, null, { params: { enabled: String(enabled) } });
+    }
+
+    async deleteWorkflowExecution(id: string) {
+        return axios_api_instance.delete(`/workflow-executions/${id}`);
     }
 }
 

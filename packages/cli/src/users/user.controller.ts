@@ -17,6 +17,12 @@ export class UserController {
     const result = await this.userService.findById(req.params.id);
     return { data: result.data, error: result.error };
   }
+  
+  @Get('/project/:id/:project')
+  async getProject(req: UserRequest.ProjectParam) {
+    const result = await this.userService.findProjectUserByName(req.params.id, req.params.project);
+    return { data: result.data, error: result.error };
+  }
 
   @Post('/')
   async create(req: UserRequest.Create) {

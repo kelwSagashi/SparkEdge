@@ -12,6 +12,9 @@ export class UserService {
     return dbManager.users.findById(id);
   }
 
+  async findProjectUserByName(id: string, project: string) {
+    return dbManager.users.findProjectUserByName(id, project);
+  }
   async findByEmail(email: string): Promise<ReturningQueries<UserReturningValues | null>> {
     return dbManager.users.findByEmail(email);
   }

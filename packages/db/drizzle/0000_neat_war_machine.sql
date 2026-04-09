@@ -5,7 +5,7 @@ CREATE TABLE `code_instances` (
 	`source` text NOT NULL,
 	`url` text,
 	`path` text NOT NULL,
-	`main_file_name` text DEFAULT 'app.py' NOT NULL,
+	`main_file_name` text NOT NULL,
 	`author` text NOT NULL,
 	`repo` text,
 	`language` text NOT NULL,
@@ -13,6 +13,18 @@ CREATE TABLE `code_instances` (
 	`version` text DEFAULT '1.0' NOT NULL,
 	`created_at` text NOT NULL,
 	`updated_at` text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE `credentials` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`type` text NOT NULL,
+	`data` text NOT NULL,
+	`owner_id` text,
+	`project_id` text,
+	`created_at` text NOT NULL,
+	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `devices` (
@@ -69,24 +81,29 @@ CREATE TABLE `server_endpoints` (
 	FOREIGN KEY (`server_id`) REFERENCES `servers`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `server-types` (
+CREATE TABLE `server_types` (
 	`id` text PRIMARY KEY NOT NULL,
+	`key` text NOT NULL,
 	`name` text NOT NULL,
-	`type` text NOT NULL,
 	`description` text
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `server_types_key_unique` ON `server_types` (`key`);--> statement-breakpoint
 CREATE TABLE `servers` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`type` text NOT NULL,
 	`base_url` text NOT NULL,
-	`auth_type` text,
-	`authorization` text,
+	`credential_id` text,
 	`headers` text,
+	`project_id` text NOT NULL,
+	`created_by` text,
 	`created_at` text NOT NULL,
 	`updated_at` text NOT NULL,
-	FOREIGN KEY (`type`) REFERENCES `server-types`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`type`) REFERENCES `server_types`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`credential_id`) REFERENCES `credentials`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
@@ -102,6 +119,23 @@ CREATE TABLE `users` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
+CREATE TABLE `workflow_executions` (
+	`id` text PRIMARY KEY NOT NULL,
+	`workflow_id` text NOT NULL,
+	`mode` text DEFAULT 'manual' NOT NULL,
+	`status` text DEFAULT 'idle' NOT NULL,
+	`enabled` integer,
+	`created_by` text,
+	`started_at` text,
+	`stopped_at` text,
+	`deleted_at` text,
+	`wait_till` text,
+	`created_at` text NOT NULL,
+	`updated_at` text NOT NULL,
+	FOREIGN KEY (`workflow_id`) REFERENCES `workflows`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
+);
+--> statement-breakpoint
 CREATE TABLE `workflows` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -112,18 +146,6 @@ CREATE TABLE `workflows` (
 	`project_id` text,
 	`settings` text NOT NULL,
 	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `workflow_history` (
-	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`nodes` text NOT NULL,
-	`edges` text NOT NULL,
-	`active` integer,
-	`isArchived` integer,
-	`settings` text NOT NULL,
-	`workflow` text NOT NULL,
-	FOREIGN KEY (`workflow`) REFERENCES `workflows`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `workflow_versions` (

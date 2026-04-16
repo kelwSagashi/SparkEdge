@@ -11,7 +11,7 @@ export const Devices: DeviceReturningValues[] = [
         description: "",
         device_id: "id_api",
         ip_address: "",
-        others: {},
+        others: [],
         location: "",
         serial_number: ""
     }

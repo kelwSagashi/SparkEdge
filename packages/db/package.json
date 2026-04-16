@@ -6,7 +6,7 @@
     "test": "vitest run",
     "dev": "pnpm watch",
     "watch": "tsc -p tsconfig.build.json --watch",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "generate": "drizzle-kit generate:sqlite",
     "migrate": "drizzle-kit migrate:sqlite",
     "db:generate": "drizzle-kit generate",
@@ -24,8 +24,7 @@
     "better-sqlite3": "^12.4.6",
     "drizzle-kit": "^0.31.6",
     "drizzle-orm": "^0.44.7",
-    "nanoid": "^5.1.6",
-    "nmg8-workflow": "workspace:*"
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
     "@nmg8/typescript-config": "workspace:*",

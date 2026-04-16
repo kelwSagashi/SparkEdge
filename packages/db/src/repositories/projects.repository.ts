@@ -55,6 +55,28 @@ export class ProjectsRepository {
     }
   }
 
+  findByOwner(ownerId: string): ReturningQueries<ProjectReturningValues[]> {
+    try {
+      const data = this.db.select().from(Tables.ProjectsTable)
+        .where(eq(Tables.ProjectsTable.owner_id, ownerId)).all();
+      return { data };
+    } catch (error: unknown) {
+      return { error, data: [] };
+    }
+  }
+
+  update(id: string, values: Partial<ProjectUpsertValues>): ReturningQueries<ProjectReturningValues | null> {
+    try {
+      const data = this.db.update(Tables.ProjectsTable)
+        .set({ ...values, updated_at: new Date().toISOString() })
+        .where(eq(Tables.ProjectsTable.id, id))
+        .returning().get();
+      return { data: data ?? null };
+    } catch (error: unknown) {
+      return { error, data: null };
+    }
+  }
+
   delete(id: string): ReturningQueries<unknown> {
     try {
       const data = this.db.delete(Tables.ProjectsTable).where(eq(Tables.ProjectsTable.id, id)).run();

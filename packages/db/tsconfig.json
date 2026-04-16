@@ -18,8 +18,5 @@
       "@types/*": ["./src/types/*"],
     },
   },
-  "include": ["src/**/*.ts"],
-  "references": [
-    { "path": "../workflow/tsconfig.build.esm.json" },
-  ]
+  "include": ["src/**/*.ts"]
 }

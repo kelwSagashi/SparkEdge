@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "1a7e791e-d6a8-4e30-8082-1cf283938611",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "c49ea4fa-5e68-4753-be7d-2c38cb5f08db",
+  "prevId": "ba505051-3fc2-42dd-94b2-77e4d5ec03f5",
   "tables": {
     "auth_type": {
       "name": "auth_type",
@@ -34,10 +34,31 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "server_type_id": {
+          "name": "server_type_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "auth_type_server_type_id_server_types_id_fk": {
+          "name": "auth_type_server_type_id_server_types_id_fk",
+          "tableFrom": "auth_type",
+          "tableTo": "server_types",
+          "columnsFrom": [
+            "server_type_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -274,6 +295,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "resource_operation_id": {
+          "name": "resource_operation_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "text",
@@ -298,7 +326,21 @@
           "isUnique": true
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "devices_resource_operation_id_resource_operations_id_fk": {
+          "name": "devices_resource_operation_id_resource_operations_id_fk",
+          "tableFrom": "devices",
+          "tableTo": "resource_operations",
+          "columnsFrom": [
+            "resource_operation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -416,6 +458,20 @@
         },
         "schema_config": {
           "name": "schema_config",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "output_success_schema": {
+          "name": "output_success_schema",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "output_error_schema": {
+          "name": "output_error_schema",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -1230,6 +1286,20 @@
         },
         "config": {
           "name": "config",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "input_schema": {
+          "name": "input_schema",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "output_schema": {
+          "name": "output_schema",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

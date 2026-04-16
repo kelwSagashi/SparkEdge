@@ -46,14 +46,14 @@ export class ServersRepository {
     }
   }
 
-  listAllWithDetails() {
+  listAllWithResources() {
     try {
       const data = this.db.select().from(Tables.ServersTable)
-        .leftJoin(Tables.ServerEndpointsTable, eq(Tables.ServersTable.id, Tables.ServerEndpointsTable.server_id))
+        .leftJoin(Tables.ServerResourcesTable, eq(Tables.ServersTable.id, Tables.ServerResourcesTable.server_id))
         .all();
       return { data };
-    } catch (e: unknown){
-
+    } catch (e: unknown) {
+      return { data: [], error: e };
     }
   }
 

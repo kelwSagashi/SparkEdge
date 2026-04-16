@@ -1,0 +1,1 @@
+ALTER TABLE `downloaded_scripts` DROP COLUMN `input_schema`;

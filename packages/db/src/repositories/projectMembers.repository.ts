@@ -15,12 +15,24 @@ export class ProjectMembersRepository {
     }
   }
 
-  listByProject(project_id: string): ReturningQueries<ProjectMemberReturningValues[]> {
+  findByProject(project_id: string): ReturningQueries<ProjectMemberReturningValues[]> {
     try {
       const data = this.db.select().from(Tables.ProjectMembersTable).where(eq(Tables.ProjectMembersTable.project_id, project_id)).all();
       return { data };
     } catch (error: unknown) {
       return { error, data: [] };
+    }
+  }
+
+  upsert(values: ProjectMemberUpsertValues): ReturningQueries<ProjectMemberReturningValues | null> {
+    try {
+      const data = this.db.insert(Tables.ProjectMembersTable)
+        .values(values)
+        .onConflictDoUpdate({ target: Tables.ProjectMembersTable.id, set: values })
+        .returning().get();
+      return { data };
+    } catch (error: unknown) {
+      return { error, data: null };
     }
   }
 

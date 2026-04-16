@@ -1,0 +1,1 @@
+ALTER TABLE `server_types` ADD `auth_type_id` text REFERENCES auth_type(id);

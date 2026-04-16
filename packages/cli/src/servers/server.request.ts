@@ -1,6 +1,9 @@
-import type { ServerUpsertValues } from 'nmg8-db/src/types';
-import { AuthenticatedRequest } from 'nmg8-workflow';
-import type { CredentialUpsertValues, ServerEndpointsUpsertValues } from 'nmg8-db/src/types';
+import type { 
+  ServerUpsertValues, 
+  ServerResourceUpsertValues, 
+  ResourceOperationUpsertValues 
+} from 'nmg8-db/src/types';
+import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace ServerRequest {
   export type Create = AuthenticatedRequest<{}, {}, ServerUpsertValues>;
@@ -9,7 +12,15 @@ export namespace ServerRequest {
 
   export type IdParam = AuthenticatedRequest<{ id: string }>;
 
-  export type Register = AuthenticatedRequest<{}, {}, { server: ServerUpsertValues; authorization: CredentialUpsertValues; endpoints: ServerEndpointsUpsertValues[] }>;
+  export type Register = AuthenticatedRequest<{}, {}, { 
+    server: ServerUpsertValues; 
+    resources: {
+      resource: ServerResourceUpsertValues;
+      operations: ResourceOperationUpsertValues[];
+    }[];
+  }>;
+
+  export type Execute = AuthenticatedRequest<{}, {}, { resource_operation_id: string; payload?: any }>;
 }
 
 export default ServerRequest;

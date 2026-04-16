@@ -9,11 +9,11 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "buildAndDev": "pnpm run build && pnpm run dev",
-    "dev": "concurrently -k -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"pnpm watch\" \"nodemon\"",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 concurrently -k -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"pnpm watch\" \"nodemon\"",
     "start": "run-script-os",
     "start:default": "cd bin && ./nmg8",
     "start:windows": "cd bin && nmg8",
-    "watch": "tsc-watch -p tsconfig.build.json --onCompilationComplete \"tsc-alias -p tsconfig.build.json\""
+    "watch": "cross-env NODE_OPTIONS=--max-old-space-size=4096 tsc-watch -p tsconfig.build.json --onCompilationComplete \"tsc-alias -p tsconfig.build.json\""
   },
   "bin": {
     "nmg8": "./bin/nmg8"
@@ -27,10 +27,13 @@
   ],
   "devDependencies": {
     "@nmg8/typescript-config": "workspace:*",
+    "@types/adm-zip": "^0.5.8",
     "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
+    "@types/pg": "^8.20.0",
     "@types/socket.io": "^3.0.1",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.16",
@@ -40,18 +43,26 @@
   },
   "dependencies": {
     "@nmg8/di": "workspace:*",
+    "adm-zip": "^0.5.17",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.61.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "csv-stringify": "^6.7.0",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "fast-glob": "^3.3.3",
+    "firebase-admin": "^13.8.0",
+    "googleapis": "^171.4.0",
+    "jsonpath-plus": "^10.4.0",
     "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.1",
+    "multer": "^2.1.1",
     "nmg8-core": "workspace:*",
     "nmg8-db": "workspace:*",
     "nmg8-nodes": "workspace:*",
     "nmg8-workflow": "workspace:*",
+    "pg": "^8.20.0",
     "zod": "^4.1.12",
     "zod-class": "^0.0.18"
   }

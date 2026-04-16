@@ -6,6 +6,11 @@ import CredentialsRequest from './credentials.request';
 export class CredentialsController {
   constructor(readonly svc: CredentialsService) {}
 
+  @Get('/config/meta')
+  async getMeta() {
+    return this.svc.getMeta();
+  }
+
   @Get('/')
   async list() {
     return this.svc.list();
@@ -30,6 +35,9 @@ export class CredentialsController {
   async delete(request: CredentialsRequest.IdParam) {
     return this.svc.remove(request.params.id);
   }
-}
 
-export default CredentialsController;
+  @Post('/test')
+  async test(request: { body: { auth_type_id: string, data: any } }) {
+    return this.svc.testCredential(request.body.auth_type_id, request.body.data);
+  }
+}

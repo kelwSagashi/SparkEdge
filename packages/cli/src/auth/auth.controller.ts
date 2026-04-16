@@ -36,6 +36,11 @@ export class AuthController {
     // middleware should attach user to req as any.user
     return { data: (req as any).user ?? null };
   }
+
+  @Post('/generate-new-api-key/:userId')
+  async generateNewApiKey(req: Request) {
+    return await this.authService.generateNewApiKey(req.params.userId);
+  }
 }
 
 export default AuthController;

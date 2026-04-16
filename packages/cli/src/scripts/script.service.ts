@@ -1,38 +1,31 @@
 import { Service } from '@nmg8/di';
 import { dbManager } from 'nmg8-db';
-import type { ReturningQueries, CodeInstanceUpsertValues, CodeInstanceReturningValues } from 'nmg8-db/src/types';
+import type { ReturningQueries, DownloadedScriptUpsertValues, DownloadedScriptReturningValues } from 'nmg8-db/src/types';
 
 @Service()
 export class ScriptService {
-  async listAll(): Promise<ReturningQueries<CodeInstanceReturningValues[]>> {
-    return dbManager.codeInstances.listAll();
+  async listAll(): Promise<ReturningQueries<DownloadedScriptReturningValues[]>> {
+    return dbManager.downloadedScripts.listAll();
   }
 
-  async listSampleScripts(): Promise<ReturningQueries<CodeInstanceReturningValues[]>> {
-    // DatabaseService contains a helper that returns example scripts
-    // Wrap the call into ReturningQueries for consistency
-    try {
-      const resp = dbManager.listSampleScripts();
-      return { data: resp.data };
-    } catch (error: unknown) {
-      return { error, data: [] };
-    }
+  async findById(id: string): Promise<ReturningQueries<DownloadedScriptReturningValues | null>> {
+    return dbManager.downloadedScripts.findById(id);
   }
 
-  async findById(id: string): Promise<ReturningQueries<CodeInstanceReturningValues | null>> {
-    return dbManager.codeInstances.findById(id);
+  async upsert(values: DownloadedScriptUpsertValues): Promise<ReturningQueries<DownloadedScriptReturningValues | null>> {
+    return dbManager.downloadedScripts.upsert(values);
   }
 
-  async upsert(values: CodeInstanceUpsertValues): Promise<ReturningQueries<CodeInstanceReturningValues | null>> {
-    return dbManager.codeInstances.upsert(values);
+  async update(id: string, values: Partial<DownloadedScriptUpsertValues>): Promise<ReturningQueries<DownloadedScriptReturningValues | null>> {
+    return dbManager.downloadedScripts.update(id, values);
   }
 
-  async create(values: CodeInstanceUpsertValues): Promise<ReturningQueries<CodeInstanceReturningValues | null>> {
-    return dbManager.codeInstances.create(values);
+  async create(values: DownloadedScriptUpsertValues): Promise<ReturningQueries<DownloadedScriptReturningValues | null>> {
+    return dbManager.downloadedScripts.create(values);
   }
 
   async delete(id: string): Promise<ReturningQueries<unknown>> {
-    return dbManager.codeInstances.delete(id);
+    return dbManager.downloadedScripts.delete(id);
   }
 }
 

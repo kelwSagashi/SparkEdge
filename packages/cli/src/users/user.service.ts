@@ -30,6 +30,10 @@ export class UserService {
   async delete(id: string): Promise<ReturningQueries<unknown>> {
     return dbManager.users.delete(id);
   }
+
+  async createApiKey(id: string): Promise<ReturningQueries<{ userId: string; apiKey: string } | null>> {
+    return dbManager.users.createApiKey(id);
+  }
 }
 
 export default UserService;

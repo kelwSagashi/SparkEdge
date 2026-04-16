@@ -1,0 +1,115 @@
+import os from 'os';
+import path from 'path';
+import fs from 'fs';
+import AdmZip from 'adm-zip';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import crypto from 'crypto';
+
+const execAsync = promisify(exec);
+
+export const SCRIPTS_STORAGE_DIR = path.join(os.homedir(), '.nmg8', 'scripts');
+
+export async function ensureScriptsStorageDir() {
+    if (!fs.existsSync(SCRIPTS_STORAGE_DIR)) {
+        fs.mkdirSync(SCRIPTS_STORAGE_DIR, { recursive: true });
+    }
+}
+
+export async function extractZipToTemp(zipFilePath: string): Promise<{ tempFolder: string, pyFiles: string[] }> {
+    const tempFolder = path.join(os.tmpdir(), `nmg8_script_${crypto.randomUUID()}`);
+    fs.mkdirSync(tempFolder, { recursive: true });
+
+    const zip = new AdmZip(zipFilePath);
+    zip.extractAllTo(tempFolder, true);
+
+    const pyFiles: string[] = [];
+    
+    // Recursive read to find .py files
+    const scanDir = (dir: string) => {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            const fullPath = path.join(dir, file);
+            if (fs.statSync(fullPath).isDirectory()) {
+                scanDir(fullPath);
+            } else if (file.endsWith('.py')) {
+                pyFiles.push(path.relative(tempFolder, fullPath).replace(/\\/g, '/'));
+            }
+        }
+    };
+
+    scanDir(tempFolder);
+    return { tempFolder, pyFiles };
+}
+
+export async function setupScriptEnvironment(tempFolder: string, finalFolder: string, mainFile: string): Promise<{ schema: any, venvPath: string }> {
+    // 1. Move tempFolder to finalFolder
+    if (!fs.existsSync(finalFolder)) {
+        fs.mkdirSync(path.dirname(finalFolder), { recursive: true });
+    }
+    fs.renameSync(tempFolder, finalFolder);
+
+    const venvPath = path.join(finalFolder, 'venv');
+    const pythonExe = process.platform === 'win32' ? path.join(venvPath, 'Scripts', 'python.exe') : path.join(venvPath, 'bin', 'python');
+    const pipExe = process.platform === 'win32' ? path.join(venvPath, 'Scripts', 'pip.exe') : path.join(venvPath, 'bin', 'pip');
+
+    // 2. Create venv
+    await execAsync(`python -m venv "${venvPath}"`);
+
+    // 3. Install requirements if present
+    const reqPath = path.join(finalFolder, 'requirements.txt');
+    if (fs.existsSync(reqPath)) {
+        await execAsync(`"${pipExe}" install -r "${reqPath}"`);
+    }
+
+    // 4. Get schema
+    const sdkPath = path.resolve(__dirname, '../../../../extensions/samples/nmg8_class_code/nmg8pySDK');
+    const mainFilePath = path.join(finalFolder, mainFile);
+    
+    // Inject SDK into PYTHONPATH
+    const env = { 
+        ...process.env, 
+        PYTHONPATH: process.env.PYTHONPATH ? `${sdkPath}${path.delimiter}${process.env.PYTHONPATH}` : sdkPath 
+    };
+
+    const { stdout } = await execAsync(`"${pythonExe}" "${mainFilePath}" --schema`, { env });
+    
+    let schemaResult = { schema: { inputs: [], outputs: [] } };
+    try {
+        schemaResult = JSON.parse(stdout);
+    } catch(err) {
+        throw new Error('Failed to parse schema from script stdout.');
+    }
+
+    return { schema: schemaResult.schema, venvPath };
+}
+
+export async function runPythonScript(scriptFolder: string, mainFile: string, venvPath: string, inputPayload: any): Promise<{ stdout: any, stderr: any }> {
+    const pythonExe = process.platform === 'win32' ? path.join(venvPath, 'Scripts', 'python.exe') : path.join(venvPath, 'bin', 'python');
+    const sdkPath = path.resolve(__dirname, '../../../../extensions/samples/nmg8_class_code/nmg8pySDK');
+    const mainFilePath = path.join(scriptFolder, mainFile);
+
+    const env = { 
+        ...process.env, 
+        PYTHONPATH: process.env.PYTHONPATH ? `${sdkPath}${path.delimiter}${process.env.PYTHONPATH}` : sdkPath 
+    };
+
+    // We can pass the JSON input via `--input` flag payload formatted as a string.
+    // Or we write it to a temp file and use `--input-file`. Using temp file avoids quote escapism issues.
+    const tempInputFile = path.join(os.tmpdir(), `nmg8_input_${crypto.randomUUID()}.json`);
+    fs.writeFileSync(tempInputFile, JSON.stringify(inputPayload), 'utf8');
+
+    try {
+        const { stdout, stderr } = await execAsync(`"${pythonExe}" "${mainFilePath}" --input-file "${tempInputFile}"`, { env });
+        try {
+            const result = JSON.parse(stdout);
+            return { stdout: result.stdout, stderr: result.stderr };
+        } catch(e) {
+            return { stdout: null, stderr: { type: 'ParseError', message: stdout } };
+        }
+    } catch(err: any) {
+        return { stdout: null, stderr: err.stderr || err.message };
+    } finally {
+        if (fs.existsSync(tempInputFile)) fs.unlinkSync(tempInputFile);
+    }
+}

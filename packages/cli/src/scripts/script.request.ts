@@ -1,12 +1,11 @@
-import type { CodeInstanceUpsertValues } from 'nmg8-db/src/types';
-import { AuthenticatedRequest } from 'nmg8-workflow';
+import type { DownloadedScriptUpsertValues } from 'nmg8-db/src/types';
+import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace ScriptRequest {
-  export type Create = AuthenticatedRequest<{}, {}, CodeInstanceUpsertValues>;
-
-  export type Update = AuthenticatedRequest<{ id: string }, {}, Partial<CodeInstanceUpsertValues>>;
-
+  export type Create = AuthenticatedRequest<{}, {}, DownloadedScriptUpsertValues>;
+  export type Update = AuthenticatedRequest<{ id: string }, {}, Partial<DownloadedScriptUpsertValues>>;
   export type IdParam = AuthenticatedRequest<{ id: string }>;
+  export type HubSearch = AuthenticatedRequest<{}, { query?: string; page?: string }>;
 }
 
 export default ScriptRequest;

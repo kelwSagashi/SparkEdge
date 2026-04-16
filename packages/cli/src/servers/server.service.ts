@@ -1,9 +1,18 @@
 import { Service } from '@nmg8/di';
 import { dbManager } from 'nmg8-db';
-import type { CredentialUpsertValues, ServerEndpointsUpsertValues, ServerUpsertValues } from 'nmg8-db/src/types';
+import type { 
+  ServerUpsertValues, 
+  ServerResourceUpsertValues, 
+  ResourceOperationUpsertValues 
+} from 'nmg8-db/src/types';
+import { CredentialsService } from '../credentials/credentials.service';
 
 @Service()
 export class ServerService {
+  constructor(
+    private readonly credentialsService: CredentialsService
+  ) {}
+
   async create(values: ServerUpsertValues) {
     return dbManager.servers.create(values as any);
   }
@@ -20,15 +29,29 @@ export class ServerService {
     return dbManager.servers.listAll();
   }
 
+  async listResources(id: string) {
+    return dbManager.listAllServerResources(id);
+  }
+
   async remove(id: string) {
     return dbManager.servers.delete(id);
   }
 
-  async register(created_by: string | undefined, payload: { server: ServerUpsertValues; authorization: CredentialUpsertValues; endpoints: ServerEndpointsUpsertValues[] }) {
-    const serverValues = { ...payload.server };
-    if (created_by && !serverValues.created_by) serverValues.created_by = created_by;
+  async register(payload: { 
+    server: ServerUpsertValues; 
+    resources: {
+      resource: ServerResourceUpsertValues;
+      operations: ResourceOperationUpsertValues[];
+    }[];
+  }) {
+    return dbManager.registerServer({ 
+      server: payload.server, 
+      resources: payload.resources 
+    });
+  }
 
-    return dbManager.registerServer({ server: serverValues, authorization: payload.authorization, endpoints: payload.endpoints });
+  async executeOperation(resource_operation_id: string, payload?: any) {
+    return this.credentialsService.executeOperation(resource_operation_id, payload);
   }
 }
 

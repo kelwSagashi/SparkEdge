@@ -1,4 +1,4 @@
-import { AuthenticatedRequest } from "nmg8-workflow";
+import { AuthenticatedRequest } from "@/auth/authenticated-request";
 
 export namespace AuthRequest {
     export type UserRegister = { 

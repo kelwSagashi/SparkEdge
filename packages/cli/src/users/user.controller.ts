@@ -42,6 +42,12 @@ export class UserController {
     const result = await this.userService.delete(req.params.id);
     return { data: result.data, error: result.error };
   }
+
+  @Get('/:id/api-key')
+  async createApiKey(req: UserRequest.IdParam) {
+    const result = await this.userService.createApiKey(req.params.id);
+    return { data: result.data, error: result.error };
+  }
 }
 
 export default UserController;

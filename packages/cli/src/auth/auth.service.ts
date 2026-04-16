@@ -84,6 +84,11 @@ export class AuthService {
       return { error: err, data: null };
     }
   }
+
+  async generateNewApiKey(userId: string) {
+    const result = dbManager.users.createApiKey(userId);
+    return result;
+  }
 }
 
 export default AuthService;

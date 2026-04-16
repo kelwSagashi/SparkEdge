@@ -9,15 +9,25 @@ import path from "node:path";
 import cookieParser from "cookie-parser";
 
 import '@/devices/device.controller';
-import '@/nodes/node.controller';
 import '@/scripts/script.controller';
 import '@/servers/server.controller';
 import '@/users/user.controller';
-import '@/workflows/workflow.controller';
-import '@/workflows/workflow-executions.controller';
 import '@/auth/auth.controller';
 import '@/servers/server-types.controller';
 import '@/credentials/credentials.controller';
+import '@/instances/instance.controller';
+import '@/tags/tags.controller';
+import '@/executions/executions.controller';
+import '@/fallback/fallback.controller';
+import '@/projects/projects.controller';
+import '@/webhook/webhook.controller';
+import '@/instances/adapters.controller';
+
+import { ServerTypeRegistry } from './instances/server-types';
+import { AdapterRegistry } from './instances/destination-adapters';
+import './instances/adapters';
+import './instances/server-types';
+import './instances/destination-adapters';
 
 
 @Service()
@@ -34,30 +44,78 @@ export class Server {
     }
 
     setupMiddlewares() {
-        // Attach user from JWT cookie if present
+        // Authenticate request
         this.app.use(async (req: Request, _res: Response, next) => {
             try {
-                const token = (req.cookies as any)?.nmg8_token;
-                if (token) {
-                    const secret = process.env.JWT_SECRET ?? 'dev-secret';
-                    const decoded = jwt.verify(token, secret) as any;
-                    // load user record
-                    const { dbManager } = await import('nmg8-db');
-                    const found = dbManager.users.findById(decoded.id);
-                    (req as any).user = found.data ?? null;
+                const { dbManager } = await import('nmg8-db');
+                const secret = process.env.JWT_SECRET ?? 'dev-secret';
+
+                // Helper to verify JWT and find user
+                const verifyUserByToken = (token: string) => {
+                    try {
+                        const decoded = jwt.verify(token, secret) as any;
+                        const found = dbManager.users.findById(decoded.id);
+                        return found.data;
+                    } catch {
+                        return null;
+                    }
+                };
+
+                // 1. Try JWT from Cookie
+                const cookieToken = (req.cookies as any)?.nmg8_token;
+                if (cookieToken) {
+                    const user = verifyUserByToken(cookieToken);
+                    if (user) {
+                        (req as any).user = user;
+                        return next();
+                    }
+                }
+
+                // 2. Try JWT from Authorization Header
+                const authHeader = req.headers.authorization;
+                if (authHeader?.startsWith('Bearer ')) {
+                    const headerToken = authHeader.substring(7);
+                    const user = verifyUserByToken(headerToken);
+                    if (user) {
+                        (req as any).user = user;
+                        return next();
+                    }
+                }
+
+                // 3. Try API Key from Header
+                const apiKey = req.headers['x-api-key'] as string;
+                if (apiKey) {
+                    const found = dbManager.users.findByApiKey(apiKey);
+                    if (found.data) {
+                        (req as any).user = found.data;
+                        return next();
+                    }
                 }
             } catch (err) {
-                // ignore
+                // Unexpected error during auth process
             }
             next();
         });
 
-        // Protect specific API routes: require authenticated user
+        // Protect specific API routes
         this.app.use((req: Request, res: Response, next) => {
-            const openPrefixes = ['/api/auth', '/api/health', '/api/nodes'];
+            const openPrefixes = ['/api/auth', '/api/health', '/api/nodes', '/api/webhook'];
             if (openPrefixes.some(p => req.path.startsWith(p))) return next();
 
-            const protectedPrefixes = ['/api/workflows', '/api/workflow-executions', '/api/scripts', '/api/devices', '/api/servers', '/api/users', '/api/server-types', '/api/credentials'];
+            const protectedPrefixes = [
+                '/api/instances', 
+                '/api/scripts', 
+                '/api/devices', 
+                '/api/servers', 
+                '/api/users', 
+                '/api/server-types', 
+                '/api/credentials', 
+                '/api/tags', 
+                '/api/executions', 
+                '/api/fallback', 
+                '/api/projects'
+            ];
+
             if (protectedPrefixes.some(p => req.path.startsWith(p)) && !(req as any).user) {
                 return res.status(401).json({ message: 'Unauthorized' });
             }
@@ -67,18 +125,14 @@ export class Server {
     }
 
     public async start(port: number = 3009) {
+        await ServerTypeRegistry.syncWithDatabase();
+        await AdapterRegistry.syncWithDatabase();
 
         this.setupMiddlewares();
         const nodesIconsPath = path.resolve(__dirname, "../../nodes/dist/nodes")
         this.app.use("/icons", express.static(nodesIconsPath));
 
         this.setupRoutes();
-        
-        // console.log(this.app._router);
-
-        // this.app.use((req, res, next) => {
-        //     res.json({aaaaaaaaa: 'aaaaaaaaaaaa'});
-        // });
 
         this.app.listen(port, () => {
             this.logger.log(`🚀 Servidor rodando em http://localhost:${port}`);

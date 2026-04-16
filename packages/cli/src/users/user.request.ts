@@ -1,5 +1,5 @@
 import type { UserUpsertValues } from 'nmg8-db/src/types';
-import { AuthenticatedRequest } from 'nmg8-workflow';
+import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace UserRequest {
   export type Create = AuthenticatedRequest<{}, {}, UserUpsertValues>;

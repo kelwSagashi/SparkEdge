@@ -1,5 +1,5 @@
 # sample_proc.py
-from nmg8py import nmg8py, Input, Output, Run
+from nmg8pySDK import nmg8py, Input, Output, Run
 
 @Input("ip", required=True, type=str)
 @Input("device_id", required=False, type=str)

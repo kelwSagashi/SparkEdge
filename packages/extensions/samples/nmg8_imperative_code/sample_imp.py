@@ -1,4 +1,4 @@
-from nmg8py import nmg8py
+from nmg8pySDK import nmg8py
 
 def run(ip, device_id):
     nmg8py.set_stdout({"msg": "OK", "ip": ip, "id": device_id})

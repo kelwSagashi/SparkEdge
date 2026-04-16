@@ -1,8 +1,11 @@
-from nmg8py import Node, Input, Output, Run, MainOut, Out, nmg8py
+from nmg8pySDK import Node, Input, Output, Run, MainOut, Out, nmg8py
 import requests
 
 @Node
 @Input(name="host", required=True, type=str)
+@Input(name="protocol", required=True, type=str)
+@Input(name="_response", required=False, type=str)
+@Input(name="_error", required=False, type=str)
 @Output(name="status_code", type=int)
 @Output(name="content_type", type=str)
 class StatusReporter:

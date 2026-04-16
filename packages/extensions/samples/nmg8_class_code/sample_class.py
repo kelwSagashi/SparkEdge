@@ -1,4 +1,4 @@
-from nmg8py import NodeBase, nmg8py
+from nmg8pySDK import NodeBase, nmg8py
 
 class SampleMonitor(NodeBase):
     ip: str

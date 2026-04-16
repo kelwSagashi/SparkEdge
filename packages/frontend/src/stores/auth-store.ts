@@ -15,6 +15,7 @@ type AuthState = {
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, name?: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  generateNewApiKey: (userId: string) => Promise<void>;
 };
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -88,4 +89,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     set({ user: null });
   },
+  generateNewApiKey: async (userId: string) => {
+    try {
+      const res = await authApi.generateNewApiKey(userId);
+      set({ user: { ...get().user, api_key: res.data?.data?.apiKey } as UserReturningValues });
+    } catch (err: any) {
+      set({ error: err?.response?.data?.message ?? 'Failed to generate new API key' });
+    }
+  }
 }));

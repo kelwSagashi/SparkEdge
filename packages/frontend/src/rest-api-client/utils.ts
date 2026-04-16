@@ -1,4 +1,4 @@
-import type { GenericValue } from 'nmg8-workflow/src/index.ts';
+type GenericValue = string | number | boolean | object | null | undefined | GenericValue[];
 import axios from 'axios';
 import type { AxiosRequestConfig, Method, RawAxiosRequestHeaders } from 'axios';
 import { ResponseError } from './response';
@@ -74,7 +74,7 @@ export async function request(config: {
 		return response.data;
 	} catch (error: any) {
 		if (error.message === 'Network Error') {
-			throw new ResponseError("Can't connect to n8n.", {
+			throw new ResponseError("Can't connect to nmg8.", {
 				errorCode: 999,
 			});
 		}

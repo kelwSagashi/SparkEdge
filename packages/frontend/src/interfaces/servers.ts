@@ -20,7 +20,7 @@ export interface ServerWithRelations extends ServerReturningValues {
 export interface ServerFormData {
   name: string;
   type: string;
-  base_url: string;
+  address: string;
   credential_id?: string;
   headers?: Record<string, string>;
   project_id: string;

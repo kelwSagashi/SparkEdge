@@ -1,167 +1,258 @@
+import type {
+  CredentialReturningValues,
+  CredentialUpsertValues,
+  DeviceReturningValues,
+  DeviceUpsertValues,
+  ProjectReturningValues,
+  ReturningQueries,
+  ResourceOperationReturningValues,
+  ResourceOperationUpsertValues,
+  ServerResourceReturningValues,
+  ServerResourceUpsertValues,
+  ServerReturningValues,
+  ServerTypeReturningValues,
+  ServerUpsertValues,
+  UserReturningValues,
+  AuthorizationsTypeUpsertValues,
+  AuthorizationsTypeReturningValues,
+  InstanceReturningValues,
+  DownloadedScriptReturningValues,
+} from "nmg8-db/src/types";
+import { axios_api_instance } from "./instance";
 
-import type { INodeTypeDescription } from 'nmg8-workflow';
-import axios from "axios";
-import { interpolate } from "./executor/server-executor";
-import type { INode } from "@/interfaces/nodes";
-import type { DeclarativeRestApiSettings, IDataObject, INodeInputConfiguration, INodeOutputConfiguration, IWorkflowBase } from "nmg8-workflow";
-import type { Edge } from "@xyflow/react";
-import type { CredentialReturningValues, CredentialUpsertValues, DeviceReturningValues, DeviceUpsertValues, ProjectReturningValues, ReturningQueries, ServerEndpointsReturningValues, ServerEndpointsUpsertValues, ServerReturningValues, ServerTypeReturningValues, ServerUpsertValues, UserReturningValues } from 'nmg8-db/src/types'
-
-const baseURL = "http://localhost:3009/api";
-
-const axios_api_instance = axios.create({
-    baseURL
-});
-axios_api_instance.defaults.withCredentials = true;
-
-export type APIBaseRequest<T = unknown> = {
-    server: ServerReturningValues,
-    endpoint: ServerEndpointsReturningValues,
-    params?: Record<string, string>,
-    body?: T
+export interface ConfigField {
+  key: string;
+  label: string;
+  type: "text" | "password" | "textarea" | "number" | "select" | "boolean";
+  placeholder?: string;
+  options?: { label: string; value: any }[];
+  grid?: string;
 }
+
+export interface AdapterMetadata extends AuthorizationsTypeReturningValues {
+  resourceFields?: ConfigField[];
+  operationFields?: ConfigField[];
+}
+
 export class API {
-    async getNodeDescription({
-        name
-    }: { name: string }) {
-        const response = axios_api_instance.get<INodeTypeDescription>(`/nodes/${name}/description`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            }
-        });
+  async listServersTypes() {
+    const response =
+      await axios_api_instance.get<
+        ReturningQueries<ServerTypeReturningValues[]>
+      >("/server-types");
+    return response;
+  }
 
-        return response;
-    }
-    
-    async getNodes() {
-        const response = axios_api_instance.get<{nodes: Partial<INodeTypeDescription>[]}>(`/nodes`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            }
-        });
+  async listAdaptersMetadata() {
+    const response =
+      await axios_api_instance.get<AdapterMetadata[]>("/adapters/metadata");
+    return response;
+  }
 
-        return response;
-    }
+  async listServers() {
+    return axios_api_instance.get<ReturningQueries<ServerReturningValues[]>>(
+      "/servers",
+    );
+  }
 
-    async getNodeInputs({
-        name,
-        node
-    }: { name: string, node: INode }) {
-        const response = axios_api_instance.post<{
-            inputs: Array<INodeInputConfiguration>, 
-            outputs: Array<INodeOutputConfiguration>
-        }>(`/nodes/${name}/io`, {
-            node
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            }
-        });
+  async registerServer(payload: {
+    server: any;
+    resources: {
+      resource: any;
+      operations: any[];
+    }[];
+  }) {
+    const response = await axios_api_instance.post<
+      ReturningQueries<{
+        server: ServerReturningValues;
+        resources: {
+          resource: ServerResourceReturningValues;
+          operations: ResourceOperationReturningValues[];
+        }[];
+      }>
+    >("/servers/register", payload);
 
-        return response;
-    }
+    return response;
+  }
 
-    async execute<T = IDataObject>({
-        request,
-        params
-    }: {
-        request: DeclarativeRestApiSettings.HttpRequestOptions;
-        params?: Record<string, string>;
-    }) {
-        const response = await axios.request<T>({
-            baseURL: request.baseURL ?? baseURL,
-            url: interpolate(request.url, params),
-            method: request.method,
-            data: request.body,
-            auth: request.auth,
-            headers: request.headers as any
-        });
+  async listResources(serverId: string) {
+    return axios_api_instance.get<ReturningQueries<any[]>>(
+      `/servers/${serverId}/resources`,
+    );
+  }
 
-        return response;
-    }
+  async createDevice(device: DeviceUpsertValues) {
+    const response = await axios_api_instance.post<
+      ReturningQueries<DeviceReturningValues | null>
+    >("/devices", device);
+    return response;
+  }
 
+  async getProject(userId: string, projectName: string = "PERSONAL") {
+    const response = await axios_api_instance.get<
+      ReturningQueries<{
+        user: UserReturningValues;
+        project: ProjectReturningValues;
+      } | null>
+    >(`/users/project/${userId}/${projectName}`);
+    return response;
+  }
 
-    async runTestNode({
-        node
-    }: {
-        node: INode
-    }) {
-        const response = await axios_api_instance.post('/nodes/run/test', {
-            node
-        });
+  async listAllServers() {
+    return axios_api_instance.get<ReturningQueries<ServerReturningValues[]>>(
+      "/servers",
+    );
+  }
 
-        return response;
-    }
+  async getServerById(serverId: string) {
+    return axios_api_instance.get<ReturningQueries<ServerReturningValues>>(
+      `/servers/${serverId}`,
+    );
+  }
 
-    async runWorkflowTest({
-        workflow,
-        destinationNode
-    }: {
-        workflow: IWorkflowBase<INode[], Edge[]>,
-        destinationNode?: string
-    }) {
-        const response = await axios_api_instance.post('/workflows/run/test', {
-            workflow,
-            destinationNode,
-        });
+  async deleteServerById(serverId: string) {
+    return axios_api_instance.delete<ReturningQueries<any>>(
+      `/servers/${serverId}`,
+    );
+  }
 
-        return response;
-    }
+  // deprecated
+  async listEndpoints(serverId: string) {
+    return axios_api_instance.get<ReturningQueries<any[]>>(
+      `/servers/${serverId}/endpoints`,
+    );
+  }
 
-    async listWorkflowExecutions() {
-        return axios_api_instance.get('/workflow-executions');
-    }
+  async listAllDevices() {
+    return axios_api_instance.get<ReturningQueries<DeviceReturningValues[]>>(
+      "/devices",
+    );
+  }
 
-    async listServersTypes() {
-        const response = await axios_api_instance.get<ReturningQueries<ServerTypeReturningValues[]>>('/server-types');
-        return response;
-    }
+  async getDeviceById(id: string) {
+    return axios_api_instance.get<ReturningQueries<DeviceReturningValues>>(
+      `/devices/${id}`,
+    );
+  }
 
-    async listServers() {
-        return axios_api_instance.get<ReturningQueries<ServerReturningValues[]>>('/servers');
-    }
+  async updateDevice(id: string, device: DeviceUpsertValues) {
+    return axios_api_instance.put<ReturningQueries<DeviceReturningValues>>(
+      `/devices/${id}`,
+      device,
+    );
+  }
 
-    async registerServer(payload: { 
-        server: ServerUpsertValues; 
-        authorization: CredentialUpsertValues; 
-        endpoints: ServerEndpointsUpsertValues[]
-    }) {
-        const response = await axios_api_instance.post<ReturningQueries<{
-            server: ServerReturningValues; 
-            credential: CredentialReturningValues; 
-            endpoints: ServerEndpointsReturningValues[] 
-        }>>('/servers/register', payload);
+  async deleteDevice(id: string) {
+    return axios_api_instance.delete<ReturningQueries<any>>(`/devices/${id}`);
+  }
 
-        return response;
-    }
+  async testCredential(payload: { auth_type_id: string; data: any }) {
+    return axios_api_instance.post<{ success: boolean; error?: string }>(
+      "/credentials/test",
+      payload,
+    );
+  }
 
-    async createDevice(device: DeviceUpsertValues) {
-        const response = await axios_api_instance.post<ReturningQueries<DeviceReturningValues | null>>('/devices', device);
-        return response;
-    }
-    
-    async getProject(userId: string, projectName: string = "PERSONAL") {
-        const response = await axios_api_instance.get<ReturningQueries<{
-            user: UserReturningValues, 
-            project: ProjectReturningValues,
-        } | null>>(`/users/project/${userId}/${projectName}`);
-        return response;
-    }
+  async discoverResources(adapterId: string, credentials: any) {
+    return axios_api_instance.post<{ resources: any[] }>(
+      `/adapters/${adapterId}/discover`,
+      { credentials },
+    );
+  }
 
-    async triggerWorkflowExecution(id: string) {
-        return axios_api_instance.post(`/workflow-executions/${id}/trigger`);
-    }
+  async testServer(resource_operation_id: string) {
+    return axios_api_instance.post<{ success: boolean; error?: string }>(
+      "/servers/execute",
+      { resource_operation_id },
+    );
+  }
 
-    async setWorkflowExecutionEnabled(id: string, enabled: boolean) {
-        return axios_api_instance.put(`/workflow-executions/${id}/enable`, null, { params: { enabled: String(enabled) } });
-    }
+  async executeOperation(resource_operation_id: string, payload?: any) {
+    return axios_api_instance.post<{
+      success: boolean;
+      data?: any;
+      error?: string;
+    }>("/servers/execute", { resource_operation_id, payload });
+  }
 
-    async deleteWorkflowExecution(id: string) {
-        return axios_api_instance.delete(`/workflow-executions/${id}`);
-    }
+  // ─── Instances ────────────────────────────────────────────────────────
+
+  async listAllInstances() {
+    return axios_api_instance.get<ReturningQueries<InstanceReturningValues[]>>(
+      "/instances",
+    );
+  }
+
+  async listActiveInstances() {
+    return axios_api_instance.get<ReturningQueries<InstanceReturningValues[]>>(
+      "/instances/active",
+    );
+  }
+
+  async listInstancesByProject(projectId: string) {
+    return axios_api_instance.get<ReturningQueries<InstanceReturningValues[]>>(
+      `/instances/project/${projectId}`,
+    );
+  }
+
+  async getInstanceById(id: string) {
+    return axios_api_instance.get<ReturningQueries<InstanceReturningValues>>(
+      `/instances/${id}`,
+    );
+  }
+
+  async createInstance(payload: any) {
+    return axios_api_instance.post<ReturningQueries<InstanceReturningValues>>(
+      "/instances",
+      payload,
+    );
+  }
+
+  async updateInstance(id: string, payload: any) {
+    return axios_api_instance.put<ReturningQueries<InstanceReturningValues>>(
+      `/instances/${id}`,
+      payload,
+    );
+  }
+
+  async deleteInstance(id: string) {
+    return axios_api_instance.delete<ReturningQueries<any>>(`/instances/${id}`);
+  }
+
+  async triggerInstance(id: string) {
+    return axios_api_instance.post<ReturningQueries<any>>(
+      `/instances/${id}/trigger`,
+      {},
+    );
+  }
+
+  // ─── Scripts ──────────────────────────────────────────────────────────
+
+  async listAllScripts() {
+    return axios_api_instance.get<
+      ReturningQueries<DownloadedScriptReturningValues[]>
+    >("/scripts");
+  }
+
+  async getScriptById(id: string) {
+    return axios_api_instance.get<
+      ReturningQueries<DownloadedScriptReturningValues>
+    >(`/scripts/${id}`);
+  }
+
+  // ─── Projects ─────────────────────────────────────────────────────────
+
+  async listAllProjects() {
+    return axios_api_instance.get<ReturningQueries<ProjectReturningValues[]>>(
+      "/projects",
+    );
+  }
+
+  async getProjectById(id: string) {
+    return axios_api_instance.get<ReturningQueries<ProjectReturningValues>>(
+      `/projects/${id}`,
+    );
+  }
 }
 
 export const api = new API();

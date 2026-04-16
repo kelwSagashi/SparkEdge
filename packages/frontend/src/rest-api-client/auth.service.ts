@@ -24,6 +24,13 @@ export class AuthAPI {
   async logout() {
     return axiosInstance.post('/auth/logout');
   }
+
+  async generateNewApiKey(userId: string) {
+    return axiosInstance.post<APIResponse<{
+      userId: string;
+      apiKey: string;
+    }>>(`/auth/generate-new-api-key/${userId}`);
+  }
 }
 
 export const authApi = new AuthAPI();

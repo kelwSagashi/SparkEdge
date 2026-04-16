@@ -1,0 +1,27 @@
+import type { DownloadedScriptUpsertValues } from 'nmg8-db/src/types';
+import { axios_api_instance } from '@/server/instance';
+
+export const scriptsApi = {
+  list: () => axios_api_instance.get('/scripts').then((res) => res.data),
+
+  get: (id: string) => axios_api_instance.get(`/scripts/${id}`).then((res) => res.data),
+
+  create: (data: Partial<DownloadedScriptUpsertValues>) => axios_api_instance.post('/scripts', data).then((res) => res.data),
+
+  update: (id: string, data: Partial<DownloadedScriptUpsertValues>) => axios_api_instance.put(`/scripts/${id}`, data).then((res) => res.data),
+
+  delete: (id: string) => axios_api_instance.delete(`/scripts/${id}`).then((res) => res.data),
+
+  uploadInspect: (formData: FormData) =>
+    axios_api_instance.post('/scripts/upload/inspect', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then((res) => res.data),
+
+  uploadFinalize: (data: { tempFolder: string; mainFile: string; name?: string; description?: string; tags?: string[]; author?: string; version?: string }) =>
+    axios_api_instance.post('/scripts/upload/finalize', data).then((res) => res.data),
+
+  listSamples: () => axios_api_instance.get('/scripts/samples/list').then((res) => res.data),
+
+  getSampleSchema: (name: string) => axios_api_instance.get(`/scripts/samples/${name}/schema`).then((res) => res.data),
+
+  runPlayground: (data: { script_id?: string; sample_name?: string; inputs: any }) =>
+    axios_api_instance.post('/scripts/playground/run', data).then((res) => res.data),
+};

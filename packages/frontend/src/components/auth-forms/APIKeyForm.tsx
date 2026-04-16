@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { cn } from '@/lib/utils'; // Para classes de utilidade
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText } from '../ui/input-group';
 import { Eye, EyeClosed } from 'lucide-react';
-import type { FullServerValues } from '../add-server-steps/server-form';
+import type { FullServerValues } from '../add-server/server-form';
 
 interface ApiKeyAuthFormProps {
     form: UseFormReturn<FullServerValues>

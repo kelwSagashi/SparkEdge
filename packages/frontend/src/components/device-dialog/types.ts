@@ -1,6 +1,5 @@
-import { DeviceConnectionMethods } from "nmg8-db/src/types";
 import z from "zod";
-
+const DeviceConnectionMethods = ["none", "serial", "tcp", "udp"];
 export const deviceFormSchema = z.object({
     id: z.string().optional(),
     name: z.string().min(1, "Nome é obrigatório"),
@@ -14,7 +13,8 @@ export const deviceFormSchema = z.object({
         key: z.string().min(1, "Chave é obrigatória"),
         value: z.string().min(1, "Valor é obrigatório"),
         type: z.enum(["text", "number"])
-    }))
+    })),
+    resource_operation_id: z.string().optional(),
 });
 export type DeviceFormValues = z.infer<typeof deviceFormSchema>;
 export type DeviceConnectionFormValues = keyof typeof deviceFormSchema.shape.connection.enum;

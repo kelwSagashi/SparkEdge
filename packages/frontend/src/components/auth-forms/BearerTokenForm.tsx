@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText } from '../ui/input-group';
 import { Eye, EyeClosed } from 'lucide-react';
-import type { FullServerValues } from '../add-server-steps/server-form';
+import type { FullServerValues } from '../add-server/server-form';
 
 
 

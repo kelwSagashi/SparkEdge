@@ -10,21 +10,40 @@ import { ItemTypes } from '@/lib/constants';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { deviceFormSchema, type DeviceConfigFormProps, type DeviceConnectionFormValues, type DeviceFormValues } from './types';
 import DroppableInput from './droppable-input';
+import React from 'react';
 
 
 export default function DeviceConfigForm({
-    onSubmit
-}: DeviceConfigFormProps) {
+    onSubmit,
+    defaultValues
+}: DeviceConfigFormProps & { defaultValues?: Partial<DeviceFormValues> }) {
     const form = useForm<DeviceFormValues>({
         resolver: zodResolver(deviceFormSchema),
         defaultValues: {
-            id: "",
-            name: "",
-            brand: "",
-            serial_number: undefined,
-            others: []
+            id: defaultValues?.id || "",
+            name: defaultValues?.name || "",
+            brand: defaultValues?.brand || "",
+            serial_number: defaultValues?.serial_number || undefined,
+            description: defaultValues?.description || "",
+            ip_address: defaultValues?.ip_address || "",
+            location: defaultValues?.location || "",
+            connection: defaultValues?.connection || undefined,
+            others: defaultValues?.others || []
         }
     });
+
+    // Reset form when defaultValues change
+    React.useEffect(() => {
+        if (defaultValues) {
+            form.reset({
+                ...defaultValues,
+                id: defaultValues.id || "",
+                name: defaultValues.name || "",
+                brand: defaultValues.brand || "",
+                others: defaultValues.others || []
+            });
+        }
+    }, [defaultValues, form.reset]);
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,

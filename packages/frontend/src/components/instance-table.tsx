@@ -1,19 +1,18 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, type ColumnDef, type ColumnFiltersState, type SortingState, type VisibilityState } from "@tanstack/react-table";
 import React from "react";
-import { useWorkflowExecutionsStore } from '@/stores/workflow-executions-store';
+import { useInstancesStore } from '@/stores/instances-store';
 import { Button } from "./ui/button";
-import { Spinner } from './ui/spinner';
-import { ArrowUpDown, ChevronDown, MoreVertical, Pause, RotateCcw, SquareStopIcon, Trash } from "lucide-react";
+import { ArrowUpDown, ChevronDown, MoreVertical, Play, Trash } from "lucide-react";
 import { Checkbox } from "./ui/checkbox";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 import Search from "./search";
 import { useNavigate } from "react-router-dom";
-import type { WorkflowExecutionReturningValues } from "nmg8-db/src/types";
+import type { Instance } from "@/rest-api-client/instances.service";
 import { useShallow } from "zustand/react/shallow";
 
-type InstanceType = WorkflowExecutionReturningValues;
+type InstanceType = Instance;
 
 const HeaderColumn = ({
     title,
@@ -22,26 +21,17 @@ const HeaderColumn = ({
     title: string, column: ColumnDef<InstanceType, unknown>
 }) => {
     const [isHovered, setIsHovered] = React.useState(false);
-
-    const handleMouseEnter = () => {
-        setIsHovered(true);
-    };
-
-    const handleMouseLeave = () => {
-        setIsHovered(false);
-    };
     return (
         <div className="inline-flex items-center w-full justify-between"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
         >
             <div className="text-primary text-right font-medium">{title}</div>
             {isHovered && (
                 <Button
                     variant={"ghost"}
                     className="rounded-full hover:bg-primary-foreground text-primary hover:text-primary/60"
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-expect-error
+                    // @ts-expect-error column typing
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
                     <ArrowUpDown />
@@ -50,6 +40,13 @@ const HeaderColumn = ({
         </div>
     )
 }
+
+const statusColors: Record<string, string> = {
+    idle: 'bg-zinc-500',
+    running: 'bg-emerald-500',
+    paused: 'bg-amber-500',
+    error: 'bg-red-500',
+};
 
 const columns: ColumnDef<InstanceType>[] = [
     {
@@ -76,116 +73,76 @@ const columns: ColumnDef<InstanceType>[] = [
     },
     {
         accessorKey: "status",
-        header: () => {
-            return <></>
-        },
+        header: () => <></>,
         cell: ({ row }) => {
-            const status = row.getValue("status");
-            const active = status === 'running' || status === 'idle';
+            const status = row.getValue("status") as string;
             return (
                 <div className="p-2">
-                    <div className={`w-3 h-3 rounded-full ${active ? "bg-green-900" : "border border-primary-foreground"}`} />
+                    <div className={`w-3 h-3 rounded-full ${statusColors[status] || 'border border-primary-foreground'}`} />
                 </div>
             )
         },
     },
     {
-        accessorKey: "workflow_id",
-        header: ({ column }) => {
-            return <HeaderColumn title="Workflow" column={column} />
-        },
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("workflow_id")}</div>
-        ),
+        accessorKey: "name",
+        header: ({ column }) => <HeaderColumn title="Nome" column={column} />,
+        cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
     },
     {
         accessorKey: "id",
-        header: ({ column }) => {
-            return <HeaderColumn title="Id" column={column} />
-        },
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("id")}</div>
-        ),
+        header: ({ column }) => <HeaderColumn title="Id" column={column} />,
+        cell: ({ row }) => <div className="font-mono text-xs">{(row.getValue("id") as string).slice(0, 12)}...</div>,
     },
     {
-        accessorKey: "mode",
-        header: () => {
-            return <div className="text-primary font-medium">Mode</div>
-        },
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("mode")}</div>
-        ),
+        accessorKey: "trigger_type",
+        header: () => <div className="text-primary font-medium">Trigger</div>,
+        cell: ({ row }) => <div className="capitalize">{row.getValue("trigger_type")}</div>,
     },
     {
-        accessorKey: "wait_till",
-        header: () => {
-            return <div className="text-primary font-medium">Scheduled</div>
-        },
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("wait_till") ?? '—'}</div>
-        ),
+        accessorKey: "created_at",
+        header: () => <div className="text-primary font-medium">Criado em</div>,
+        cell: ({ row }) => <div>{new Date(row.getValue("created_at")).toLocaleDateString('pt-BR')}</div>,
     },
     {
-        accessorKey: "started_at",
-        header: () => {
-            return <div className="text-primary font-medium">Last start</div>
-        },
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("started_at") ?? '—'}</div>
-        ),
-    },
-    {
-        accessorKey: "enabled",
-        header: () => {
-            return <div className="text-primary font-medium">Enabled</div>
-        },
-        cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("enabled") ? 'Yes' : 'No'}</div>
-        ),
+        accessorKey: "active",
+        header: () => <div className="text-primary font-medium">Ativo</div>,
+        cell: ({ row }) => <div className="capitalize">{row.getValue("active") ? 'Sim' : 'Não'}</div>,
     },
 ];
 
 
 export default function InstanceTable() {
     const navigate = useNavigate();
-    const [ 
-        executions,
-        loadAll,
-        trigger,
-        setEnabled,
-        remove,
+    const [
+        instances,
+        fetchAll,
+        triggerInstance,
+        deleteInstance,
         loading
-    ] = useWorkflowExecutionsStore(
+    ] = useInstancesStore(
         useShallow((s) => [
-            s.executions,
-            s.loadAll,
-            s.trigger,
-            s.setEnabled,
-            s.remove,
+            s.instances,
+            s.fetchAll,
+            s.triggerInstance,
+            s.deleteInstance,
             s.loading
         ])
     );
     const [sorting, setSorting] = React.useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-        []
-    )
-    const [columnVisibility, setColumnVisibility] =
-        React.useState<VisibilityState>({})
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
 
-    const handleNavigateToEditor = (id: string) => {
-        navigate(`/workflow/${id}`);
+    const handleNavigate = (id: string) => {
+        navigate(`/instances/${id}`);
     };
 
     React.useEffect(() => {
-        loadAll();
-    }, [loadAll]);
+        fetchAll();
+    }, [fetchAll]);
 
-    const showPauseButton = React.useMemo(() => { return Object.entries(rowSelection).length > 0 }, [rowSelection]);
-
-    // override data used by table
     const table = useReactTable({
-        data: executions,
+        data: instances,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -195,23 +152,17 @@ export default function InstanceTable() {
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
-        state: {
-            sorting,
-            columnFilters,
-            columnVisibility,
-            rowSelection,
-        },
+        state: { sorting, columnFilters, columnVisibility, rowSelection },
     })
 
     return (
         <section className="mt-4">
-
             <div className="flex flex-row justify-between items-stretch">
                 <div className="flex gap-2">
                     <Search
-                        value={(table.getColumn("id")?.getFilterValue() as string) ?? ""}
+                        value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                         onChange={(event) => {
-                            table.getColumn("id")?.setFilterValue(event.target.value)
+                            table.getColumn("name")?.setFilterValue(event.target.value)
                         }}
                     />
                     <DropdownMenu>
@@ -224,37 +175,18 @@ export default function InstanceTable() {
                             {table
                                 .getAllColumns()
                                 .filter((column) => column.getCanHide())
-                                .map((column) => {
-                                    return (
-                                        <DropdownMenuCheckboxItem
-                                            key={column.id}
-                                            className="capitalize"
-                                            checked={column.getIsVisible()}
-                                            onCheckedChange={(value) =>
-                                                column.toggleVisibility(!!value)
-                                            }
-                                        >
-                                            {column.id}
-                                        </DropdownMenuCheckboxItem>
-                                    )
-                                })}
+                                .map((column) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="capitalize"
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                </div>
-                <div>
-                    {showPauseButton && (
-                        <>
-                            <Button className="bg-primary-foreground hover:bg-primary-foreground/45 rounded-none">
-                                <SquareStopIcon size={40} color="white" />
-                            </Button>
-                            <Button className="bg-primary-foreground hover:bg-primary-foreground/45 rounded-none">
-                                <Pause size={40} color="white" />
-                            </Button>
-                        </>
-                    )}
-                </div>
-                <div>
-                    {/* <InstanceForm /> */}
                 </div>
             </div>
             <section className="mt-4">
@@ -262,79 +194,58 @@ export default function InstanceTable() {
                     <div className="absolute overflow-x-hidden w-full">
                         <div className="flex flex-row">
                             <div className="w-full">
-                                <Table className="">
+                                <Table>
                                     <TableHeader className="[&_tr]:border-b-primary-foreground/60">
                                         {table.getHeaderGroups().map((headerGroup) => (
                                             <TableRow className="hover:bg-background" key={headerGroup.id}>
-                                                {headerGroup.headers.map((header) => {
-                                                    return (
-                                                        <TableHead key={header.id}>
-                                                            {header.isPlaceholder
-                                                                ? null
-                                                                : flexRender(
-                                                                    header.column.columnDef.header,
-                                                                    header.getContext()
-                                                                )}
-                                                        </TableHead>
-                                                    )
-                                                })}
+                                                {headerGroup.headers.map((header) => (
+                                                    <TableHead key={header.id}>
+                                                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                                    </TableHead>
+                                                ))}
                                             </TableRow>
                                         ))}
-
                                     </TableHeader>
                                     <TableBody>
                                         {table.getRowModel().rows?.length ? (
                                             table.getRowModel().rows.map((row) => (
                                                 <TableRow
-                                                    onClick={() => handleNavigateToEditor(row.getValue("id"))}
+                                                    onClick={() => handleNavigate(row.getValue("id"))}
                                                     key={row.id}
                                                     data-state={row.getIsSelected() && "selected"}
-                                                    className="border-b-primary-foreground data-[state=selected]:bg-primary-foreground/40 hover:bg-secondary-foreground"
+                                                    className="border-b-primary-foreground data-[state=selected]:bg-primary-foreground/40 hover:bg-secondary-foreground cursor-pointer"
                                                 >
                                                     {row.getVisibleCells().map((cell) => (
-                                                        <TableCell
-                                                            key={cell.id}
-                                                            className="h-14 text-primary"
-                                                        >
-                                                            {flexRender(
-                                                                cell.column.columnDef.cell,
-                                                                cell.getContext()
-                                                            )}
+                                                        <TableCell key={cell.id} className="h-14 text-primary">
+                                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                         </TableCell>
                                                     ))}
                                                 </TableRow>
                                             ))
                                         ) : (
                                             <TableRow>
-                                                <TableCell
-                                                    colSpan={columns.length}
-                                                    className="h-24 text-center"
-                                                >
-                                                    No results.
+                                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                                    Sem instâncias.
                                                 </TableCell>
                                             </TableRow>
                                         )}
                                     </TableBody>
                                 </Table>
                             </div>
-                            <div className="">
+                            <div>
                                 <Table className="bg-primary-foreground/20">
                                     <TableHeader className="[&_tr]:border-b-primary-foreground/60">
-                                        <TableRow >
+                                        <TableRow>
                                             <TableHead className="text-primary">Ações</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {table.getRowModel().rows?.length ? (
                                             table.getRowModel().rows.map((row) => (
-                                                <TableRow
-                                                    key={row.id}
-                                                    data-state={row.getIsSelected() && "selected"}
-                                                    className="border-b-primary-foreground data-[state=selected]:bg-primary-foreground/40 hover:bg-secondary-foreground"
-                                                >
-                                                    <TableCell key={"action"} className="h-14 hover:bg-transparent">
-                                                        <Button disabled={loading} className="bg-transparent hover:bg-background/95 rounded-full" onClick={(e) => { e.stopPropagation(); trigger(row.getValue("id")) }}>
-                                                            {loading ? <Spinner /> : <RotateCcw color="white" />}
+                                                <TableRow key={row.id} className="border-b-primary-foreground hover:bg-secondary-foreground">
+                                                    <TableCell className="h-14 hover:bg-transparent">
+                                                        <Button disabled={loading} className="bg-transparent hover:bg-background/95 rounded-full" onClick={(e) => { e.stopPropagation(); triggerInstance(row.getValue("id")) }}>
+                                                            <Play color="white" size={16} />
                                                         </Button>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
@@ -345,21 +256,14 @@ export default function InstanceTable() {
                                                             <DropdownMenuContent align="start" side="left" className="bg-secondary-foreground">
                                                                 <DropdownMenuItem
                                                                     className="text-primary focus:bg-primary-foreground"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        navigator.clipboard.writeText(row.getValue("id"))
-                                                                    }}
+                                                                    onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(row.getValue("id")) }}
                                                                 >
                                                                     Copiar ID
                                                                 </DropdownMenuItem>
                                                                 <DropdownMenuSeparator />
-                                                                <DropdownMenuItem className="text-primary focus:bg-primary-foreground" onClick={(e) => { e.stopPropagation(); trigger(row.getValue("id")) }} disabled={loading}>
-                                                                    <RotateCcw color="white" />
-                                                                    Reiniciar
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-primary focus:bg-primary-foreground" onClick={(e) => { e.stopPropagation(); setEnabled(row.getValue("id"), !row.getValue("enabled")) }} disabled={loading}>
-                                                                    <Pause color="white" />
-                                                                    {row.getValue("enabled") ? 'Desabilitar' : 'Habilitar'}
+                                                                <DropdownMenuItem className="text-primary focus:bg-primary-foreground" onClick={(e) => { e.stopPropagation(); triggerInstance(row.getValue("id")) }} disabled={loading}>
+                                                                    <Play color="white" size={14} />
+                                                                    Executar
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
@@ -379,7 +283,7 @@ export default function InstanceTable() {
                                                                 </AlertDialogHeader>
                                                                 <AlertDialogFooter>
                                                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                                    <AlertDialogAction onClick={(e) => { e.stopPropagation(); remove(row.getValue("id")) }} disabled={loading}>Continuar</AlertDialogAction>
+                                                                    <AlertDialogAction onClick={(e) => { e.stopPropagation(); deleteInstance(row.getValue("id")) }} disabled={loading}>Continuar</AlertDialogAction>
                                                                 </AlertDialogFooter>
                                                             </AlertDialogContent>
                                                         </AlertDialog>
@@ -388,10 +292,7 @@ export default function InstanceTable() {
                                             ))
                                         ) : (
                                             <TableRow>
-                                                <TableCell
-                                                    // colSpan={columns.length}
-                                                    className="h-24 text-center"
-                                                >
+                                                <TableCell className="h-24 text-center">
                                                     Sem resultados.
                                                 </TableCell>
                                             </TableRow>

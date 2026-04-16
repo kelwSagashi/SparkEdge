@@ -1,113 +1,14 @@
-
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { AuthorizationTypes, DeviceConnectionMethods, ServerEndpointMethods } from '../types';
+import { integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
+import { DeviceConnectionMethods } from '../types';
 import { nanoid } from 'nanoid';
-import { type INode, type IEdge, type IWorkflowSettings, WorkflowExecuteModeValues } from 'nmg8-workflow'
+
+// ─── Server Infrastructure ────────────────────────────────────────────────────
 
 export const ServerTypesTable = sqliteTable('server_types', {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
   key: text('key').notNull().unique(),
   name: text('name').notNull(),
-  description: text('description')
-});
-
-export const CredentialsTable = sqliteTable('credentials', {
-  id: text('id').primaryKey().$defaultFn(() => nanoid()),
-  name: text('name').notNull(),
-  type: text("type", { enum: AuthorizationTypes }).notNull(),
-  data: text('data', { mode: 'json' }).notNull(),
-  owner_id: text('owner_id').references(() => UsersTable.id),
-  project_id: text('project_id').references(() => ProjectsTable.id),
-  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
-});
-
-
-export const ServersTable = sqliteTable('servers', {
-  id: text("id").primaryKey().$defaultFn(() => nanoid()),
-  name: text('name').notNull(),
-  type: text('type').notNull().references(() => ServerTypesTable.id, { onDelete: 'cascade' }),
-  base_url: text("base_url").notNull(),
-  credential_id: text('credential_id').references(() => CredentialsTable.id, { onDelete: 'set null' }),
-  headers: text("headers", { mode: "json" }),
-
-  project_id: text('project_id')
-  .notNull()
-  .references(() => ProjectsTable.id, { onDelete: 'cascade' }),
-
-  created_by: text('created_by')
-    .references(() => UsersTable.id, { onDelete: 'set null' }),
-
-  created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
-  updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
-});
-
-export const ServerEndpointsTable = sqliteTable('server_endpoints', {
-  id: text("id").primaryKey().$defaultFn(() => nanoid()),
-  server_id: text('server_id')
-    .notNull()
-    .references(() => ServersTable.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
   description: text('description'),
-  path: text('path').notNull(),
-  payload_schema: text('payload_schema'),
-  response_schema: text('response_schema'),
-  method: text('method', {
-    enum: ServerEndpointMethods,
-  }).notNull(),
-  headers: text("headers", { mode: "json" }),
-  created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
-  updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
-});
-
-export const DeviceTable = sqliteTable('devices', {
-  id: text("id").primaryKey().$defaultFn(() => nanoid()),
-  device_id: text("device_id").$defaultFn(() => nanoid()).unique(),
-  name: text('name').notNull(),
-  brand: text('brand').notNull(),
-  serial_number: text('serial_number'),
-  connection_method: text('connection_method', {
-    enum: DeviceConnectionMethods
-  }).default("none").notNull(),
-  ip_address: text('ip_address'),
-  location: text('location'),
-  description: text('description'),
-  others: text('others', { mode: 'json' }).$type<{
-    key: string;
-    value: string;
-    type: "number" | "text";
-  }[]>().$defaultFn(() => []),
-  created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
-  updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
-});
-
-export const CodeInstanceTable = sqliteTable('code_instances', {
-  id: text("id").primaryKey().$defaultFn(() => nanoid()),
-  name: text('name').notNull(),
-  description: text('description'),
-  source: text('source', {
-    enum: ['local', 'system_repo', 'remote_url']
-  }).notNull(),
-  url: text('url'),
-  path: text('path').notNull(),
-  main_file_name: text('main_file_name').notNull(),
-  author: text('author').notNull(),
-  repo: text('repo'),
-  language: text('language').notNull(),
-  entry_fn: text('entry_fn'),
-  version: text('version').notNull().default('1.0'),
-  created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
-  updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
-});
-
-export const WorkflowTable = sqliteTable('workflows', {
-  id: text("id").primaryKey().$defaultFn(() => nanoid()),
-  name: text('name').notNull(),
-  nodes: text('nodes', { mode: 'json' }).notNull().$type<INode[]>().$defaultFn(() => []),
-  edges: text('edges', { mode: 'json' }).notNull().$type<IEdge[]>().$defaultFn(() => []),
-  active: integer('active', {mode: 'boolean'}).$defaultFn(() => true),
-  isArchived: integer('isArchived', {mode: 'boolean'}).$defaultFn(() => true),
-  project_id: text('project_id').references(() => ProjectsTable.id, { onDelete: 'cascade' }),
-  settings: text('settings', { mode: 'json' }).$type<IWorkflowSettings>().notNull().$defaultFn(() => ({})),
 });
 
 export const UsersTable = sqliteTable('users', {
@@ -115,13 +16,15 @@ export const UsersTable = sqliteTable('users', {
   email: text('email').notNull().unique(),
   first_name: text('first_name'),
   last_name: text('last_name'),
-  // store password hashes only
   password_hash: text('password_hash'),
   role: text('role', { enum: ['admin', 'editor', 'viewer'] }).notNull().default('viewer'),
   is_active: integer('is_active', { mode: 'boolean' }).$defaultFn(() => true),
   created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
   updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
+  api_key: text('api_key').$defaultFn(() => nanoid()).notNull(),
 });
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
 
 export const ProjectsTable = sqliteTable('projects', {
   id: text('id').primaryKey().$defaultFn(() => nanoid()),
@@ -142,35 +45,300 @@ export const ProjectMembersTable = sqliteTable('project_members', {
   created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
-export const WorkflowVersionsTable = sqliteTable('workflow_versions', {
+// ─── Credentials ──────────────────────────────────────────────────────────────
+
+export type AuthorizationsTypeField = {
+  key: string;
+  label: string;
+  type: string;
+  placeholder?: string;
+  grid?: string;
+  options?: { label: string; value: any }[];
+};
+
+export const AuthorizationsTypeTable = sqliteTable('auth_type', {
   id: text('id').primaryKey().$defaultFn(() => nanoid()),
-  workflow_id: text('workflow_id').notNull().references(() => WorkflowTable.id, { onDelete: 'cascade' }),
-  project_id: text('project_id').references(() => ProjectsTable.id, { onDelete: 'cascade' }),
-  version: text('version').notNull().default('1.0'),
   name: text('name').notNull(),
-  nodes: text('nodes', { mode: 'json' }).notNull().$type<INode[]>().$defaultFn(() => []),
-  edges: text('edges', { mode: 'json' }).notNull().$type<IEdge[]>().$defaultFn(() => []),
-  settings: text('settings', { mode: 'json' }).$type<IWorkflowSettings>().notNull().$defaultFn(() => ({})),
-  created_by: text('created_by').references(() => UsersTable.id, { onDelete: 'set null' }),
+  strategy: text('strategy').notNull(), // "bearer", "basic", "apikey"
+  fields: text("fields", { mode: "json" }).$type<AuthorizationsTypeField[]>().$defaultFn(() => []),
+  server_type_id: text('server_type_id').references(() => ServerTypesTable.id),
+});
+
+export const CredentialsTable = sqliteTable('credentials', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  name: text('name').notNull(),
+  auth_type_id: text('auth_type_id').notNull().references(() => AuthorizationsTypeTable.id, { onDelete: 'cascade' }),
+  data: text('data', { mode: 'json' }).$type<{[key: string]: string}>().notNull(),
+  owner_id: text('owner_id').references(() => UsersTable.id),
+  project_id: text('project_id').references(() => ProjectsTable.id),
   created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
-export const WorkflowExecutionsTable = sqliteTable('workflow_executions', {
-  id: text('id').primaryKey().$defaultFn(() => nanoid()),
-  workflow_id: text('workflow_id').notNull().references(() => WorkflowTable.id, { onDelete: 'cascade' }),
-  
-  mode: text('mode', { enum: WorkflowExecuteModeValues }).notNull().default('manual'),
+// ─── Servers ──────────────────────────────────────────────────────────────────
 
-  status: text('status', { enum: ['idle', 'running', 'failed', 'completed', 'stoped'] }).notNull().default('idle'),
+export const ServersTable = sqliteTable('servers', {
+  id: text("id").primaryKey().$defaultFn(() => nanoid()),
+  name: text('name').notNull(),
+  type: text('type').notNull(),
+  server_type_id: text('server_type_id').references(() => ServerTypesTable.id),
+  driver_key: text('driver_key').notNull(),
+  credential_id: text('credential_id').references(() => CredentialsTable.id, { onDelete: 'set null' }),
+  headers: text("headers", { mode: "json" }).$type<Record<string, any>>().$defaultFn(() => ({})),
+  project_id: text('project_id').notNull().references(() => ProjectsTable.id, { onDelete: 'cascade' }),
+  created_by: text('created_by').references(() => UsersTable.id, { onDelete: 'set null' }),
+  created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
+  updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ─── NEW: Server Resources ─────────────────────────────────────────────────────
+
+export const ServerResourcesTable = sqliteTable('server_resources', {
+  id: text("id").primaryKey().$defaultFn(() => nanoid()),
+  server_id: text('server_id').notNull().references(() => ServersTable.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  type: text('type').notNull(), // "table", "sheet", "topic", "endpoint"
+  config: text('config', { mode: 'json' }).notNull().$type<Record<string, any>>().$defaultFn(() => ({})),
+  created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ─── NEW: Resource Operations ──────────────────────────────────────────────────
+
+export const ResourceOperationsTable = sqliteTable('resource_operations', {
+  id: text("id").primaryKey().$defaultFn(() => nanoid()),
+  resource_id: text('resource_id').notNull().references(() => ServerResourcesTable.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  type: text('type').notNull(), // "http_request", "sql_query", etc
+  config: text('config', { mode: 'json' }).$type<Record<string, any>>().$defaultFn(() => ({})),
+  input_schema: text('input_schema', { mode: 'json' }).$type<any>().$defaultFn(() => null),
+  output_schema: text('output_schema', { mode: 'json' }).$type<any>().$defaultFn(() => null),
+  created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ─── Devices ──────────────────────────────────────────────────────────────────
+
+export const DeviceTable = sqliteTable('devices', {
+  id: text("id").primaryKey().$defaultFn(() => nanoid()),
+  device_id: text("device_id").$defaultFn(() => nanoid()).unique(),
+  name: text('name').notNull(),
+  brand: text('brand').notNull(),
+  serial_number: text('serial_number'),
+  connection_method: text('connection_method', { enum: DeviceConnectionMethods }).default("none").notNull(),
+  ip_address: text('ip_address'),
+  location: text('location'),
+  description: text('description'),
+  others: text('others', { mode: 'json' }).$type<{ key: string; value: string; type: "number" | "text"; }[]>().$defaultFn(() => []),
+  resource_operation_id: text('resource_operation_id').references(() => ResourceOperationsTable.id, { onDelete: 'set null' }),
+  created_at: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
+  updated_at: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ─── Tags ─────────────────────────────────────────────────────────────────────
+
+export const TagsTable = sqliteTable('tags', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  name: text('name').notNull(),
+  color: text('color').default('#6b7280'),
+  project_id: text('project_id').references(() => ProjectsTable.id, { onDelete: 'cascade' }),
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+}, (t) => ({
+  unq: unique().on(t.project_id, t.name)
+}));
+
+export const InstanceTagsTable = sqliteTable('instance_tags', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  instance_id: text('instance_id').notNull().references(() => InstancesTable.id, { onDelete: 'cascade' }),
+  tag_id: text('tag_id').notNull().references(() => TagsTable.id, { onDelete: 'cascade' }),
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ─── Downloaded Scripts (Script Hub) ──────────────────────────────────────────
+
+export const DownloadedScriptsTable = sqliteTable('downloaded_scripts', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+
+  // Identity from GitHub repo
+  name: text('name').notNull(),
+  description: text('description'),
+  author: text('author').notNull(),
+  version: text('version').notNull().default('1.0.0'),
+
+  // Source tracking
+  source: text('source', { enum: ['local', 'hub_github'] }).notNull().default('local'),
+  github_repo: text('github_repo'),    // e.g. "username/repo-name"
+  github_ref: text('github_ref'),      // branch or tag e.g. "main"
+
+  // Local storage
+  local_path: text('local_path').notNull(), // absolute path to the script dir
+  main_file: text('main_file').notNull(),   // e.g. "main.py"
+  venv_path: text('venv_path'),             // path to the venv, created on first run
+
+  // Requirements
+  requirements_file: text('requirements_file'), // e.g. "requirements.txt"
+  venv_ready: integer('venv_ready', { mode: 'boolean' }).$defaultFn(() => false),
+
+  language: text('language', { enum: ['python'] }).notNull().default('python'),
+  tags: text('tags', { mode: 'json' }).$type<string[]>().$defaultFn(() => []),
+  schema_config: text('schema_config', { mode: 'json' }).$type<any>().$defaultFn(() => null),
+
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ─── Instances ────────────────────────────────────────────────────────────────
+
+export const TriggerTypes = ['interval', 'webhook', 'interval_and_webhook'] as const;
+export const ExecutionTriggerTypes = ['interval', 'webhook', 'manual'] as const;
+export const FallbackStrategies = ['background_job', 'active_queue'] as const;
+export const InstanceStatuses = ['idle', 'running', 'paused', 'error'] as const;
+export const OnErrorActions = ['log_only', 'retry', 'notify_webhook', 'stop'] as const;
+
+export const InstancesTable = sqliteTable('instances', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+
+  name: text('name').notNull(),
+  description: text('description'),
+  tags: text('tags', { mode: 'json' }).$type<string[]>().$defaultFn(() => []),
+
+  status: text('status', { enum: InstanceStatuses }).notNull().default('idle'),
+  active: integer('active', { mode: 'boolean' }).$defaultFn(() => true),
+
+  // Project relationship
+  project_id: text('project_id').notNull().references(() => ProjectsTable.id, { onDelete: 'cascade' }),
+
+  // Device being monitored
+  device_id: text('device_id').references(() => DeviceTable.id, { onDelete: 'set null' }),
+
+  // Script to execute
+  script_id: text('script_id').references(() => DownloadedScriptsTable.id, { onDelete: 'set null' }),
+
+  // Include device data in execution context
+  include_device_data: integer('include_device_data', { mode: 'boolean' }).$defaultFn(() => false),
+
+  // Trigger configuration
+  trigger_type: text('trigger_type', { enum: TriggerTypes }).notNull().default('interval'),
+  trigger_config: text('trigger_config', { mode: 'json' })
+    .$type<{
+      // For 'interval': interval in seconds
+      interval_seconds?: number;
+      // For 'webhook': auto-generated path exposed by Express
+      webhook_path?: string;
+      webhook_secret?: string;
+    }>()
+    .notNull()
+    .$defaultFn(() => ({ interval_seconds: 60 })),
+
+  // Fallback configuration (when primary destination fails)
+  fallback_enabled: integer('fallback_enabled', { mode: 'boolean' }).$defaultFn(() => true),
+  fallback_strategy: text('fallback_strategy', { enum: FallbackStrategies }).default('background_job'),
+  fallback_retry_interval_seconds: integer('fallback_retry_interval_seconds').default(300),
+
+  // Error handling
+  on_error_action: text('on_error_action', { enum: OnErrorActions }).notNull().default('log_only'),
+  on_error_config: text('on_error_config', { mode: 'json' })
+    .$type<{
+      notify_url?: string;
+      max_retries?: number;
+    }>()
+    .$defaultFn(() => ({})),
+
+  created_by: text('created_by').references(() => UsersTable.id, { onDelete: 'set null' }),
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ─── Instance Destinations and Mapping ────────────────────────────────────────
+
+export const InstanceDestinationsTable = sqliteTable('instance_destinations', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+
+  instance_id: text('instance_id')
+    .notNull()
+    .references(() => InstancesTable.id, { onDelete: 'cascade' }),
+
+  resource_operation_id: text('resource_operation_id')
+    .notNull()
+    .references(() => ResourceOperationsTable.id, { onDelete: 'cascade' }),
 
   enabled: integer('enabled', { mode: 'boolean' }).$defaultFn(() => true),
-  created_by: text('created_by').references(() => UsersTable.id, { onDelete: 'set null' }),
-  
-  started_at: text('started_at'),
-  stopped_at: text('stopped_at'),
-  deleted_at: text('deleted_at'),
+  priority: integer('priority').default(0),
 
-  wait_till: text('wait_till'),
+  retry_policy: text('retry_policy', { mode: 'json' })
+    .$type<{ max_retries?: number, retry_interval?: number }>()
+    .$defaultFn(() => ({})),
+
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString())
+});
+
+export const DataMappingsTable = sqliteTable('data_mappings', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  instance_destination_id: text('instance_destination_id').notNull().references(() => InstanceDestinationsTable.id, { onDelete: 'cascade' }),
+  mapping: text('mapping', { mode: 'json' }).$type<Record<string, string>>().notNull().$defaultFn(() => ({})),
+  payload_template: text('payload_template', { mode: 'json' }).$type<Record<string, any>>(),
+  custom_fields: text('custom_fields', { mode: 'json' }).$type<{key: string, value: string}[]>(),
+  transform_script: text('transform_script'),
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString())
+});
+
+// ─── Instance Executions (Execution History) ──────────────────────────────────
+
+export const ExecutionStatuses = ['queued', 'running', 'success', 'failed', 'timeout'] as const;
+
+export const InstanceExecutionsTable = sqliteTable('instance_executions', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+
+  instance_id: text('instance_id').notNull().references(() => InstancesTable.id, { onDelete: 'cascade' }),
+
+  status: text('status', { enum: ExecutionStatuses }).notNull().default('queued'),
+  trigger_type: text('trigger_type', { enum: ExecutionTriggerTypes }).notNull().default('interval'),
+
+  // Timing
+  started_at: text('started_at'),
+  finished_at: text('finished_at'),
+  duration_ms: integer('duration_ms'),
+
+  // Logs (stored as JSON array of log lines)
+  logs: text('logs', { mode: 'json' }).$type<{
+    level: 'info' | 'warn' | 'error';
+    message: string;
+    timestamp: string;
+  }[]>().$defaultFn(() => []),
+
+  // Result
+  output: text('output'),
+  error_message: text('error_message'),
+
+  // Destination result
+  destination_sent: integer('destination_sent', { mode: 'boolean' }).$defaultFn(() => false),
+  fallback_used: integer('fallback_used', { mode: 'boolean' }).$defaultFn(() => false),
+
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ─── Local Fallback Storage ───────────────────────────────────────────────────
+
+export const FallbackItemStatuses = ['pending', 'sending', 'sent', 'failed'] as const;
+
+export const LocalFallbackStorageTable = sqliteTable('local_fallback_storage', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+
+  instance_id: text('instance_id').notNull().references(() => InstancesTable.id, { onDelete: 'cascade' }),
+  execution_id: text('execution_id').references(() => InstanceExecutionsTable.id, { onDelete: 'set null' }),
+
+  status: text('status', { enum: FallbackItemStatuses }).notNull().default('pending'),
+
+  // Data payload (stored inline as JSON text)
+  payload: text('payload').notNull(),
+
+  // Optionally points to a file on disk
+  filepath: text('filepath'),
+
+  // Retry tracking
+  retry_count: integer('retry_count').notNull().default(0),
+  last_retry_at: text('last_retry_at'),
+  next_retry_at: text('next_retry_at'),
+
+  // Error from last attempt
+  last_error: text('last_error'),
 
   created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
   updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),

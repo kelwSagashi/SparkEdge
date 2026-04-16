@@ -1,450 +1,483 @@
 import { db, Tables, type DBType } from "../db";
-import type { 
-    CodeInstanceReturningValues, 
-    DeviceReturningValues, 
-    DeviceUpsertValues, 
-    ServerEndpointsReturningValues, 
-    ServerEndpointsUpsertValues, 
-    ServerReturningValues, 
-    ServerUpsertValues, 
-    WorkflowReturningValues, 
-    WorkflowUpsertValues,
-    CredentialUpsertValues,
-    CredentialReturningValues
-    } from '../types';
+import type {
+  DeviceReturningValues,
+  DeviceUpsertValues,
+  ServerReturningValues,
+  ServerUpsertValues,
+  ServerResourceUpsertValues,
+  ServerResourceReturningValues,
+  ResourceOperationUpsertValues,
+  ResourceOperationReturningValues,
+  CredentialUpsertValues,
+  CredentialReturningValues,
+} from '../types';
 import { UsersRepository } from '../repositories/users.repository';
 import { ProjectsRepository } from '../repositories/projects.repository';
 import { ProjectMembersRepository } from '../repositories/projectMembers.repository';
-import { WorkflowVersionsRepository } from '../repositories/workflowVersions.repository';
 import { ServersRepository } from '../repositories/servers.repository';
 import { ServerTypesRepository } from '../repositories/serverTypes.repository';
-import { ServerEndpointsRepository } from '../repositories/serverEndpoints.repository';
+import { ServerResourcesRepository } from '../repositories/serverResources.repository';
+import { ResourceOperationsRepository } from '../repositories/resourceOperations.repository';
 import { CredentialsRepository } from '../repositories/credentials.repository';
 import { DevicesRepository } from '../repositories/devices.repository';
-import { CodeInstancesRepository } from '../repositories/codeInstances.repository';
-import { WorkflowsRepository } from '../repositories/workflows.repository';
-import { WorkflowExecutionsRepository } from '../repositories/workflowExecutions.repository';
-import { eq } from 'drizzle-orm';
- 
+import { InstancesRepository } from '../repositories/instances.repository';
+import { InstanceExecutionsRepository } from '../repositories/instanceExecutions.repository';
+import { DownloadedScriptsRepository } from '../repositories/downloadedScripts.repository';
+import { LocalFallbackStorageRepository } from '../repositories/localFallbackStorage.repository';
+import { TagsRepository } from '../repositories/tags.repository';
+import { InstanceTagsRepository } from '../repositories/instanceTags.repository';
+import { InstanceDestinationsRepository } from '../repositories/instanceDestinations.repository';
+import { DataMappingsRepository } from '../repositories/dataMappings.repository';
+import { AuthorizationsTypeRepository } from "../repositories/authorizationTypes.repository";
+import type { InstanceUpsertValues, InstanceDestinationUpsertValues, DataMappingUpsertValues, InstanceReturningValues, InstanceDestinationReturningValues, DataMappingReturningValues } from '../types';
+import { eq, inArray, notInArray, and } from 'drizzle-orm';
+
 
 type ReturningQueries<T> = {
-    error?: unknown,
-    data: T
+  error?: unknown,
+  data: T
 };
 
 export class DatabaseService {
-    private static instance: DatabaseService;
-    private db: DBType | undefined;
-    private usersRepo?: UsersRepository;
-    private projectsRepo?: ProjectsRepository;
-    private projectMembersRepo?: ProjectMembersRepository;
-    private workflowVersionsRepo?: WorkflowVersionsRepository;
-    private serversRepo?: ServersRepository;
-    private serverTypesRepo?: ServerTypesRepository;
-    private serverEndpointsRepo?: ServerEndpointsRepository;
-    private credentialsRepo?: CredentialsRepository;
-    private devicesRepo?: DevicesRepository;
-    private codeInstancesRepo?: CodeInstancesRepository;
-    private workflowsRepo?: WorkflowsRepository;
-    private workflowExecutionsRepo?: WorkflowExecutionsRepository;
+  private static instance: DatabaseService;
+  private db: DBType | undefined;
 
-    private constructor(db: DBType | undefined) {
-        this.db = db;
+  // Core
+  private usersRepo?: UsersRepository;
+  private projectsRepo?: ProjectsRepository;
+  private projectMembersRepo?: ProjectMembersRepository;
+
+  // Infrastructure
+  private serversRepo?: ServersRepository;
+  private serverTypesRepo?: ServerTypesRepository;
+  private serverResourcesRepo?: ServerResourcesRepository;
+  private resourceOperationsRepo?: ResourceOperationsRepository;
+  private credentialsRepo?: CredentialsRepository;
+  private authorizationTypesRepo?: AuthorizationsTypeRepository;
+  private devicesRepo?: DevicesRepository;
+
+  // Instances
+  private instancesRepo?: InstancesRepository;
+  private instanceExecutionsRepo?: InstanceExecutionsRepository;
+  private instanceDestinationsRepo?: InstanceDestinationsRepository;
+  private dataMappingsRepo?: DataMappingsRepository;
+
+  // Scripts
+  private downloadedScriptsRepo?: DownloadedScriptsRepository;
+
+  // Fallback
+  private localFallbackRepo?: LocalFallbackStorageRepository;
+
+  // Tags
+  private tagsRepo?: TagsRepository;
+  private instanceTagsRepo?: InstanceTagsRepository;
+
+  private constructor(db: DBType | undefined) {
+    this.db = db;
+  }
+
+  public static getInstance(db: DBType): DatabaseService {
+    if (!DatabaseService.instance) {
+      DatabaseService.instance = new DatabaseService(db);
     }
-    
+    DatabaseService.instance.db = db;
+    return DatabaseService.instance;
+  }
 
-    public static getInstance(db: DBType): DatabaseService {
-        if (!DatabaseService.instance) {
-            DatabaseService.instance = new DatabaseService(db);
-        }
-        DatabaseService.instance.db = db;
-        return DatabaseService.instance;
+  public getDb() { return this.db; }
+
+  // ─── Core Repos ──────────────────────────────────────────────────────────────
+
+  public get users() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.usersRepo) this.usersRepo = new UsersRepository(this.db);
+    return this.usersRepo;
+  }
+
+  public get projects() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.projectsRepo) this.projectsRepo = new ProjectsRepository(this.db);
+    return this.projectsRepo;
+  }
+
+  public get projectMembers() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.projectMembersRepo) this.projectMembersRepo = new ProjectMembersRepository(this.db);
+    return this.projectMembersRepo;
+  }
+
+  // ─── Infrastructure Repos ─────────────────────────────────────────────────────
+
+  public get servers() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.serversRepo) this.serversRepo = new ServersRepository(this.db);
+    return this.serversRepo;
+  }
+
+  public get serverTypes() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.serverTypesRepo) this.serverTypesRepo = new ServerTypesRepository(this.db);
+    return this.serverTypesRepo;
+  }
+
+  public get serverResources() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.serverResourcesRepo) this.serverResourcesRepo = new ServerResourcesRepository(this.db);
+    return this.serverResourcesRepo;
+  }
+
+  public get resourceOperations() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.resourceOperationsRepo) this.resourceOperationsRepo = new ResourceOperationsRepository(this.db);
+    return this.resourceOperationsRepo;
+  }
+
+  public get credentials() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.credentialsRepo) this.credentialsRepo = new CredentialsRepository(this.db);
+    return this.credentialsRepo;
+  }
+
+  public get authorizationTypes() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.authorizationTypesRepo) this.authorizationTypesRepo = new AuthorizationsTypeRepository(this.db);
+    return this.authorizationTypesRepo;
+  }
+
+  public get devices() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.devicesRepo) this.devicesRepo = new DevicesRepository(this.db);
+    return this.devicesRepo;
+  }
+
+  // ─── Instance Repos ───────────────────────────────────────────────────────────
+
+  public get instances() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.instancesRepo) this.instancesRepo = new InstancesRepository(this.db);
+    return this.instancesRepo;
+  }
+
+  public get instanceExecutions() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.instanceExecutionsRepo) this.instanceExecutionsRepo = new InstanceExecutionsRepository(this.db);
+    return this.instanceExecutionsRepo;
+  }
+
+  public get instanceDestinations() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.instanceDestinationsRepo) this.instanceDestinationsRepo = new InstanceDestinationsRepository(this.db);
+    return this.instanceDestinationsRepo;
+  }
+
+  public get dataMappings() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.dataMappingsRepo) this.dataMappingsRepo = new DataMappingsRepository(this.db);
+    return this.dataMappingsRepo;
+  }
+
+  // ─── Script Repos ─────────────────────────────────────────────────────────────
+
+  public get downloadedScripts() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.downloadedScriptsRepo) this.downloadedScriptsRepo = new DownloadedScriptsRepository(this.db);
+    return this.downloadedScriptsRepo;
+  }
+
+  // ─── Fallback Repos ───────────────────────────────────────────────────────────
+
+  public get localFallback() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.localFallbackRepo) this.localFallbackRepo = new LocalFallbackStorageRepository(this.db);
+    return this.localFallbackRepo;
+  }
+
+  // ─── Tags Repos ─────────────────────────────────────────────────────────────
+
+  public get tags() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.tagsRepo) this.tagsRepo = new TagsRepository(this.db);
+    return this.tagsRepo;
+  }
+
+  public get instanceTags() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.instanceTagsRepo) this.instanceTagsRepo = new InstanceTagsRepository(this.db);
+    return this.instanceTagsRepo;
+  }
+
+  // ─── Composite Operations ─────────────────────────────────────────────────────
+
+  upsertServer(values: ServerUpsertValues): ReturningQueries<ServerReturningValues | null> {
+    try {
+      if (!this.db) throw Error("The database has not been instantiated.");
+      return {
+        data: this.db.insert(Tables.ServersTable)
+          .values(values)
+          .onConflictDoUpdate({ target: Tables.ServersTable.id, set: values })
+          .returning().get()
+      };
+    } catch (error: unknown) {
+      return { error, data: null };
     }
+  }
 
-    public getDb() { return this.db }
-
-    public get users() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.usersRepo) this.usersRepo = new UsersRepository(this.db);
-        return this.usersRepo;
+  upsertServerResource(values: ServerResourceUpsertValues): ReturningQueries<ServerResourceReturningValues | null> {
+    try {
+      if (!this.db) throw Error("The database has not been instantiated.");
+      return {
+        data: this.db.insert(Tables.ServerResourcesTable)
+          .values(values)
+          .onConflictDoUpdate({ target: Tables.ServerResourcesTable.id, set: values })
+          .returning().get()
+      };
+    } catch (error: unknown) {
+      return { error, data: null };
     }
+  }
 
-    public get projects() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.projectsRepo) this.projectsRepo = new ProjectsRepository(this.db);
-        return this.projectsRepo;
+  upsertResourceOperation(values: ResourceOperationUpsertValues): ReturningQueries<ResourceOperationReturningValues | null> {
+    try {
+      if (!this.db) throw Error("The database has not been instantiated.");
+      return {
+        data: this.db.insert(Tables.ResourceOperationsTable)
+          .values(values)
+          .onConflictDoUpdate({ target: Tables.ResourceOperationsTable.id, set: values })
+          .returning().get()
+      };
+    } catch (error: unknown) {
+      return { error, data: null };
     }
+  }
 
-    public get projectMembers() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.projectMembersRepo) this.projectMembersRepo = new ProjectMembersRepository(this.db);
-        return this.projectMembersRepo;
+  upsertDevice(values: DeviceUpsertValues): ReturningQueries<DeviceReturningValues | null> {
+    try {
+      if (!this.db) throw Error("The database has not been instantiated.");
+      return {
+        data: this.db.insert(Tables.DeviceTable)
+          .values(values)
+          .onConflictDoUpdate({ target: Tables.DeviceTable.id, set: values })
+          .returning().get()
+      };
+    } catch (error: unknown) {
+      return { error, data: null };
     }
+  }
 
-    public get workflowVersions() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.workflowVersionsRepo) this.workflowVersionsRepo = new WorkflowVersionsRepository(this.db);
-        return this.workflowVersionsRepo;
+  listAllDevices(): ReturningQueries<DeviceReturningValues[]> {
+    try {
+      if (!this.db) throw Error("The database has not been instantiated.");
+      return { data: this.db.select().from(Tables.DeviceTable).all() };
+    } catch (error: unknown) {
+      return { error, data: [] };
     }
+  }
 
-    public get servers() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.serversRepo) this.serversRepo = new ServersRepository(this.db);
-        return this.serversRepo;
+  listAllServers(): ReturningQueries<ServerReturningValues[]> {
+    try {
+      if (!this.db) throw Error("The database has not been instantiated.");
+      return { data: this.db.select().from(Tables.ServersTable).all() };
+    } catch (error: unknown) {
+      return { error, data: [] };
     }
+  }
 
-    public get serverTypes() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.serverTypesRepo) this.serverTypesRepo = new ServerTypesRepository(this.db);
-        return this.serverTypesRepo;
+  listAllServerResources(server_id: string): ReturningQueries<{
+    resource: ServerResourceReturningValues;
+    operations: ResourceOperationReturningValues[];
+  }[]> {
+    try {
+      if (!this.db) throw Error("The database has not been instantiated.");
+      
+      const resources = this.db.select()
+        .from(Tables.ServerResourcesTable)
+        .where(eq(Tables.ServerResourcesTable.server_id, server_id))
+        .all();
+
+      const data = resources.map(resource => {
+        const operations = this.db!.select()
+          .from(Tables.ResourceOperationsTable)
+          .where(eq(Tables.ResourceOperationsTable.resource_id, resource.id))
+          .all();
+        return { resource, operations };
+      });
+
+      return { data };
+    } catch (error: unknown) {
+      return { error, data: [] };
     }
+  }
 
-    public get serverEndpoints() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.serverEndpointsRepo) this.serverEndpointsRepo = new ServerEndpointsRepository(this.db);
-        return this.serverEndpointsRepo;
+  /**
+   * Register a full server configuration in a single transaction.
+   */
+  registerServer(
+    params: {
+      server: ServerUpsertValues;
+      resources: {
+        resource: ServerResourceUpsertValues;
+        operations: ResourceOperationUpsertValues[];
+      }[];
     }
+  ): ReturningQueries<{
+    server: ServerReturningValues;
+    resources: {
+      resource: ServerResourceReturningValues;
+      operations: ResourceOperationReturningValues[];
+    }[];
+  } | null> {
+    try {
+      if (!this.db) throw Error("The database has not been instantiated.");
 
-    public get credentials() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.credentialsRepo) this.credentialsRepo = new CredentialsRepository(this.db);
-        return this.credentialsRepo;
-    }
+      // Sanitize empty strings to undefined for foreign keys
+      const sanitize = (val: any) => (val === "" ? undefined : val);
+      const sanitizedServer = {
+        ...params.server,
+        id: sanitize(params.server.id),
+        server_type_id: sanitize(params.server.server_type_id),
+        credential_id: sanitize(params.server.credential_id),
+        project_id: sanitize(params.server.project_id),
+      };
 
-    public get devices() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.devicesRepo) this.devicesRepo = new DevicesRepository(this.db);
-        return this.devicesRepo;
-    }
+      const tx = this.db.$client.transaction(() => {
+        const serverRes = this.upsertServer(sanitizedServer);
+        if (serverRes.error || !serverRes.data) throw serverRes.error ?? new Error('Failed to upsert server');
+        const server = serverRes.data;
 
-    public get codeInstances() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.codeInstancesRepo) this.codeInstancesRepo = new CodeInstancesRepository(this.db);
-        return this.codeInstancesRepo;
-    }
+        const resourcesWithOps: {
+          resource: ServerResourceReturningValues;
+          operations: ResourceOperationReturningValues[];
+        }[] = [];
 
-    public get workflows() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.workflowsRepo) this.workflowsRepo = new WorkflowsRepository(this.db);
-        return this.workflowsRepo;
-    }
+        const incomingResourceIds: string[] = [];
 
-    public get workflowExecutions() {
-        if (!this.db) throw Error('The database has not been instantiated.');
-        if (!this.workflowExecutionsRepo) this.workflowExecutionsRepo = new WorkflowExecutionsRepository(this.db);
-        return this.workflowExecutionsRepo;
-    }
+        for (const resData of params.resources ?? []) {
+          const resourceVals: ServerResourceUpsertValues = { 
+            ...resData.resource, 
+            id: sanitize(resData.resource.id),
+            server_id: server.id 
+          };
+          const resourceRes = this.upsertServerResource(resourceVals);
+          if (resourceRes.error || !resourceRes.data) throw resourceRes.error ?? new Error('Failed to upsert server resource');
+          const resource = resourceRes.data;
+          incomingResourceIds.push(resource.id);
 
-    upsertWorkflow(values: WorkflowUpsertValues): ReturningQueries<WorkflowReturningValues | null> {
-        try {
-            if (!this.db) throw Error("The database has not been instantiated.");
-            return {
-                data: this.db.insert(Tables.WorkflowTable)
-                    .values(values)
-                    .onConflictDoUpdate({
-                        target: Tables.WorkflowTable.id,
-                        set: values
-                    }).returning().get()
-            }
-        } catch (error: unknown) {
-            return {
-                error: error,
-                data: null
+          const operations: ResourceOperationReturningValues[] = [];
+          const incomingOpIds: string[] = [];
+
+          for (const opData of resData.operations ?? []) {
+            const opVals: ResourceOperationUpsertValues = { 
+              ...opData, 
+              id: sanitize(opData.id),
+              resource_id: resource.id 
             };
+            const opRes = this.upsertResourceOperation(opVals);
+            if (opRes.error || !opRes.data) throw opRes.error ?? new Error('Failed to upsert resource operation');
+            const op = opRes.data;
+            operations.push(op);
+            incomingOpIds.push(op.id);
+          }
+
+          // Delete operations not in the incoming list for this resource
+          if (incomingOpIds.length > 0) {
+            this.db!.delete(Tables.ResourceOperationsTable)
+              .where(and(
+                eq(Tables.ResourceOperationsTable.resource_id, resource.id),
+                notInArray(Tables.ResourceOperationsTable.id, incomingOpIds)
+              )).run();
+          } else {
+            this.db!.delete(Tables.ResourceOperationsTable)
+              .where(eq(Tables.ResourceOperationsTable.resource_id, resource.id)).run();
+          }
+
+          resourcesWithOps.push({ resource, operations });
         }
+
+        // Delete resources not in the incoming list for this server
+        if (incomingResourceIds.length > 0) {
+          this.db!.delete(Tables.ServerResourcesTable)
+            .where(and(
+              eq(Tables.ServerResourcesTable.server_id, server.id),
+              notInArray(Tables.ServerResourcesTable.id, incomingResourceIds)
+            )).run();
+        } else {
+          this.db!.delete(Tables.ServerResourcesTable)
+            .where(eq(Tables.ServerResourcesTable.server_id, server.id)).run();
+        }
+
+        return { server, resources: resourcesWithOps };
+      });
+
+      const result = tx();
+      return { data: result };
+    } catch (error: unknown) {
+      return { error, data: null };
     }
-
-    upsertServer(values: ServerUpsertValues): ReturningQueries<ServerReturningValues | null> {
-        try {
-            if (!this.db) throw Error("The database has not been instantiated.");
-            return {
-                data: this.db.insert(Tables.ServersTable)
-                    .values(values)
-                    .onConflictDoUpdate({
-                        target: Tables.ServersTable.id,
-                        set: values
-                    }).returning().get()
-            }
-        } catch (error: unknown) {
-            return {
-                error: error,
-                data: null
-            };
-        }
+  }
+  /**
+   * Register a full instance configuration including destinations and mappings in a single transaction.
+   */
+  registerInstance(
+    params: {
+      instance: InstanceUpsertValues;
+      destinations: {
+        destination: Omit<InstanceDestinationUpsertValues, 'instance_id'>;
+        mapping?: Omit<DataMappingUpsertValues, 'instance_destination_id'>;
+      }[];
+      tagIds?: string[];
     }
+  ): ReturningQueries<{
+    instance: InstanceReturningValues;
+    destinations: InstanceDestinationReturningValues[];
+    mappings: DataMappingReturningValues[];
+  } | null> {
+    try {
+      if (!this.db) throw Error("The database has not been instantiated.");
 
-    upsertServerEndpoint(values: ServerEndpointsUpsertValues): ReturningQueries<ServerEndpointsReturningValues | null> {
-        try {
+      const tx = this.db.$client.transaction(() => {
+        // Upsert standard Instance structure
+        const instRes = this.instances.upsert(params.instance);
+        if (instRes.error || !instRes.data) throw instRes.error ?? new Error('Failed to upsert instance');
+        const instance = instRes.data;
 
-            if (!this.db) throw Error("The database has not been instantiated.");
-            return {
-                data: this.db.insert(Tables.ServerEndpointsTable)
-                    .values(values)
-                    .onConflictDoUpdate({
-                        target: Tables.ServerEndpointsTable.id,
-                        set: values
-                    }).returning().get()
-            }
-        } catch (error: unknown) {
-            return {
-                error: error,
-                data: null
-            };
+        // Tags linkage
+        if (params.tagIds) {
+          const syncRes = this.instanceTags.syncTags(instance.id, params.tagIds);
+          if (syncRes.error) throw syncRes.error;
         }
+
+        // Ensure fresh layout: deleting old destinations entirely simplifies the update
+        if (params.instance.id) {
+          this.instanceDestinations.deleteByInstance(params.instance.id);
+        }
+
+        const createdDestinations: InstanceDestinationReturningValues[] = [];
+        const createdMappings: DataMappingReturningValues[] = [];
+
+        for (const dest of params.destinations) {
+          const destValues: InstanceDestinationUpsertValues = { ...dest.destination, instance_id: instance.id };
+          const destRes = this.instanceDestinations.upsert(destValues);
+          if (destRes.error || !destRes.data) throw destRes.error ?? new Error('Failed to upsert destination');
+          const createdDest = destRes.data;
+          createdDestinations.push(createdDest);
+
+          if (dest.mapping) {
+            const mapValues: DataMappingUpsertValues = { ...dest.mapping, instance_destination_id: createdDest.id };
+            const mapRes = this.dataMappings.upsert(mapValues);
+            if (mapRes.error || !mapRes.data) throw mapRes.error ?? new Error('Failed to upsert mapping');
+            createdMappings.push(mapRes.data);
+          }
+        }
+
+        return { instance, destinations: createdDestinations, mappings: createdMappings };
+      });
+
+      const result = tx();
+      return { data: result };
+    } catch (error: unknown) {
+      return { error, data: null };
     }
-
-    upsertDevice(values: DeviceUpsertValues): ReturningQueries<DeviceReturningValues | null> {
-        try {
-            if (!this.db) throw Error("The database has not been instantiated.");
-            return {
-                data: this.db.insert(Tables.DeviceTable)
-                    .values(values)
-                    .onConflictDoUpdate({
-                        target: Tables.DeviceTable.id,
-                        set: values
-                    }).returning().get()
-            }
-        } catch (error: unknown) {
-            return {
-                error: error,
-                data: null
-            };
-        }
-    }
-
-    listAllDevices(): ReturningQueries<DeviceReturningValues[]> {
-        try {
-            if (!this.db) throw Error("The database has not been instantiated.");
-            return {
-                data: this.db.select().from(Tables.DeviceTable).all()
-            }
-        } catch (error: unknown) {
-            return {
-                error,
-                data: []
-            }
-        }
-    }
-
-    listAllServers(): ReturningQueries<ServerReturningValues[]> {
-        try {
-            if (!this.db) throw Error("The database has not been instantiated.");
-            return {
-                data: this.db.select().from(Tables.ServersTable).all()
-            }
-        } catch (error: unknown) {
-            return {
-                error,
-                data: []
-            }
-        }
-    }
-
-    listAllServerEndpoints(server_id: string): ReturningQueries<ServerEndpointsReturningValues[]> {
-        try {
-            if (!this.db) throw Error("The database has not been instantiated.");
-            return {
-                data: this.db.select()
-                    .from(Tables.ServerEndpointsTable)
-                    .where(eq(Tables.ServerEndpointsTable.server_id, server_id))
-                    .all()
-            }
-        } catch (error: unknown) {
-            return {
-                error,
-                data: []
-            }
-        }
-    }
-
-    /**
-     * Register a full server configuration in a single transaction.
-     * - Optionally create credentials
-     * - Upsert server (with credential_id if created)
-     * - Upsert endpoints (attached to server id)
-     */
-    registerServer(
-        params: { 
-            server: ServerUpsertValues; 
-            authorization: CredentialUpsertValues; 
-            endpoints: ServerEndpointsUpsertValues[]
-        } & { 
-            created_by?: string | undefined, 
-            project_id?: string | undefined
-        }
-    ): ReturningQueries<{ 
-        server: ServerReturningValues; 
-        credential: CredentialReturningValues; 
-        endpoints: ServerEndpointsReturningValues[] 
-    } | null> {
-        try {
-            if (!this.db) throw Error("The database has not been instantiated.");
-
-            const tx = this.db.$client.transaction(() => {
-                
-
-                const credValues: CredentialUpsertValues = {
-                    name: params.authorization.name ?? `${params.server.name} Credential`,
-                    type: params.authorization.type,
-                    data: params.authorization.data ?? {},
-                    owner_id: params.server.created_by ?? params.created_by ?? null,
-                    project_id: params.server.project_id ?? params.project_id ?? null,
-                };
-
-                const credRes = this.credentials.upsert(credValues);
-                if (credRes.error || !credRes.data) throw credRes.error;
-                const createdCredential = credRes.data;
-                params.server.credential_id = createdCredential.id;
-                
-
-                // Ensure created_by/project_id are set on server
-                if (params.created_by && !params.server.created_by) params.server.created_by = params.created_by;
-                if (params.project_id && !params.server.project_id) params.server.project_id = params.project_id;
-
-                const serverRes = this.upsertServer(params.server);
-                if (serverRes.error || !serverRes.data) throw serverRes.error ?? new Error('Failed to upsert server');
-                const server = serverRes.data;
-
-                const createdEndpoints: ServerEndpointsReturningValues[] = [];
-                for (const ep of params.endpoints ?? []) {
-                    const epVals: ServerEndpointsUpsertValues = { ...ep, server_id: server.id };
-                    const epRes = this.upsertServerEndpoint(epVals);
-                    if (epRes.error || !epRes.data) throw epRes.error ?? new Error('Failed to upsert server endpoint');
-                    createdEndpoints.push(epRes.data);
-                }
-
-                return { server, credential: createdCredential, endpoints: createdEndpoints };
-            });
-
-            const result = tx();
-            return { data: result };
-        } catch (error: unknown) {
-            return { error, data: null };
-        }
-    }
-
-    listAllCodeInstances(): ReturningQueries<CodeInstanceReturningValues[]> {
-        try {
-            if (!this.db) throw Error("The database has not been instantiated.");
-            return {
-                data: this.db.select()
-                    .from(Tables.CodeInstanceTable)
-                    .all()
-            }
-        } catch (error: unknown) {
-            return {
-                error,
-                data: []
-            }
-        }
-    }
-    
-    listMockDevices(): ReturningQueries<DeviceReturningValues[]> {
-        try {
-            return {
-                data: [
-                    {
-                        brand: "intelbras",
-                        connection_method: "serial",
-                        created_at: new Date().toISOString(),
-                        description: "",
-                        device_id: "1",
-                        id: "1",
-                        ip_address: null,
-                        location: "laber_1",
-                        name: "controlador intelbras",
-                        serial_number: "abc123",
-                        updated_at: new Date().toISOString(),
-                        others: []
-                    }
-                ]
-            }
-        } catch (error: unknown) {
-            return {
-                error,
-                data: []
-            }
-        }
-    }
-    
-    listSampleScripts(): ReturningQueries<CodeInstanceReturningValues[]> {
-        try {
-            return {
-                data: [
-                    {
-                        author: "system",
-                        created_at: Date.now().toString(),
-                        updated_at: Date.now().toString(),
-                        name: "sample class",
-                        description: "",
-                        id: "1",
-                        language: "python",
-                        main_file_name: "sample_class.py",
-                        path: "/extensions/samples/",
-                        source: "system_repo",
-                        entry_fn: null,
-                        repo: null,
-                        url: null,
-                        version: "1"
-                    },
-                    {
-                        author: "system",
-                        created_at: Date.now().toString(),
-                        updated_at: Date.now().toString(),
-                        name: "sample class with decorators",
-                        description: "",
-                        id: "2",
-                        language: "python",
-                        main_file_name: "sample_class_dec.py",
-                        path: "/extensions/samples/",
-                        source: "system_repo",
-                        entry_fn: null,
-                        repo: null,
-                        url: null,
-                        version: "1"
-                    },
-                    {
-                        author: "system",
-                        created_at: Date.now().toString(),
-                        updated_at: Date.now().toString(),
-                        name: "sample imp",
-                        description: "",
-                        id: "3",
-                        language: "python",
-                        main_file_name: "sample_imp.py",
-                        path: "/extensions/samples/",
-                        source: "system_repo",
-                        entry_fn: null,
-                        repo: null,
-                        url: null,
-                        version: "1"
-                    },
-                    {
-                        author: "system",
-                        created_at: Date.now().toString(),
-                        updated_at: Date.now().toString(),
-                        name: "sample imp with decorators",
-                        description: "",
-                        id: "4",
-                        language: "python",
-                        main_file_name: "sample_imp_dec.py",
-                        path: "/extensions/samples",
-                        source: "system_repo",
-                        entry_fn: null,
-                        repo: null,
-                        url: null,
-                        version: "1"
-                    },
-                ]
-            }
-        } catch (error: unknown) {
-            return {
-                error,
-                data: []
-            }
-        }
-    }
-
-
+  }
 }
+
 export const dbManager = DatabaseService.getInstance(db);

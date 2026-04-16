@@ -1,14 +1,5 @@
-import { db, Tables } from "../db";
-import { DefaultServerTypes } from "types";
 async function main() {
-
-    for (const serverType of DefaultServerTypes) {
-        await db.insert(Tables.ServerTypesTable)
-            .values(serverType).onConflictDoUpdate({
-                target: Tables.ServerTypesTable.id,
-                set: serverType,
-            }).run();
-    }
+    console.log("Nothing to change")
 }
 
 main().catch((error) => {

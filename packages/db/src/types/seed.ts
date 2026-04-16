@@ -1,9 +1,0 @@
-import type { ServerTypeReturningValues } from './types'
-export const DefaultServerTypes: ServerTypeReturningValues[] = [
-    {
-        id: "http",
-        key: "http_rest",
-        name: "Servidor HTTP REST",
-        description: "http, https, rest services are running as a service that u can consult via http request"
-    }
-]

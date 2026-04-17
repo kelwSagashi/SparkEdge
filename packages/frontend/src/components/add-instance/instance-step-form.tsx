@@ -140,25 +140,68 @@ export default function InstanceStepForm({ instanceId, onClose }: Props) {
         const ops: ResourceOperationReturningValues[] = [];
         const initialCache: Record<string, ResourceOperationReturningValues[]> =
           {};
-        serversData.forEach((server) => {
-          const serverOps: ResourceOperationReturningValues[] = [];
-          // server.resources?.forEach((res: any) => {
-          //   const list = (res.operations || []).map((op: any) => ({
-          //     ...op,
-          //     id: String(op.id),
-          //   }));
-          //   ops.push(...list);
-          //   serverOps.push(...list);
-          // });
-          if (serverOps.length > 0) {
-            initialCache[String(server.id)] = serverOps;
-          }
-        });
-        setAllOperations(ops);
-        setOperationsCache(initialCache);
+        
+        // Load instance data if editing
+        if (instanceId) {
+          const resInstance = await api.getInstanceById(instanceId);
+          const instanceData = resInstance.data?.data;
+          
+          if (instanceData) {
+            const { instance, destinations } = instanceData as any;
+            
+            // Convert dictionary params to array for form
+            const scriptParams = Object.entries(instance.script_parameters || {}).map(([key, value]) => ({
+              key,
+              value,
+              sourceType: "manual" as const,
+            }));
 
-        // Se tem proyecto selecionado, setar como default
-        if (project?.id) {
+            const formValues: InstanceFormValues = {
+              name: instance.name || "",
+              description: instance.description || "",
+              project_id: instance.project_id || "",
+              device_id: instance.device_id || null,
+              tags: instance.tags || [],
+              includeDeviceData: instance.include_device_data || false,
+              script_id: instance.script_id || "",
+              scriptParameters: scriptParams,
+              scriptInputs: instance.script_parameters || {},
+              triggerType: instance.trigger_type || "interval",
+              triggerConfig: instance.trigger_config || defaultValues.triggerConfig,
+              active: instance.active ?? true,
+              destinations: (destinations || []).map((d: any) => ({
+                resourceOperationId: d.destination.resource_operation_id,
+                serverId: "", // We'll find this later or just leave it, individual dest forms load it
+                enabled: d.destination.enabled ?? true,
+                priority: d.destination.priority || 0,
+                retryPolicy: {
+                  maxRetries: d.destination.retry_policy?.max_retries,
+                  retryInterval: d.destination.retry_policy?.retry_interval,
+                },
+                dataMapping: {
+                  instanceDestinationId: d.destination.id,
+                  mapping: d.mapping?.mapping || {},
+                  payloadTemplate: d.mapping?.payload_template || {},
+                  customFields: d.mapping?.custom_fields || [],
+                  transformScript: d.mapping?.transform_script,
+                }
+              })),
+              fallbackConfig: {
+                enabled: instance.fallback_enabled ?? true,
+                strategy: instance.fallback_strategy || "background_job",
+                retry_interval_seconds: instance.fallback_retry_interval_seconds || 300,
+                max_retries: null,
+              },
+              errorConfig: {
+                action: instance.on_error_action || "log_only",
+                notify_url: instance.on_error_config?.notify_url,
+                max_retries: instance.on_error_config?.max_retries,
+              }
+            };
+
+            form.reset(formValues);
+          }
+        } else if (project?.id) {
           form.setValue("project_id", project.id);
         }
       } catch (e) {

@@ -253,6 +253,14 @@ export class API {
       `/projects/${id}`,
     );
   }
+
+  async listExecutions() {
+    return axios_api_instance.get<ReturningQueries<any[]>>("/executions");
+  }
+
+  async listInstanceExecutions(id: string) {
+    return axios_api_instance.get<ReturningQueries<any[]>>(`/instances/${id}/executions`);
+  }
 }
 
 export const api = new API();

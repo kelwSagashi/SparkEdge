@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Plus, Play, Pause, Trash2, Settings, Activity, Clock,
-  ChevronDown, Search, Filter, Zap
+  Search, Zap, ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { InstanceReturningValues } from 'nmg8-db/src/types';
@@ -41,34 +41,28 @@ function InstanceCard({ instance, onTrigger, onDelete }: {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
       transition={{ duration: 0.2 }}
-      className="group relative bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] rounded-xl p-5 transition-all duration-300 cursor-pointer"
-      onClick={() => navigate(`/instances/${instance.id}`)}
+      className="group relative bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] rounded-xl p-5 transition-all duration-300"
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-white truncate">{instance.name}</h3>
+          <div 
+            className="flex items-center gap-2 mb-2 cursor-pointer group/title"
+            onClick={() => navigate(`/instances/${instance.id}`)}
+          >
+            <h3 className="text-sm font-medium text-white group-hover/title:text-emerald-400 transition-colors">
+              {instance.name}
+            </h3>
+            <ExternalLink size={12} className="text-zinc-600 opacity-0 group-hover/title:opacity-100 transition-all" />
+          </div>
           <p className="text-xs text-zinc-500 mt-0.5 truncate">
             {instance.description || 'Sem descrição'}
           </p>
         </div>
         <StatusBadge status={instance.status} />
       </div>
-
-      {/* Tags 
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {instance.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-white/[0.06] text-zinc-400 border border-white/[0.06]">
-              {tag}
-            </span>
-          ))}
-          {instance.tags.length > 3 && (
-            <span className="text-[10px] text-zinc-500">+{instance.tags.length - 3}</span>
-          )}
-        </div>
-      */}
 
       {/* Info Row */}
       <div className="flex items-center gap-4 text-[11px] text-zinc-500">
@@ -93,22 +87,39 @@ function InstanceCard({ instance, onTrigger, onDelete }: {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             className="absolute top-3 right-3 flex items-center gap-1"
-            onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => onTrigger(instance.id)}
-              className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors"
-              title="Run now"
-            >
-              <Play size={12} />
-            </button>
-            <button
-              onClick={() => onDelete(instance.id)}
-              className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors"
-              title="Delete"
-            >
-              <Trash2 size={12} />
-            </button>
+            <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/instances/${instance.id}/edit`);
+                }}
+                className="p-1.5 rounded-md hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                title="Editar"
+              >
+                <Settings size={14} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTrigger(instance.id);
+                }}
+                className="p-1.5 rounded-md hover:bg-white/10 text-zinc-400 hover:text-emerald-400 transition-colors"
+                title="Executar agora"
+              >
+                <Play size={14} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(instance.id);
+                }}
+                className="p-1.5 rounded-md hover:bg-white/10 text-zinc-400 hover:text-red-400 transition-colors"
+                title="Excluir"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -9,6 +9,7 @@ export const Tables = schema;
 const sqlite = new Database(
     path.resolve(__dirname, "../../monitor.db")
 );
+sqlite.pragma('foreign_keys = ON');
 export const db = drizzle(sqlite, { schema });
 
 export type DBType = BetterSQLite3Database<typeof schema> & {

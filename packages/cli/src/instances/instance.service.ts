@@ -10,12 +10,18 @@ import type {
 } from "nmg8-db/src/types";
 
 import { InstanceRequest } from "./instance.request";
+import type { 
+  IDataMapping, 
+  IFallbackConfig, 
+  IErrorConfig,
+  IInstanceDestination
+} from "./instance.types";
 
 interface NormalizedInstancePayload {
   instance: InstanceUpsertValues;
   destinations: {
     destination: Omit<InstanceDestinationUpsertValues, "instance_id">;
-    mapping?: Omit<DataMappingUpsertValues, "instance_destination_id">;
+    mapping?: Omit<DataMappingUpsertValues, "instance_destination_id"> | IDataMapping;
   }[];
 }
 
@@ -28,9 +34,9 @@ export class InstanceService {
   }
 
   async listByProject(
-    projectId: string,
+    project_id: string,
   ): Promise<ReturningQueries<InstanceReturningValues[]>> {
-    return dbManager.instances.listByProject(projectId);
+    return dbManager.instances.listByProject(project_id);
   }
 
   async listActive(): Promise<ReturningQueries<InstanceReturningValues[]>> {
@@ -81,50 +87,79 @@ export class InstanceService {
   }
 
   private normalizePayload(
-    payload: Partial<InstanceRequest.InstancePayload>,
+    payload: InstanceRequest.InstancePayload | Partial<InstanceRequest.InstancePayload>,
   ): NormalizedInstancePayload {
-    const fallbackConfig = payload.fallback_config;
-    const errorConfig = payload.error_config;
+    // 1. Map top-level instance fields
+    const instanceData: Partial<InstanceUpsertValues> = {
+      name: payload.name,
+      description: payload.description,
+      project_id: payload.project_id || payload.projectId,
+      script_id: payload.script_id || payload.scriptId,
+      device_id: payload.device_id || payload.deviceId,
+      include_device_data: payload.include_device_data ?? payload.includeDeviceData ?? false,
+      status: payload.status as any,
+      active: payload.active,
+      trigger_type: payload.trigger_type ?? payload.triggerType ?? "interval",
+    };
+
+    // 2. Resolve script parameters (Dictionary logic)
+    // We merge script_inputs (object from JSON editor) and script_parameters (array from forms)
+    const finalParams: Record<string, any> = {
+      ...(payload.script_inputs || payload.scriptInputs || {}),
+    };
+
+    const rawParams = payload.script_parameters || payload.scriptParameters;
+    if (Array.isArray(rawParams)) {
+      rawParams.forEach((p: any) => {
+        if (p && typeof p === "object" && "key" in p) {
+          finalParams[p.key] = p.value;
+        }
+      });
+    }
+
+    // 3. Trigger configuration
+    const trigger_config = payload.trigger_config || payload.triggerType || {};
+    
+    // 4. Fallback and Error mapping
+    const fallback_enabled = payload.fallback_config?.enabled ?? payload.fallbackConfig?.enabled ?? false;
+    const fallback_strategy = payload.fallback_config?.strategy ?? payload.fallbackConfig?.strategy ?? "background_job";
+    const fallback_retry_interval_seconds = payload.fallback_config?.retry_interval_seconds ?? payload.fallbackConfig?.retryIntervalSeconds ?? 300;
+    
+    const on_error_action = payload.error_config?.action ?? payload.errorConfig?.action ?? "log_only";
+    const on_error_config = payload.error_config || payload.errorConfig || { action: "log_only" };
 
     return {
       instance: {
-        name: payload.name || "",
-        description: payload.description,
-        project_id: payload.project_id || "",
-        script_id: payload.script_id || "",
-        device_id: payload.device_id,
-        include_device_data: payload.include_device_data,
-        trigger_type: payload.trigger_type,
-        trigger_config: payload.trigger_config,
-        fallback_enabled: fallbackConfig?.enabled,
-        fallback_strategy: fallbackConfig?.strategy,
-        fallback_retry_interval_seconds: fallbackConfig?.retry_interval_seconds,
-        on_error_action: errorConfig?.action || "log_only",
-        on_error_config: errorConfig,
-        active: payload.active !== undefined ? payload.active : true,
-      },
+        ...instanceData,
+        script_parameters: finalParams,
+        trigger_config: trigger_config,
+        fallback_enabled,
+        fallback_strategy,
+        fallback_retry_interval_seconds,
+        on_error_action,
+        on_error_config,
+      } as InstanceUpsertValues,
       destinations: (payload.destinations || []).map((dest) => {
-        const dataMapping = dest.data_mapping;
+        const dataMapping = dest.data_mapping || dest.dataMapping;
+        
         return {
           destination: {
-            resource_operation_id: dest.resource_operation_id,
+            resource_operation_id: dest.resource_operation_id || dest.resourceOperationId || "",
             enabled: dest.enabled !== undefined ? dest.enabled : true,
             priority: dest.priority || 0,
-            retry_policy: dest.retry_policy
-              ? {
-                  max_retries: dest.retry_policy.max_retries,
-                  retry_interval: dest.retry_policy.retry_interval,
-                }
-              : {},
+            retry_policy: {
+              max_retries: dest.retry_policy?.max_retries ?? dest.retryPolicy?.maxRetries ?? 3,
+              retry_interval: dest.retry_policy?.retry_interval ?? dest.retryPolicy?.retryInterval ?? 60,
+            },
           },
           mapping: dataMapping
             ? {
-                mapping: dataMapping.mapping,
-                payload_template: dataMapping.payload_template,
-                custom_fields: dataMapping.custom_fields,
-                transform_script: dataMapping.transform_script,
+                mapping: dataMapping.mapping || {},
+                payload_template: dataMapping.payload_template || dataMapping.payloadTemplate || {},
+                custom_fields: dataMapping.custom_fields || dataMapping.customFields || [],
+                transform_script: dataMapping.transform_script || dataMapping.transformScript,
               }
-            : undefined,
+            : { mapping: {} },
         };
       }),
     };

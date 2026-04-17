@@ -50,6 +50,13 @@
       "when": 1776306133988,
       "tag": "0006_curious_epoch",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1776360155907,
+      "tag": "0007_petite_colonel_america",
+      "breakpoints": true
     }
   ]
 }

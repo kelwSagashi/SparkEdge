@@ -22,9 +22,9 @@ export class InstanceController {
         return { data: result.data, error: result.error };
     }
 
-    @Get('/project/:projectId')
+    @Get('/project/:project_id')
     async listByProject(req: InstanceRequest.ListByProject) {
-        const result = await this.instanceService.listByProject(req.params.projectId);
+        const result = await this.instanceService.listByProject(req.params.project_id);
         return { data: result.data, error: result.error };
     }
 

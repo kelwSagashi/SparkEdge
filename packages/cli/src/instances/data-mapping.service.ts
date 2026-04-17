@@ -89,10 +89,10 @@ export class DataMappingService {
     }
 
     return {
-      instanceDestinationId: "", // Set by caller
+      instance_destination_id: "", // Set by caller
       mapping: validMapping,
-      availableFields,
-      requiredFields: Object.keys(schemaFields).filter(
+      available_fields: availableFields,
+      required_fields: Object.keys(schemaFields).filter(
         (f) => schemaFields[f].required,
       ),
     };
@@ -140,18 +140,16 @@ export class DataMappingService {
    */
   validateMappedData(
     mappedData: Record<string, any>,
-    requiredFields?: string[],
+    required_fields?: string[],
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
-
-    if (requiredFields) {
-      requiredFields.forEach((field) => {
+    if (required_fields) {
+      required_fields.forEach((field) => {
         if (mappedData[field] === undefined || mappedData[field] === null) {
           errors.push(`Required field "${field}" is missing or null`);
         }
       });
     }
-
     return {
       valid: errors.length === 0,
       errors,
@@ -198,11 +196,11 @@ export class DataMappingService {
     const key = keyParts.join(".");
 
     if (source === "script") {
-      return data.scriptOutput?.[key];
+      return data.script_output?.[key];
     } else if (source === "device") {
-      return data.deviceData?.[key];
+      return data.device_data?.[key];
     } else if (source === "custom") {
-      return data.customFields?.[key];
+      return data.custom_fields?.[key];
     }
 
     return undefined;

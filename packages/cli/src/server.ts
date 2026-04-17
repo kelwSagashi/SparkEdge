@@ -28,6 +28,7 @@ import { AdapterRegistry } from './instances/destination-adapters';
 import './instances/adapters';
 import './instances/server-types';
 import './instances/destination-adapters';
+import { InstanceSchedulerService } from './instances/instance-scheduler.service';
 
 
 @Service()
@@ -133,6 +134,9 @@ export class Server {
         this.app.use("/icons", express.static(nodesIconsPath));
 
         this.setupRoutes();
+
+        // Start the instance execution scheduler
+        Container.get(InstanceSchedulerService).start();
 
         this.app.listen(port, () => {
             this.logger.log(`🚀 Servidor rodando em http://localhost:${port}`);

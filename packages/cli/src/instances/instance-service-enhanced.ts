@@ -30,10 +30,10 @@ export class InstanceServiceEnhanced {
   }
 
   async listByProject(
-    projectId: string,
+    project_id: string,
   ): Promise<ReturningQueries<InstanceReturningValues[]>> {
     try {
-      const result = await dbManager.instances.listByProject(projectId);
+      const result = await dbManager.instances.listByProject(project_id);
       return result;
     } catch (error) {
       const msg =

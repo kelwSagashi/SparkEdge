@@ -28,12 +28,12 @@ export class InstanceExecutionService {
     try {
       this.addLog(
         "info",
-        `Starting execution for instance: ${context.instanceId}`,
+        `Starting execution for instance: ${context.instance_id}`,
       );
 
       // 1. Get instance config
       const instanceResult = await dbManager.instances.findById(
-        context.instanceId,
+        context.instance_id,
       );
       if (!instanceResult.data) {
         throw new Error("Instance not found");
@@ -43,7 +43,7 @@ export class InstanceExecutionService {
 
       // 2. Get destinations
       const destResult = await dbManager.instanceDestinations.listByInstance(
-        context.instanceId,
+        context.instance_id,
       );
       if (!destResult.data || destResult.data.length === 0) {
         throw new Error("No destinations configured");
@@ -85,9 +85,9 @@ export class InstanceExecutionService {
       // 4. Create execution record
       const duration = Date.now() - startTime;
       await dbManager.instanceExecutions.create({
-        instance_id: context.instanceId,
+        instance_id: context.instance_id,
         status: sentCount > 0 ? "success" : "failed",
-        trigger_type: context.triggerType,
+        trigger_type: context.trigger_type,
         started_at: new Date(startTime).toISOString(),
         finished_at: new Date().toISOString(),
         duration_ms: duration,
@@ -111,9 +111,9 @@ export class InstanceExecutionService {
 
       const duration = Date.now() - startTime;
       await dbManager.instanceExecutions.create({
-        instance_id: context.instanceId,
+        instance_id: context.instance_id,
         status: "failed",
-        trigger_type: context.triggerType,
+        trigger_type: context.trigger_type,
         started_at: new Date(startTime).toISOString(),
         finished_at: new Date().toISOString(),
         duration_ms: duration,

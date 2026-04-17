@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
-import { DeviceConnectionMethods } from '../types';
+import { DeviceConnectionMethods, SchemaConfig } from '../types';
 import { nanoid } from 'nanoid';
 
 // ─── Server Infrastructure ────────────────────────────────────────────────────
@@ -178,7 +178,7 @@ export const DownloadedScriptsTable = sqliteTable('downloaded_scripts', {
 
   language: text('language', { enum: ['python'] }).notNull().default('python'),
   tags: text('tags', { mode: 'json' }).$type<string[]>().$defaultFn(() => []),
-  schema_config: text('schema_config', { mode: 'json' }).$type<any>().$defaultFn(() => null),
+  schema_config: text('schema_config', { mode: 'json' }).$type<SchemaConfig>().$defaultFn(() => ({ inputs: [], outputs: [], output_schemas: { stdout: { type: 'object', properties: {}, required: [] } } })),
 
   created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
   updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
@@ -213,6 +213,12 @@ export const InstancesTable = sqliteTable('instances', {
 
   // Include device data in execution context
   include_device_data: integer('include_device_data', { mode: 'boolean' }).$defaultFn(() => false),
+
+  // Script parameters (custom values for the script)
+  script_parameters: text('script_parameters', { mode: 'json' })
+    .$type<Record<string, any>>()
+    .notNull()
+    .$defaultFn(() => ({})),
 
   // Trigger configuration
   trigger_type: text('trigger_type', { enum: TriggerTypes }).notNull().default('interval'),

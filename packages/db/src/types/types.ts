@@ -80,3 +80,27 @@ export type ReturningQueries<T> = {
   error?: unknown;
   data: T;
 };
+
+export type SchemaConfigIO = {
+  name: string;
+  type: string;
+  required?: boolean;
+  description?: string;
+  nullable?: boolean;
+  fields?: SchemaConfigIO[];
+}
+export type SchemaConfig = {
+  inputs: SchemaConfigIO[];
+  outputs: SchemaConfigIO[];
+  output_schemas: {
+    stdout: {
+      type: string;
+      properties: {
+        [x: string]: {
+          type: string;
+        }
+      },
+      required: string[];
+    }
+  }
+}

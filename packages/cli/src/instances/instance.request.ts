@@ -1,15 +1,12 @@
-import type {
-  InstanceUpsertValues,
-  InstanceDestinationUpsertValues,
-  DataMappingUpsertValues,
-} from "nmg8-db/src/types";
 import { AuthenticatedRequest } from "@/auth/authenticated-request";
 import type {
   IInstanceConfig,
   IScriptParameterValue,
-  IDataMapping,
 } from "./instance.types";
 
+/**
+ * Instance Request Namespace
+ */
 export namespace InstanceRequest {
   /**
    * Full instance payload with all configuration
@@ -38,7 +35,7 @@ export namespace InstanceRequest {
   /**
    * List instances by project
    */
-  export type ListByProject = AuthenticatedRequest<{ projectId: string }>;
+  export type ListByProject = AuthenticatedRequest<{ project_id: string }>;
 
   /**
    * Manually trigger instance execution

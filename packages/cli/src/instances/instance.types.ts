@@ -33,7 +33,9 @@ export interface IFallbackConfig {
   enabled: boolean;
   strategy: FallbackStrategy;
   retry_interval_seconds: number;
+  retryIntervalSeconds?: number; // Support for camelCase
   max_retries?: number;
+  maxRetries?: number; // Support for camelCase
 }
 
 /**
@@ -42,7 +44,9 @@ export interface IFallbackConfig {
 export interface IErrorConfig {
   action: OnErrorAction;
   notify_url?: string;
+  notifyUrl?: string; // Support for camelCase
   max_retries?: number;
+  maxRetries?: number; // Support for camelCase
 }
 
 /**
@@ -92,12 +96,15 @@ export interface IDataMapping {
 
   // Optional base payload template (JSON)
   payload_template?: Record<string, any>;
+  payloadTemplate?: Record<string, any>; // Support for camelCase
 
   // Optional custom fields: key-value pairs
   custom_fields?: { key: string; value: string }[];
+  customFields?: { key: string; value: string }[]; // Support for camelCase
 
   // Optional custom transform script (JavaScript)
   transform_script?: string;
+  transformScript?: string; // Support for camelCase
 
   // Tracked fields for validation
   available_fields?: IDataField[];
@@ -130,54 +137,75 @@ export interface IInstanceConfig {
   name: string;
   description?: string;
   project_id: string;
+  projectId?: string; // Support for camelCase
   tags?: string[];
 
   // Script and device
   script_id: string;
+  scriptId?: string; // Support for camelCase
   device_id?: string;
+  deviceId?: string; // Support for camelCase
 
-  // Script parameters
+  // Script parameters (Array format from list)
   script_parameters: IScriptParameterValue[];
+  scriptParameters?: IScriptParameterValue[]; // Support for camelCase
+  
+  // Script inputs (Object format from JSON editor)
+  script_inputs?: Record<string, any>;
+  scriptInputs?: Record<string, any>; // Support for camelCase
 
   // Trigger
   trigger_type: TriggerType;
+  triggerType?: TriggerType; // Support for camelCase
   trigger_config: ITriggerConfig;
+  triggerConfig?: ITriggerConfig; // Support for camelCase
 
   // Destinations and mapping
   destinations: {
     resource_operation_id: string;
+    resourceOperationId?: string; // Support for camelCase
     enabled: boolean;
     priority: number;
     retry_policy?: {
       max_retries?: number;
       retry_interval?: number;
     };
+    retryPolicy?: {
+      maxRetries?: number;
+      retryInterval?: number;
+    };
     data_mapping: IDataMapping;
+    dataMapping?: IDataMapping; // Support for camelCase
   }[];
 
   // Include device data in sending
   include_device_data: boolean;
+  includeDeviceData?: boolean; // Support for camelCase
 
   // Fallback
   fallback_config: IFallbackConfig;
+  fallbackConfig?: IFallbackConfig; // Support for camelCase
 
   // Error handling
   error_config: IErrorConfig;
+  errorConfig?: IErrorConfig; // Support for camelCase
 
   // Active
   active: boolean;
+  status?: InstanceStatus;
 }
 
 /**
  * Script execution context
  */
 export interface IExecutionContext {
-  instanceId: string;
-  executionId: string;
+  instance_id: string;
+  execution_id: string;
   device?: DeviceReturningValues;
   script: DownloadedScriptReturningValues;
-  scriptParameters: Record<string, any>;
-  triggerType: ExecutionTriggerType;
+  script_parameters: Record<string, any>;
+  trigger_type: ExecutionTriggerType;
+  timestamp: string;
 }
 
 /**

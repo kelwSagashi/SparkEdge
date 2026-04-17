@@ -24,6 +24,8 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import CredentialsPage from './pages/Credentials';
 import DeviceCreationPage from './pages/DeviceCreatePage';
 import DeviceEditPage from './pages/DeviceEditPage';
+import InstanceEditPage from './pages/InstanceEditPage';
+import InstanceLogsPage from './pages/InstanceLogsPage';
 
 function App() {
   const loadMe = useAuthStore((s) => s.loadMe);
@@ -74,7 +76,8 @@ function App() {
               <Route path="/" element={<Navigate to="/instances" replace />} />
               <Route path="/instances" element={<ProtectedRoute><InstancesPage /></ProtectedRoute>} />
               <Route path="/instances/new" element={<ProtectedRoute><InstanceCreatePage /></ProtectedRoute>} />
-              <Route path="/instances/:id" element={<ProtectedRoute><InstancesPage /></ProtectedRoute>} />
+              <Route path="/instances/:id" element={<ProtectedRoute><InstanceLogsPage /></ProtectedRoute>} />
+              <Route path="/instances/:id/edit" element={<ProtectedRoute><InstanceEditPage /></ProtectedRoute>} />
 
               {/* Script Hub */}
               <Route path="/script-hub" element={<ProtectedRoute><ScriptHubPage /></ProtectedRoute>} />

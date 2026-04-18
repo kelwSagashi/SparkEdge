@@ -37,3 +37,4 @@ export const useTagsStore = create<TagsState>((set, get) => ({
     set(s => ({ tags: s.tags.filter(t => t.id !== id) }));
   },
 }));
+

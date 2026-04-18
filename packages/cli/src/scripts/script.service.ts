@@ -1,6 +1,7 @@
-import { Service } from '@nmg8/di';
-import { dbManager } from 'nmg8-db';
-import type { ReturningQueries, DownloadedScriptUpsertValues, DownloadedScriptReturningValues } from 'nmg8-db/src/types';
+import { Service } from '@spark-edge/di';
+import { dbManager } from 'spark-edge-db';
+import type { ReturningQueries, DownloadedScriptUpsertValues, DownloadedScriptReturningValues } from 'spark-edge-db/src/types';
+import { resolveHomePath } from './script.helper';
 
 @Service()
 export class ScriptService {
@@ -28,8 +29,8 @@ export class ScriptService {
     const scriptRes = await this.findById(id);
     if (scriptRes.data && (scriptRes.data as any).local_path) {
       try {
-        const fullPath = (scriptRes.data as any).local_path;
-        if (require('fs').existsSync(fullPath)) {
+        const fullPath = resolveHomePath((scriptRes.data as any).local_path);
+        if (fullPath && require('fs').existsSync(fullPath)) {
           require('fs').rmSync(fullPath, { recursive: true, force: true });
         }
       } catch (err) {
@@ -41,3 +42,4 @@ export class ScriptService {
 }
 
 export default ScriptService;
+

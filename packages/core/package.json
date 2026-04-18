@@ -1,7 +1,7 @@
 {
-  "name": "nmg8-core",
+  "name": "spark-edge-core",
   "version": "1.0.0",
-  "description": "",
+  "description": "Spark Edge Core Engine",
   "scripts": {
     "test": "vitest run",
     "dev": "pnpm watch",
@@ -23,7 +23,7 @@
     "./*": "./*"
   },
   "devDependencies": {
-    "@nmg8/typescript-config": "workspace:*",
+    "@spark-edge/typescript-config": "workspace:*",
     "@types/cors": "^2.8.19",
     "@types/lodash": "^4.17.20",
     "@types/lodash.get": "^4.4.9",
@@ -39,9 +39,9 @@
     "cors": "^2.8.5",
     "fast-glob": "^3.3.3",
     "lodash": "^4.17.21",
-    "nmg8-db": "workspace:*",
-    "nmg8-nodes": "workspace:*",
-    "nmg8-workflow": "workspace:*",
+    "spark-edge-db": "workspace:*",
     "p-cancelable": "^4.0.1"
   }
 }
+
+

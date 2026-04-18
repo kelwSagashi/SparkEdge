@@ -1,4 +1,4 @@
-import { dbManager } from 'nmg8-db';
+import { dbManager } from 'spark-edge-db';
 
 async function verify() {
   const instanceId = 'Guq12FHdgmvsx61O3NY-h';
@@ -20,3 +20,4 @@ async function verify() {
 }
 
 verify().catch(console.error);
+

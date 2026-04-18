@@ -1,4 +1,4 @@
 {
-	"extends": "./packages/@nmg8/typescript-config/tsconfig.common.json",
+	"extends": "./packages/@spark-edge/typescript-config/tsconfig.common.json",
 	"exclude": ["**/dist/**/*", "**/node_modules/**/*"]
 }

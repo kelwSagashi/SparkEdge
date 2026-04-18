@@ -1,7 +1,7 @@
-import { Delete, Get, Post, Put, RestController } from "@nmg8/di";
+import { Delete, Get, Post, Put, RestController } from "@spark-edge/di";
 import { DeviceService } from "./device.service";
 import DeviceRequest from "./device.request";
-import type { DeviceUpsertValues } from 'nmg8-db/src/types';
+import type { DeviceUpsertValues } from 'spark-edge-db/src/types';
 
 @RestController('/devices')
 export class DevicesController {

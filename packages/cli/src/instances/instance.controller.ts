@@ -1,8 +1,8 @@
-import { Delete, Get, Post, Put, RestController } from "@nmg8/di";
+import { Delete, Get, Post, Put, RestController } from "@spark-edge/di";
 import { InstanceService } from "./instance.service";
 import InstanceRequest from "./instance.request";
 import { InstanceRunnerService } from "./instance-runner.service";
-import { dbManager } from "nmg8-db";
+import { dbManager } from "spark-edge-db";
 
 @RestController('/instances')
 export class InstanceController {
@@ -65,3 +65,4 @@ export class InstanceController {
         return { data: result.data, error: result.error };
     }
 }
+

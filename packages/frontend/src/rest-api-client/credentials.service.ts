@@ -1,5 +1,5 @@
 import { axios_api_instance } from '@/server/instance';
-import type { AuthorizationsTypeReturningValues, CredentialReturningValues, CredentialUpsertValues, ReturningQueries } from 'nmg8-db/src/types';
+import type { AuthorizationsTypeReturningValues, CredentialReturningValues, CredentialUpsertValues, ReturningQueries } from 'spark-edge-db/src/types';
 
 export const credentialsApi = {
   list: () => axios_api_instance.get<ReturningQueries<CredentialReturningValues[]>>('/credentials').then((res) => res.data) ,
@@ -9,3 +9,4 @@ export const credentialsApi = {
   update: (id: string, data: Partial<CredentialUpsertValues>) => axios_api_instance.put(`/credentials/${id}`, data).then((res) => res.data),
   delete: (id: string) => axios_api_instance.delete(`/credentials/${id}`).then((res) => res.data),
 };
+

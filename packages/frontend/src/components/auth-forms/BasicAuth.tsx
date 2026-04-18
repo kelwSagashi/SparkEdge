@@ -4,7 +4,7 @@ import { Controller, type UseFormReturn } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import type { FullServerValues } from '../add-server/server-form';
+import type { FullServerValues } from '../add-server/schemas';
 
 interface BasicAuthFormProps {
     form: UseFormReturn<FullServerValues>

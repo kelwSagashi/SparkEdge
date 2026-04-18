@@ -3,7 +3,7 @@ import axios from 'axios';
 import type { AxiosRequestConfig, Method, RawAxiosRequestHeaders } from 'axios';
 import { ResponseError } from './response';
 
-export const BROWSER_ID_STORAGE_KEY = 'nmg8-browserId'
+export const BROWSER_ID_STORAGE_KEY = 'spark-edge-browserId'
 
 const getBrowserId = () => {
 	let browserId = localStorage.getItem(BROWSER_ID_STORAGE_KEY);
@@ -57,8 +57,8 @@ export async function request(config: {
 	
 	if (
 		import.meta.env.NODE_ENV !== 'production' &&
-		!baseURL.includes('api.nmg8.io') &&
-		!baseURL.includes('nmg8.cloud')
+		!baseURL.includes('api.spark-edge.io') &&
+		!baseURL.includes('spark-edge.cloud')
 	) {
 		options.withCredentials = options.withCredentials ?? true;
 	}
@@ -74,7 +74,7 @@ export async function request(config: {
 		return response.data;
 	} catch (error: any) {
 		if (error.message === 'Network Error') {
-			throw new ResponseError("Can't connect to nmg8.", {
+			throw new ResponseError("Can't connect to spark-edge.", {
 				errorCode: 999,
 			});
 		}

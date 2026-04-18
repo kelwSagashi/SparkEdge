@@ -1,8 +1,8 @@
-# nmg8 Copilot Instructions
+# spark-edge Copilot Instructions
 
 ## Project Overview
 
-**nmg8** is a monorepo for an **edge computing automation platform** targeting photovoltaic energy monitoring systems. It's transitioning from a node-graph workflow model to a simpler **Projects & Instances** architecture. The platform runs locally on resource-constrained hardware (Raspberry Pi) with offline-first capabilities.
+**spark-edge** is a monorepo for an **edge computing automation platform** targeting photovoltaic energy monitoring systems. It's transitioning from a node-graph workflow model to a simpler **Projects & Instances** architecture. The platform runs locally on resource-constrained hardware (Raspberry Pi) with offline-first capabilities.
 
 ## Architecture & Key Patterns
 
@@ -13,12 +13,12 @@
   - `packages/cli`: Backend (Express + Node.js) - the main service
   - `packages/frontend`: React + Vite dashboard (port 5173)
   - `packages/db`: SQLite database layer (Drizzle ORM)
-  - `packages/@nmg8/di`: Custom lightweight DI container
+  - `packages/@spark-edge/di`: Custom lightweight DI container
   - `packages/extensions`: Python SDK for custom scripts
 
 ### Dependency Injection Pattern
 
-- Uses custom `@nmg8/di` container with decorators: `@Service()`, `@RestController()`, `@Get/@Post/@Put/@Delete`
+- Uses custom `@spark-edge/di` container with decorators: `@Service()`, `@RestController()`, `@Get/@Post/@Put/@Delete`
 - Controllers auto-register in `ControllerRegistry` via side-effect imports in `server.ts`
 - No factory patterns - constructor injection only with circular dependency detection
 
@@ -114,14 +114,14 @@ Services return wrapped responses; controllers extract data/error. Never throw -
 
 ## Cross-Package Communication
 
-- **CLI ↔ DB**: Import `dbManager` from `nmg8-db` package (already exported)
+- **CLI ↔ DB**: Import `dbManager` from `spark-edge-db` package (already exported)
 - **Frontend ↔ CLI**: HTTP REST calls to `http://localhost:5173/api/*`
 - **Workspace aliases**: TypeScript `baseUrl` allows `@/` paths in cli package
 
 ## Critical Files to Understand First
 
-1. **Architecture**: `nmg8-spec.md` (business domain requirements)
-2. **DI Container**: `packages/@nmg8/di/src/di.ts`
+1. **Architecture**: `spark-edge-spec.md` (business domain requirements)
+2. **DI Container**: `packages/@spark-edge/di/src/di.ts`
 3. **Server Setup**: `packages/cli/src/server.ts` (all middleware, controller registration)
 4. **DB Schema Example**: `packages/db/src/db/schemas.ts` (Drizzle table definitions)
 5. **Service Example**: `packages/cli/src/devices/device.service.ts`

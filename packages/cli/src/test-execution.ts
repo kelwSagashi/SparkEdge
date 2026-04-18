@@ -1,7 +1,7 @@
 import 'reflect-metadata';
-import { Container } from '@nmg8/di';
+import { Container } from '@spark-edge/di';
 import InstanceRunnerService from './instances/instance-runner.service';
-import { dbManager } from 'nmg8-db';
+import { dbManager } from 'spark-edge-db';
 import { Logger } from './simple-logger';
 import { PythonVenvService } from './instances/python-venv.service';
 import { FallbackQueueService } from './instances/fallback-queue.service';
@@ -50,3 +50,4 @@ async function test() {
 }
 
 test().catch(console.error);
+

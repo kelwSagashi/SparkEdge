@@ -1,12 +1,7 @@
 packages:
   - packages/*
   - packages/frontend/**
-  - packages/@nmg8/*
+  - packages/@spark-edge/*
 
 catalog:
   reflect-metadata: 0.2.2
-
-ignoredBuiltDependencies:
-  - better-sqlite3
-  - esbuild
-  - msgpackr-extract

@@ -17,7 +17,7 @@ import type {
   AuthorizationsTypeReturningValues,
   InstanceReturningValues,
   DownloadedScriptReturningValues,
-} from "nmg8-db/src/types";
+} from "spark-edge-db/src/types";
 import { axios_api_instance } from "./instance";
 
 export interface ConfigField {
@@ -264,3 +264,4 @@ export class API {
 }
 
 export const api = new API();
+

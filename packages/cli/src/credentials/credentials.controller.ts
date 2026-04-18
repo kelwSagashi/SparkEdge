@@ -1,4 +1,4 @@
-import { Post, Get, Put, Delete, RestController } from '@nmg8/di';
+import { Post, Get, Put, Delete, RestController } from '@spark-edge/di';
 import { CredentialsService } from './credentials.service';
 import CredentialsRequest from './credentials.request';
 
@@ -41,3 +41,4 @@ export class CredentialsController {
     return this.svc.testCredential(request.body.auth_type_id, request.body.data);
   }
 }
+

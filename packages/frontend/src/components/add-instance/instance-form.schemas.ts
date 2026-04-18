@@ -132,3 +132,4 @@ export type InstanceDestinationValue = z.infer<
 export type DataMappingValue = z.infer<typeof DataMappingSchema>;
 export type ErrorConfigValue = z.infer<typeof ErrorConfigSchema>;
 export type FallbackConfigValue = z.infer<typeof FallbackConfigSchema>;
+

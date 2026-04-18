@@ -99,3 +99,4 @@ export class TemplateResolver {
     }, obj);
   }
 }
+

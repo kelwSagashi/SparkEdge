@@ -1,7 +1,7 @@
-import { Delete, Get, Post, Put, RestController } from "@nmg8/di";
+import { Delete, Get, Post, Put, RestController } from "@spark-edge/di";
 import { ScriptService } from "./script.service";
 import ScriptRequest from "./script.request";
-import { PythonVenvService } from "../instances/python-venv.service";
+// import { PythonVenvService } from "../instances/python-venv.service";
 import multer from 'multer';
 import { Request, Response } from "express";
 import { 
@@ -9,20 +9,22 @@ import {
     setupScriptEnvironment, 
     runPythonScript, 
     SCRIPTS_STORAGE_DIR, 
-    ensureScriptsStorageDir 
+    ensureScriptsStorageDir,
+    toRelativePath,
+    resolveHomePath
 } from "./script.helper";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
 import os from "os";
 
-const upload = multer({ dest: path.join(os.tmpdir(), "nmg8_uploads") });
+const upload = multer({ dest: path.join(os.tmpdir(), "spark-edge_uploads") });
 
 @RestController('/scripts')
 export class ScriptsController {
     constructor(
         private readonly scriptService: ScriptService,
-        private readonly venvService: PythonVenvService
+        // private readonly venvService: PythonVenvService
     ) {}
 
     @Get('/')
@@ -48,7 +50,7 @@ export class ScriptsController {
             return;
         }
 
-        const localPath = (scriptRes.data as any).local_path;
+        const localPath = resolveHomePath((scriptRes.data as any).local_path);
         if (!localPath) {
             res.status(400).json({ error: 'Script path not found' });
             return;
@@ -130,9 +132,9 @@ export class ScriptsController {
                 author: author || 'unknown',
                 version: version || '1.0.0',
                 source: 'local',
-                local_path: finalFolder,
+                local_path: toRelativePath(finalFolder)!,
                 main_file: mainFile,
-                venv_path: venvPath,
+                venv_path: toRelativePath(venvPath),
                 venv_ready: true,
                 tags: tags || [],
                 schema_config: schema,
@@ -171,11 +173,11 @@ export class ScriptsController {
             if (!fs.existsSync(sampleFolder)) return { error: 'Sample not found' };
 
             const venvPath = path.join(sampleFolder, 'venv');
-            // Assuming it's a standard py script with nmg8py SDK
+            // Assuming it's a standard py script with spark-edgepy SDK
             const pythonExe = process.platform === 'win32' ? path.join(venvPath, 'Scripts', 'python.exe') : path.join(venvPath, 'bin', 'python');
             // fallback to global python if venv doesn't exist for samples to be faster
             const executable = fs.existsSync(pythonExe) ? pythonExe : 'python';
-            const sdkPath = path.resolve(__dirname, '../../../../extensions/samples/nmg8_class_code/nmg8pySDK');
+            const sdkPath = path.resolve(__dirname, '../../../../extensions/samples/spark-edge_class_code/spark-edgepySDK');
             const mainFile = path.join(sampleFolder, 'main.py'); // samples must have main.py
 
             const util = require('util');
@@ -205,7 +207,10 @@ export class ScriptsController {
                 const script = scriptRes.data;
                 if (!script) return { error: 'Script not found' };
 
-                const result = await runPythonScript(script.local_path, script.main_file, script.venv_path!, inputs || {});
+                const absoluteLocalPath = resolveHomePath(script.local_path)!;
+                const absoluteVenvPath = resolveHomePath(script.venv_path)!;
+
+                const result = await runPythonScript(absoluteLocalPath, script.main_file, absoluteVenvPath, inputs || {});
                 return { data: result };
             }
             return { error: 'Missing script_id or sample_name' };

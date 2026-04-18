@@ -2,7 +2,7 @@ import type { Request } from 'express';
 
 /**
  * Extension of Express Request with authenticated user data.
- * Previously imported from nmg8-workflow, now self-contained.
+ * Previously imported from spark-edge-workflow, now self-contained.
  */
 export type AuthenticatedRequest<P = {}, Q = {}, B = {}> = Request<P, any, B, Q> & {
   user?: {
@@ -11,3 +11,4 @@ export type AuthenticatedRequest<P = {}, Q = {}, B = {}> = Request<P, any, B, Q>
     role: string;
   };
 };
+

@@ -1,6 +1,6 @@
-import { Service } from '@nmg8/di';
-import { dbManager } from 'nmg8-db';
-import type { ReturningQueries, UserUpsertValues, UserReturningValues } from 'nmg8-db/src/types';
+import { Service } from '@spark-edge/di';
+import { dbManager } from 'spark-edge-db';
+import type { ReturningQueries, UserUpsertValues, UserReturningValues } from 'spark-edge-db/src/types';
 
 @Service()
 export class UserService {
@@ -37,3 +37,4 @@ export class UserService {
 }
 
 export default UserService;
+

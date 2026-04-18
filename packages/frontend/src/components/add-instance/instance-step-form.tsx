@@ -25,7 +25,7 @@ import type {
   ProjectReturningValues,
   DownloadedScriptReturningValues,
   ResourceOperationReturningValues,
-} from "nmg8-db/src/types";
+} from "spark-edge-db/src/types";
 
 type Props = {
   instanceId?: string;
@@ -474,3 +474,4 @@ export default function InstanceStepForm({ instanceId, onClose }: Props) {
     </FormProvider>
   );
 }
+

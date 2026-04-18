@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ProjectReturningValues, UserReturningValues } from 'nmg8-db/src/types';
+import type { ProjectReturningValues, UserReturningValues } from 'spark-edge-db/src/types';
 import { authApi } from '@/rest-api-client/auth.service';
 import { api } from '@/server/server.service';
 
@@ -98,3 +98,4 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   }
 }));
+

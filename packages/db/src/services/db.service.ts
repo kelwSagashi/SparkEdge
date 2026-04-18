@@ -481,3 +481,7 @@ export class DatabaseService {
 }
 
 export const dbManager = DatabaseService.getInstance(db);
+
+
+
+

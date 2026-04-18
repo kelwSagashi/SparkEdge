@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { credentialsApi } from '../rest-api-client/credentials.service';
-import type { AuthorizationsTypeReturningValues, CredentialReturningValues, CredentialUpsertValues } from 'nmg8-db/src/types';
+import type { AuthorizationsTypeReturningValues, CredentialReturningValues, CredentialUpsertValues } from 'spark-edge-db/src/types';
 
 interface CredentialsState {
   credentials: CredentialReturningValues[];
@@ -66,3 +66,4 @@ export const useCredentialsStore = create<CredentialsState>((set, get) => ({
     await get().fetchAll();
   },
 }));
+

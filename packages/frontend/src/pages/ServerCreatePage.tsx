@@ -1,7 +1,7 @@
 import ServerStepForm from "@/components/add-server/server-form";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import type { ServerTypeReturningValues } from "nmg8-db/src/types";
+import type { ServerTypeReturningValues } from "spark-edge-db/src/types";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -35,3 +35,4 @@ export default function InstanceCreatePage() {
     </main>
   );
 }
+

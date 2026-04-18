@@ -1,4 +1,4 @@
-import type { DownloadedScriptUpsertValues } from 'nmg8-db/src/types';
+import type { DownloadedScriptUpsertValues } from 'spark-edge-db/src/types';
 import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace ScriptRequest {
@@ -9,3 +9,4 @@ export namespace ScriptRequest {
 }
 
 export default ScriptRequest;
+

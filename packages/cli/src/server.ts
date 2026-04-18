@@ -2,7 +2,7 @@ import express, {Application, Request, Response, Router} from "express";
 import cors from "cors";
 import jwt from 'jsonwebtoken';
 import { Logger } from "./simple-logger";
-import { Container, Service } from "@nmg8/di";
+import { Container, Service } from "@spark-edge/di";
 import { ControllerRegistry } from "./controller.registry";
 import { send } from "./response-helper";
 import path from "node:path";
@@ -48,7 +48,7 @@ export class Server {
         // Authenticate request
         this.app.use(async (req: Request, _res: Response, next) => {
             try {
-                const { dbManager } = await import('nmg8-db');
+                const { dbManager } = await import('spark-edge-db');
                 const secret = process.env.JWT_SECRET ?? 'dev-secret';
 
                 // Helper to verify JWT and find user
@@ -63,7 +63,7 @@ export class Server {
                 };
 
                 // 1. Try JWT from Cookie
-                const cookieToken = (req.cookies as any)?.nmg8_token;
+                const cookieToken = (req.cookies as any)?.spark_edge_token;
                 if (cookieToken) {
                     const user = verifyUserByToken(cookieToken);
                     if (user) {
@@ -175,3 +175,4 @@ export class Server {
         return router;
     }
 }
+

@@ -6,3 +6,4 @@ export interface Driver {
 export interface DriverConstructor<T = any> {
   new (config: T): Driver;
 }
+

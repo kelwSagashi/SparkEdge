@@ -1,6 +1,6 @@
 import { ServerService } from "./server.service";
 import type ServerRequest from "./server.request";
-import { Delete, Get, Post, Put, RestController } from "@nmg8/di";
+import { Delete, Get, Post, Put, RestController } from "@spark-edge/di";
 
 @RestController("/servers")
 export class ServersController {
@@ -57,3 +57,4 @@ export class ServersController {
 }
 
 export default ServersController;
+

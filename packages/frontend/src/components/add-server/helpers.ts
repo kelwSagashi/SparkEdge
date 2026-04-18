@@ -39,3 +39,4 @@ export function recordToHeadersArray(headersObj?: Record<string, any>) {
     type: (typeof value === "number" ? "number" : "text") as "text" | "number",
   }));
 }
+

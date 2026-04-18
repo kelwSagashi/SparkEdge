@@ -9,7 +9,7 @@ import { api } from '@/server/server.service';
 import type { 
     DeviceUpsertValues, 
     ServerReturningValues, 
-} from 'nmg8-db/src/types';
+} from 'spark-edge-db/src/types';
 import { type DeviceFormValues } from './types';
 import DeviceConfigForm from './device-config-form';
 import { Play, Loader2, Info } from 'lucide-react';

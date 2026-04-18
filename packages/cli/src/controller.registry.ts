@@ -1,4 +1,4 @@
-import { Container, Controller, ControllerRegistryMetadata, RateLimit, Service } from "@nmg8/di";
+import { Container, Controller, ControllerRegistryMetadata, RateLimit, Service } from "@spark-edge/di";
 import type { Request, Response, RequestHandler } from 'express';
 import { Router } from "express";
 import { rateLimit as expressRateLimit } from 'express-rate-limit';

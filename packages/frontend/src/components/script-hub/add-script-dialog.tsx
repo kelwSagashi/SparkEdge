@@ -280,3 +280,4 @@ export function AddScriptDialog({ open, onOpenChange, onSuccess }: AddScriptDial
     </Dialog>
   );
 }
+

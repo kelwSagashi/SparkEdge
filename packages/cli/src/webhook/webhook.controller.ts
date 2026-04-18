@@ -1,4 +1,4 @@
-import { Post, RestController } from '@nmg8/di';
+import { Post, RestController } from '@spark-edge/di';
 import { InstanceRunnerService } from '../instances/instance-runner.service';
 import { InstanceService } from '../instances/instance.service';
 import type { Request } from 'express';
@@ -33,3 +33,4 @@ export class WebhookController {
     return { data: { triggered: true, execution: result } };
   }
 }
+

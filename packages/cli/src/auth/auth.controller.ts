@@ -1,9 +1,9 @@
-import { Post, Get, RestController } from '@nmg8/di';
+import { Post, Get, RestController } from '@spark-edge/di';
 import { Response, Request } from 'express';
 import AuthService from './auth.service';
 import AuthRequest from './auth.request';
 
-const COOKIE_NAME = 'nmg8_token';
+const COOKIE_NAME = 'spark_edge_token';
 
 @RestController('/auth')
 export class AuthController {
@@ -44,3 +44,4 @@ export class AuthController {
 }
 
 export default AuthController;
+

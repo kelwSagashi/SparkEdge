@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { api } from '@/server/server.service';
-import type { ServerReturningValues } from 'nmg8-db/src/types';
+import type { ServerReturningValues } from 'spark-edge-db/src/types';
 
 type ServersState = {
   servers: ServerReturningValues[];
@@ -33,3 +33,4 @@ export const useServerssStore = create<ServersState>((set) => ({
     set(s => ({ servers: s.servers.filter(sc => sc.id !== id) }));
   }
 }));
+

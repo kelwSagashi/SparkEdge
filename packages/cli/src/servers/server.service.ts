@@ -1,10 +1,10 @@
-import { Service } from '@nmg8/di';
-import { dbManager } from 'nmg8-db';
+import { Service } from '@spark-edge/di';
+import { dbManager } from 'spark-edge-db';
 import type { 
   ServerUpsertValues, 
   ServerResourceUpsertValues, 
   ResourceOperationUpsertValues 
-} from 'nmg8-db/src/types';
+} from 'spark-edge-db/src/types';
 import { CredentialsService } from '../credentials/credentials.service';
 
 @Service()
@@ -56,3 +56,4 @@ export class ServerService {
 }
 
 export default ServerService;
+

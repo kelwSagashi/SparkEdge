@@ -1,5 +1,5 @@
 {
-	"extends": "@nmg8/typescript-config/tsconfig.common.json",
+	"extends": "@spark-edge/typescript-config/tsconfig.common.json",
 	"compilerOptions": {
 		"rootDir": ".",
 		"types": ["node"],

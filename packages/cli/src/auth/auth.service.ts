@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Service } from '@nmg8/di';
-import { dbManager, UserUpsertValues } from 'nmg8-db';
+import { Service } from '@spark-edge/di';
+import { dbManager, UserUpsertValues } from 'spark-edge-db';
 import AuthRequest from './auth.request';
 import AuthResponse from './auth.response';
 
@@ -92,3 +92,4 @@ export class AuthService {
 }
 
 export default AuthService;
+

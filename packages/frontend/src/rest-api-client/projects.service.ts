@@ -1,4 +1,4 @@
-import type { ProjectUpsertValues } from 'nmg8-db/src/types';
+import type { ProjectUpsertValues } from 'spark-edge-db/src/types';
 import { axios_api_instance } from '@/server/instance';
 
 
@@ -21,3 +21,4 @@ export const projectsApi = {
 
   addMember: (id: string, data: { user_id: string; role?: string }) => axios_api_instance.post(`/projects/${id}/members`, data).then((res) => res.data),
 };
+

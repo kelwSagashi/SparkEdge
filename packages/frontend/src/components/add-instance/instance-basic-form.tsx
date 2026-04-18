@@ -18,7 +18,7 @@ import TagInput from "@/components/tag-input";
 import type {
   DeviceReturningValues,
   ProjectReturningValues,
-} from "nmg8-db/src/types";
+} from "spark-edge-db/src/types";
 import type { InstanceFormValues } from "./instance-form.schemas";
 import { useAuthStore } from "@/stores/auth-store";
 import { useShallow } from "zustand/react/shallow";
@@ -172,3 +172,4 @@ export function InstanceBasicForm({
     </ScrollArea>
   );
 }
+

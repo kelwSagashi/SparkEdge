@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import ReactMarkdown from 'react-markdown';
 import { scriptsApi } from '@/rest-api-client/scripts.service';
-import type { DownloadedScriptReturningValues } from 'nmg8-db/src/types';
+import type { DownloadedScriptReturningValues } from 'spark-edge-db/src/types';
 
 export default function ScriptDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -210,7 +210,7 @@ export default function ScriptDetailsPage() {
                   <h4 className="text-sm font-semibold text-white mb-2">Instalação via CLI</h4>
                   <div className="relative group">
                     <pre className="bg-black/40 p-3 rounded-lg text-[10px] font-mono text-zinc-300 overflow-x-auto border border-white/5">
-                      nmg8 install {script.id}
+                      spark-edge install {script.id}
                     </pre>
                   </div>
                </CardContent>
@@ -221,3 +221,4 @@ export default function ScriptDetailsPage() {
     </div>
   );
 }
+

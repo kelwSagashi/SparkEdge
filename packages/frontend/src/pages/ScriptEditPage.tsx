@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { scriptsApi } from '@/rest-api-client/scripts.service';
-import type { DownloadedScriptReturningValues } from 'nmg8-db/src/types';
+import type { DownloadedScriptReturningValues } from 'spark-edge-db/src/types';
 
 export default function ScriptEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -192,3 +192,4 @@ export default function ScriptEditPage() {
     </div>
   );
 }
+

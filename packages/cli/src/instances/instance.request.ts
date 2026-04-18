@@ -74,3 +74,4 @@ export namespace InstanceRequest {
 }
 
 export default InstanceRequest;
+

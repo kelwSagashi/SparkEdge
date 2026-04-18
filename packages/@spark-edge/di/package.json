@@ -1,5 +1,5 @@
 {
-  "name": "@nmg8/di",
+  "name": "@spark-edge/di",
   "version": "0.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -19,6 +19,6 @@
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@nmg8/typescript-config": "workspace:*"
+    "@spark-edge/typescript-config": "workspace:*"
   }
 }

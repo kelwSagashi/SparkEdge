@@ -63,3 +63,4 @@ export class GoogleDriveAdapter extends BaseAdapter {
     return res.json().catch(() => ({}))
   }
 }
+

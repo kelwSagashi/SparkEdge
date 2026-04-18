@@ -1,4 +1,4 @@
-import type { UserUpsertValues } from 'nmg8-db/src/types';
+import type { UserUpsertValues } from 'spark-edge-db/src/types';
 import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace UserRequest {
@@ -11,3 +11,4 @@ export namespace UserRequest {
 }
 
 export default UserRequest;
+

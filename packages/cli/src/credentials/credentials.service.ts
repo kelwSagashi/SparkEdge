@@ -1,8 +1,8 @@
-import { Service } from '@nmg8/di';
-import { dbManager } from 'nmg8-db';
+import { Service } from '@spark-edge/di';
+import { dbManager } from 'spark-edge-db';
 import type { 
   CredentialUpsertValues,
-} from 'nmg8-db';
+} from 'spark-edge-db';
 import { DestinationFactory } from '../instances/destination-adapters';
 import { Logger } from '@/simple-logger';
 
@@ -103,3 +103,4 @@ export class CredentialsService {
     }
   }
 }
+

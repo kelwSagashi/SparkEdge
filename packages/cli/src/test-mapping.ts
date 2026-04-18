@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Container } from '@nmg8/di';
+import { Container } from '@spark-edge/di';
 import InstanceRunnerService from './instances/instance-runner.service';
 import { TemplateResolver } from './instances/template-resolver';
 import { Logger } from './simple-logger';
@@ -73,3 +73,4 @@ async function testMapping() {
 }
 
 testMapping().catch(console.error);
+

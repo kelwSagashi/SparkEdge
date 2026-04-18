@@ -1,7 +1,7 @@
 require('reflect-metadata');
 
 (async () => {
-	const { Container } = await import('@nmg8/di');
+	const { Container } = await import('@spark-edge/di');
 	const { CommandRegistry } = await import('../dist/command-registry.js');
 	await Container.get(CommandRegistry).execute();
 })();

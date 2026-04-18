@@ -1,4 +1,4 @@
-import { Get, Post, RestController } from '@nmg8/di';
+import { Get, Post, RestController } from '@spark-edge/di';
 import { AdapterRegistry } from './adapter-base';
 import { DestinationFactory } from './destination-adapters';
 import { Logger } from '@/simple-logger';
@@ -33,3 +33,4 @@ export class AdaptersController {
 }
 
 export default AdaptersController;
+

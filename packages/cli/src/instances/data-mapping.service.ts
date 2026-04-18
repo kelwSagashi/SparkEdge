@@ -3,7 +3,7 @@
  * Handles mapping of script output and device data to resource operation input schema
  */
 
-import { Service } from "@nmg8/di";
+import { Service } from "@spark-edge/di";
 import type { IDataMapping, IDataField } from "./instance.types";
 
 @Service()
@@ -250,3 +250,4 @@ export class DataMappingService {
 }
 
 export default DataMappingService;
+

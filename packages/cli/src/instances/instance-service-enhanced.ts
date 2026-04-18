@@ -4,13 +4,13 @@
  * Uses existing InstanceService from instance.service.ts
  */
 
-import { Service } from "@nmg8/di";
-import { dbManager } from "nmg8-db";
+import { Service } from "@spark-edge/di";
+import { dbManager } from "spark-edge-db";
 import { DataMappingService } from "./data-mapping.service";
 import type {
   ReturningQueries,
   InstanceReturningValues,
-} from "nmg8-db/src/types";
+} from "spark-edge-db/src/types";
 
 @Service()
 export class InstanceServiceEnhanced {
@@ -287,3 +287,4 @@ export class InstanceServiceEnhanced {
 }
 
 export default InstanceServiceEnhanced;
+

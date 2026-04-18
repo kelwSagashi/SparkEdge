@@ -54,9 +54,9 @@ export default function SideBar({ ...props }: React.ComponentProps<typeof Sideba
       <SidebarHeader className='flex items-center gap-3 p-4 border-b border-white/[0.06]'>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
-            <span className="text-white font-bold text-[10px]">NMG8</span>
+            <span className="text-white font-bold text-[10px] leading-tight text-center">SPARK<br/>EDGE</span>
           </div>
-          <span className="text-white font-semibold text-sm tracking-tight group-data-[collapsible=icon]:hidden">nmg8</span>
+          <span className="text-white font-semibold text-sm tracking-tight group-data-[collapsible=icon]:hidden">Spark Edge</span>
         </div>
       </SidebarHeader>
       <SidebarContent className='h-full overflow-hidden flex flex-col'>

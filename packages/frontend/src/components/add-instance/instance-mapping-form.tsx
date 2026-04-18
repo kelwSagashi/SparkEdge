@@ -10,7 +10,7 @@ import type {
   DownloadedScriptReturningValues,
   DeviceReturningValues,
   SchemaConfigIO,
-} from "nmg8-db/src/types";
+} from "spark-edge-db/src/types";
 import type { InstanceFormValues } from "./instance-form.schemas";
 import { useEffect } from "react";
 
@@ -379,3 +379,4 @@ export function InstanceMappingForm({
     </ScrollArea>
   );
 }
+

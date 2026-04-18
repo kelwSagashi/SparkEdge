@@ -8,7 +8,37 @@ import crypto from 'crypto';
 
 const execAsync = promisify(exec);
 
-export const SCRIPTS_STORAGE_DIR = path.join(os.homedir(), '.nmg8', 'scripts');
+export const SCRIPTS_STORAGE_DIR = path.join(os.homedir(), '.spark_edge', 'scripts');
+
+/**
+ * Resolves a path that might be relative to the home directory.
+ * If the path starts with '.spark_edge', it is joined with the home directory.
+ */
+export function resolveHomePath(p: string | null | undefined): string | null {
+    if (!p) return null;
+    if (p.startsWith('.spark_edge')) {
+        return path.join(os.homedir(), p);
+    }
+    return p;
+}
+
+/**
+ * Converts an absolute path to a relative path starting with '.spark_edge' 
+ * if it is inside the home directory.
+ */
+export function toRelativePath(p: string | null | undefined): string | null {
+    if (!p) return null;
+    const home = os.homedir();
+    if (p.startsWith(home)) {
+        // Remove home prefix and any leading separator
+        let relative = p.slice(home.length);
+        if (relative.startsWith(path.sep)) {
+            relative = relative.slice(1);
+        }
+        return relative;
+    }
+    return p;
+}
 
 export async function ensureScriptsStorageDir() {
     if (!fs.existsSync(SCRIPTS_STORAGE_DIR)) {
@@ -17,7 +47,7 @@ export async function ensureScriptsStorageDir() {
 }
 
 export async function extractZipToTemp(zipFilePath: string): Promise<{ tempFolder: string, pyFiles: string[], hasSparkit: boolean }> {
-    const tempFolder = path.join(os.tmpdir(), `nmg8_script_${crypto.randomUUID()}`);
+    const tempFolder = path.join(os.tmpdir(), `spark_edge_script_${crypto.randomUUID()}`);
     fs.mkdirSync(tempFolder, { recursive: true });
 
     const zip = new AdmZip(zipFilePath);
@@ -116,11 +146,11 @@ export async function runPythonScript(scriptFolder: string, mainFile: string, ve
 
     // We can pass the JSON input via `--input` flag payload formatted as a string.
     // Or we write it to a temp file and use `--input-file`. Using temp file avoids quote escapism issues.
-    const tempInputFile = path.join(os.tmpdir(), `nmg8_input_${crypto.randomUUID()}.json`);
+    const tempInputFile = path.join(os.tmpdir(), `spark-edge_input_${crypto.randomUUID()}.json`);
     fs.writeFileSync(tempInputFile, JSON.stringify(inputPayload), 'utf8');
 
     try {
-        const { stdout, stderr } = await execAsync(`"${pythonExe}" "${mainFilePath}" --input-file "${tempInputFile}"`);
+        const { stdout } = await execAsync(`"${pythonExe}" "${mainFilePath}" --input-file "${tempInputFile}"`);
         try {
             const result = JSON.parse(stdout);
             return result;
@@ -133,3 +163,4 @@ export async function runPythonScript(scriptFolder: string, mainFile: string, ve
         if (fs.existsSync(tempInputFile)) fs.unlinkSync(tempInputFile);
     }
 }
+

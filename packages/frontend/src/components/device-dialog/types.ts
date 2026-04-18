@@ -44,3 +44,4 @@ export const endpointSchema = z.object({
 });
 
 export type EndpointsFormValues = z.infer<typeof endpointSchema>;
+

@@ -1,4 +1,4 @@
-import { Post, Get, Put, Delete, RestController } from '@nmg8/di';
+import { Post, Get, Put, Delete, RestController } from '@spark-edge/di';
 import { ServerTypesService } from './server-types.service';
 import ServerTypesRequest from './server-types.request';
 
@@ -33,3 +33,4 @@ export class ServerTypesController {
 }
 
 export default ServerTypesController;
+

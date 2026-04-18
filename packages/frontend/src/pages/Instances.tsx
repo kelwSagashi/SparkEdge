@@ -7,7 +7,7 @@ import {
   Search, Zap, ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { InstanceReturningValues } from 'nmg8-db/src/types';
+import type { InstanceReturningValues } from 'spark-edge-db/src/types';
 import { cn } from '@/lib/utils';
 
 const statusConfig: Record<InstanceReturningValues['status'], { label: string; color: string; dotColor: string }> = {
@@ -280,3 +280,4 @@ export default function InstancesPage() {
     </main>
   );
 }
+

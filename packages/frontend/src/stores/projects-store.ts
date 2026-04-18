@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { projectsApi } from '@/rest-api-client/projects.service';
-import type { ProjectReturningValues, ProjectUpsertValues } from 'nmg8-db/src/types';
+import type { ProjectReturningValues, ProjectUpsertValues } from 'spark-edge-db/src/types';
 
 type ProjectsState = {
   projects: ProjectReturningValues[];
@@ -38,3 +38,4 @@ export const useProjectsStore = create<ProjectsState>((set) => ({
     set(s => ({ projects: s.projects.filter(p => p.id !== id) }));
   },
 }));
+

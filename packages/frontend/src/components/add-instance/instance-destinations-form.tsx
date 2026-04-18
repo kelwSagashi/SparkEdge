@@ -21,7 +21,7 @@ import { api } from "@/server/server.service";
 import type {
   ServerReturningValues,
   ResourceOperationReturningValues,
-} from "nmg8-db/src/types";
+} from "spark-edge-db/src/types";
 import type { InstanceFormValues } from "./instance-form.schemas";
 
 interface InstanceDestinationsFormProps {
@@ -438,3 +438,4 @@ export function InstanceDestinationsForm({
     </ScrollArea>
   );
 }
+

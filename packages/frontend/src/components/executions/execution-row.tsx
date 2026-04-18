@@ -158,3 +158,4 @@ export function ExecutionRow({ execution }: { execution: InstanceExecution }) {
     </motion.div>
   );
 }
+

@@ -3,12 +3,13 @@ import type {
   ServerTypeReturningValues,
   ProjectReturningValues,
   CredentialReturningValues 
-} from 'nmg8-db/src/types';
+} from 'spark-edge-db/src/types';
 
 /**
  * Extended Server interface with related data for UI display
  */
 export interface ServerWithRelations extends ServerReturningValues {
+  base_url?: string;
   serverType?: ServerTypeReturningValues;
   project?: ProjectReturningValues;
   credential?: CredentialReturningValues;
@@ -33,3 +34,4 @@ export interface HeaderKeyValue {
   key: string;
   value: string;
 }
+

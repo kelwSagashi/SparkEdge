@@ -1,5 +1,5 @@
-import { Service } from '@nmg8/di';
-import { dbManager } from 'nmg8-db';
+import { Service } from '@spark-edge/di';
+import { dbManager } from 'spark-edge-db';
 
 @Service()
 export class TagsService {
@@ -30,3 +30,4 @@ export class TagsService {
     return tagIds;
   }
 }
+

@@ -1,5 +1,5 @@
-import { Get, Post, RestController } from '@nmg8/di';
-import { dbManager } from 'nmg8-db';
+import { Get, Post, RestController } from '@spark-edge/di';
+import { dbManager } from 'spark-edge-db';
 import type { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 @RestController('/fallback')
@@ -16,3 +16,4 @@ export class FallbackController {
     return { data: result.data, error: result.error };
   }
 }
+

@@ -10,3 +10,8 @@ export default {
     url: process.env.DB_FILE_NAME!,
   },
 } satisfies Config;
+
+
+
+
+

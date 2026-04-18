@@ -23,3 +23,4 @@ export function ServersEmptyState({ onAddServer }: ServersEmptyStateProps) {
     </div>
   );
 }
+

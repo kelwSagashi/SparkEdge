@@ -1,4 +1,4 @@
-import type { ServerTypeUpsertValues } from 'nmg8-db/src/types';
+import type { ServerTypeUpsertValues } from 'spark-edge-db/src/types';
 import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace ServerTypesRequest {
@@ -10,3 +10,4 @@ export namespace ServerTypesRequest {
 }
 
 export default ServerTypesRequest;
+

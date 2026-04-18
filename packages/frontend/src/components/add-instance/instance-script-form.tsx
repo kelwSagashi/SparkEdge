@@ -15,7 +15,7 @@ import { JsonViewMain } from "../json-view/json-view";
 import type {
   DownloadedScriptReturningValues,
   DeviceReturningValues,
-} from "nmg8-db/src/types";
+} from "spark-edge-db/src/types";
 import type { InstanceFormValues } from "./instance-form.schemas";
 
 interface InstanceScriptFormProps {
@@ -314,3 +314,4 @@ export function InstanceScriptForm({
     </ScrollArea>
   );
 }
+

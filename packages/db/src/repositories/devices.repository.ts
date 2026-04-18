@@ -66,3 +66,8 @@ export class DevicesRepository {
 }
 
 export default DevicesRepository;
+
+
+
+
+

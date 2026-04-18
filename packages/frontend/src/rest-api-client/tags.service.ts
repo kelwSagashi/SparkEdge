@@ -1,5 +1,5 @@
 import { axios_api_instance } from '@/server/instance';
-import type { TagReturningValues } from 'nmg8-db/src/types';
+import type { TagReturningValues } from 'spark-edge-db/src/types';
 
 export type Tag = TagReturningValues;
 
@@ -15,3 +15,4 @@ export const tagsApi = {
   delete: (id: string) =>
     axios_api_instance.delete(`/tags/${id}`).then((res) => res.data),
 };
+

@@ -1,5 +1,5 @@
 {
-  "extends": "@nmg8/typescript-config/tsconfig.frontend.json",
+  "extends": "../@spark-edge/typescript-config/tsconfig.frontend.json",
   "files": [],
   "compilerOptions": {
     "baseUrl": ".",
@@ -15,9 +15,6 @@
     },
     {
       "path": "./tsconfig.node.json"
-    },
-    { 
-      "path": "../workflow/tsconfig.build.esm.json"
-    },
+    }
   ],
 }

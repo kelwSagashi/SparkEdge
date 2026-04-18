@@ -2,7 +2,7 @@ import type {
   ServerUpsertValues, 
   ServerResourceUpsertValues, 
   ResourceOperationUpsertValues 
-} from 'nmg8-db/src/types';
+} from 'spark-edge-db/src/types';
 import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace ServerRequest {
@@ -24,3 +24,4 @@ export namespace ServerRequest {
 }
 
 export default ServerRequest;
+

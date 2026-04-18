@@ -5,7 +5,7 @@ import {
     ServerResourceReturningValues,
     ResourceOperationReturningValues,
     AuthorizationsTypeReturningValues
-} from 'nmg8-db';
+} from 'spark-edge-db';
 import { ServerTypeConstructor } from './server-types';
 
 export interface DestinationAdapter {
@@ -62,7 +62,7 @@ export class AdapterRegistry {
   }
 
   static async syncWithDatabase() {
-    const { dbManager } = await import('nmg8-db');
+    const { dbManager } = await import('spark-edge-db');
     const adapterMetadata = this.getAllMetadata();
     
     for (const metadata of adapterMetadata) {
@@ -121,3 +121,4 @@ export abstract class BaseAdapter<TCreds = any> implements DestinationAdapter {
       };
   }
 }
+

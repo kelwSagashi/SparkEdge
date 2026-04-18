@@ -163,3 +163,4 @@ export function EndpointMapping({ mapping, onChange, suggestedFields = [] }: End
     </div>
   );
 }
+

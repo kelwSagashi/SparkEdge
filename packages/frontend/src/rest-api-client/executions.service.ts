@@ -1,5 +1,5 @@
 import { axios_api_instance } from '@/server/instance';
-import type { InstanceExecutionReturningValues, ReturningQueries } from 'nmg8-db/src/types';
+import type { InstanceExecutionReturningValues, ReturningQueries } from 'spark-edge-db/src/types';
 
 export const executionsApi = {
   list: () =>
@@ -11,3 +11,4 @@ export const executionsApi = {
   listByInstance: (instanceId: string) =>
     axios_api_instance.get<ReturningQueries<InstanceExecutionReturningValues[]>>(`/executions/instance/${instanceId}`).then((res) => res.data),
 };
+

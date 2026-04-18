@@ -1,4 +1,4 @@
-import { Service } from '@nmg8/di';
+import { Service } from '@spark-edge/di';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -13,7 +13,7 @@ export class PythonVenvService {
   private readonly baseVenvDir: string;
 
   constructor(private readonly logger: Logger) {
-    this.baseVenvDir = path.resolve(process.cwd(), '.nmg8', 'venvs');
+    this.baseVenvDir = path.resolve(process.cwd(), '.spark-edge', 'venvs');
     if (!fs.existsSync(this.baseVenvDir)) {
       fs.mkdirSync(this.baseVenvDir, { recursive: true });
     }
@@ -137,3 +137,4 @@ export class PythonVenvService {
 }
 
 export default PythonVenvService;
+

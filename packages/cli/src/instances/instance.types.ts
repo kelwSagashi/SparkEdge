@@ -7,7 +7,7 @@ import type {
   DeviceReturningValues,
   DownloadedScriptReturningValues,
   InstanceReturningValues,
-} from "nmg8-db/src/types";
+} from "spark-edge-db/src/types";
 
 export type TriggerType = "interval" | "webhook" | "interval_and_webhook";
 export type FallbackStrategy = "background_job" | "active_queue";
@@ -228,3 +228,4 @@ export interface IExecutionLog {
   message: string;
   timestamp: string;
 }
+

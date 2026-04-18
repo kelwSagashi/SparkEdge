@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { scriptsApi } from '@/rest-api-client/scripts.service';
-import type { DownloadedScriptReturningValues, DownloadedScriptUpsertValues } from 'nmg8-db/src/types';
+import type { DownloadedScriptReturningValues, DownloadedScriptUpsertValues } from 'spark-edge-db/src/types';
 
 type ScriptsState = {
   scripts: DownloadedScriptReturningValues[];
@@ -40,3 +40,4 @@ export const useScriptsStore = create<ScriptsState>((set) => ({
     set({ samples: res?.data ?? [] });
   },
 }));
+

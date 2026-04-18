@@ -10,11 +10,11 @@ import { scriptsApi } from '@/rest-api-client/scripts.service';
 import { AddScriptDialog } from '@/components/script-hub/add-script-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import type { DownloadedScriptReturningValues } from 'nmg8-db/src/types';
+import type { DownloadedScriptReturningValues } from 'spark-edge-db/src/types';
 
 import ScriptPlayground from '@/components/ScriptPlayground';
 import { inferSchema } from '@/utils/schema-inference';
-import type { SchemaConfigIO } from 'nmg8-db/src/types';
+import type { SchemaConfigIO } from 'spark-edge-db/src/types';
 
 /**
  * Converte um esquema JSON (inferido) para o formato SchemaConfigIO[]
@@ -349,3 +349,4 @@ export default function ScriptHubPage() {
     </main>
   );
 }
+

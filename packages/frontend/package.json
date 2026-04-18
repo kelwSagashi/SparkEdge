@@ -1,5 +1,5 @@
 {
-  "name": "nmg8-frontend",
+  "name": "spark-edge-ui",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -36,7 +36,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.25.0",
     "lucide-react": "^0.544.0",
-    "nmg8-db": "workspace:*",
+    "spark-edge-db": "workspace:*",
     "react": "^19.1.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
-    "@nmg8/typescript-config": "workspace:*",
+    "@spark-edge/typescript-config": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.6.2",
     "@types/react": "^19.1.16",
@@ -72,3 +72,4 @@
     "vite": "^7.1.7"
   }
 }
+

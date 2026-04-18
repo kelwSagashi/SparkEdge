@@ -1,4 +1,4 @@
-import type { DownloadedScriptUpsertValues } from 'nmg8-db/src/types';
+import type { DownloadedScriptUpsertValues } from 'spark-edge-db/src/types';
 import { axios_api_instance } from '@/server/instance';
 
 export const scriptsApi = {
@@ -27,3 +27,4 @@ export const scriptsApi = {
   runPlayground: (data: { script_id?: string; sample_name?: string; inputs: any }) =>
     axios_api_instance.post('/scripts/playground/run', data).then((res) => res.data),
 };
+

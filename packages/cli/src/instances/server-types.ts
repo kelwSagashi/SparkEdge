@@ -1,4 +1,4 @@
-import { ServerTypeUpsertValues } from 'nmg8-db';
+import { ServerTypeUpsertValues } from 'spark-edge-db';
 
 export interface ServerTypeMetadata extends ServerTypeUpsertValues {}
 
@@ -31,7 +31,7 @@ export class ServerTypeRegistry {
   }
 
   static async syncWithDatabase() {
-    const { dbManager } = await import('nmg8-db');
+    const { dbManager } = await import('spark-edge-db');
     const types = this.getAllMetadata();
     for (const type of types) {
       await dbManager.serverTypes.upsert(type);
@@ -124,3 +124,4 @@ export class MongoServerType {
     description: "Inserção de documentos em coleções do MongoDB."
   };
 }
+

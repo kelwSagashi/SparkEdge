@@ -3,8 +3,8 @@
  * REST API endpoints for instance management
  */
 
-import { RestController, Get, Post, Put, Delete } from "@nmg8/di";
-import { dbManager } from "nmg8-db";
+import { RestController, Get, Post, Put, Delete } from "@spark-edge/di";
+import { dbManager } from "spark-edge-db";
 import { InstanceService } from "./instance.service";
 import { InstanceServiceEnhanced } from "./instance-service-enhanced";
 import { InstanceRequest } from "./instance.request";
@@ -196,3 +196,4 @@ export class InstanceAdvancedController {
 }
 
 export default InstanceAdvancedController;
+

@@ -1,4 +1,5 @@
-import type { DataMappingUpsertValues, InstanceDestinationUpsertValues, InstanceReturningValues, InstanceUpsertValues, ReturningQueries } from 'nmg8-db/src/types';
+import type { DataMappingUpsertValues, InstanceDestinationUpsertValues, InstanceReturningValues, InstanceUpsertValues, ReturningQueries } from 'spark-edge-db/src/types';
+export type Instance = InstanceReturningValues;
 import { axios_api_instance } from '@/server/instance';
 
 export namespace InstanceRequest {
@@ -38,3 +39,4 @@ export const instancesApi = {
 export const executionsApi = {
   list: () => axios_api_instance.get<ReturningQueries<InstanceReturningValues>>('/executions'),
 };
+

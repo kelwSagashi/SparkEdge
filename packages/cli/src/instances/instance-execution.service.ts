@@ -3,8 +3,8 @@
  * Handles the complete execution flow of an instance
  */
 
-import { Service } from "@nmg8/di";
-import { dbManager } from "nmg8-db";
+import { Service } from "@spark-edge/di";
+import { dbManager } from "spark-edge-db";
 import { Logger } from "@/simple-logger";
 import type {
   IExecutionContext,
@@ -144,3 +144,4 @@ export class InstanceExecutionService {
 }
 
 export default InstanceExecutionService;
+

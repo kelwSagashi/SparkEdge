@@ -1,5 +1,5 @@
 {
-	"extends": "../@nmg8/typescript-config/tsconfig.backend.json",
+	"extends": "../@spark-edge/typescript-config/tsconfig.backend.json",
 	"compilerOptions": {
 		"rootDir": ".",
 		"emitDecoratorMetadata": true,
@@ -15,7 +15,8 @@
 	},
 	"include": ["src/**/*.ts"],
 	"references": [
-		{ "path": "../@nmg8/di/tsconfig.build.json" },
+		{ "path": "../@spark-edge/di/tsconfig.build.json" },
 		{ "path": "../db/tsconfig.build.json" },
 	]
 }
+

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { instancesApi, type InstanceRequest } from '@/rest-api-client/instances.service';
-import type { InstanceReturningValues } from 'nmg8-db/src/types';
+import type { InstanceReturningValues } from 'spark-edge-db/src/types';
 
 interface InstancesState {
   instances: InstanceReturningValues[];
@@ -94,3 +94,4 @@ export const useInstancesStore = create<InstancesState>((set, get) => ({
 
   setSelectedId: (id) => set({ selectedId: id }),
 }));
+

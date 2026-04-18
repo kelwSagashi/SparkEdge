@@ -67,3 +67,4 @@ export function ServerConfigForm({ form, metadata }: ServerConfigFormProps) {
     </div>
   );
 }
+

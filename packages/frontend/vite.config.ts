@@ -21,10 +21,10 @@ export default defineConfig({
   server: {
     watch: {
       // ignored: [
-      //   '!**/node_modules/nmg8-workflow/**',
-      //   '!**/node_modules/nmg8-db/**',
-      //   '!**/node_modules/nmg8-nodes/**',
-      //   '!**/node_modules/nmg8-core/**',
+      //   '!**/node_modules/spark-edge-workflow/**',
+      //   '!**/node_modules/spark-edge-db/**',
+      //   '!**/node_modules/spark-edge-nodes/**',
+      //   '!**/node_modules/spark-edge-core/**',
       // ]
     },
     proxy: {
@@ -36,3 +36,4 @@ export default defineConfig({
     }
   }
 })
+

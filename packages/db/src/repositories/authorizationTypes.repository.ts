@@ -57,3 +57,7 @@ export class AuthorizationsTypeRepository {
 }
 
 export default AuthorizationsTypeRepository;
+
+
+
+

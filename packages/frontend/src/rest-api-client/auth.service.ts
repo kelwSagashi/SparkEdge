@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { UserReturningValues } from 'nmg8-db/src/types';
+import type { UserReturningValues } from 'spark-edge-db/src/types';
 
 const baseURL = 'http://localhost:3009/api';
 const axiosInstance = axios.create({ baseURL, withCredentials: true });
@@ -34,3 +34,4 @@ export class AuthAPI {
 }
 
 export const authApi = new AuthAPI();
+

@@ -374,7 +374,7 @@ const ResourceItem = ({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2 col-span-2">
             <Label className="text-muted-foreground text-xs">
-              NOME EXIBIÇÃO NO NMG8
+              NOME EXIBIÇÃO NO SPARK EDGE
             </Label>
             <Input
               {...control.register(`resources.${index}.name`)}
@@ -762,3 +762,4 @@ const OperationItem = ({
     </Card>
   );
 };
+

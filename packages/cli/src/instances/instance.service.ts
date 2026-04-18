@@ -1,5 +1,5 @@
-import { Service } from "@nmg8/di";
-import { dbManager } from "nmg8-db";
+import { Service } from "@spark-edge/di";
+import { dbManager } from "spark-edge-db";
 import { TagsService } from "../tags/tags.service";
 import type {
   ReturningQueries,
@@ -7,7 +7,7 @@ import type {
   InstanceReturningValues,
   InstanceDestinationUpsertValues,
   DataMappingUpsertValues,
-} from "nmg8-db/src/types";
+} from "spark-edge-db/src/types";
 
 import { InstanceRequest } from "./instance.request";
 import type { 
@@ -258,3 +258,4 @@ export class InstanceService {
 }
 
 export default InstanceService;
+

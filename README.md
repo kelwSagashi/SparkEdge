@@ -1,8 +1,8 @@
 ![Banner image](assets/banner.png)
 
-# nmg8 - Agente de Automação de Monitoramento em Nó
+# spark-edge - Agente de Automação de Monitoramento em Nó
 
-O nmg8 é uma plataforma baseada em workflows de automação para monitoramento com nós, visando sistemas de energia fotovoltáicos on-grid e off-grid. A plataforma oferece e permite integração, automação e execução de código de baixo nível que fazem coleta de dados em dispositivos computadores conectados diretamente à sistemas de energia, seja por cabo ou rede, permitindo maior controle na automação de armazenamento e envio de dados.
+O spark-edge é uma plataforma baseada em workflows de automação para monitoramento com nós, visando sistemas de energia fotovoltáicos on-grid e off-grid. A plataforma oferece e permite integração, automação e execução de código de baixo nível que fazem coleta de dados em dispositivos computadores conectados diretamente à sistemas de energia, seja por cabo ou rede, permitindo maior controle na automação de armazenamento e envio de dados.
 
 # Principais capacidades
 - **Integração com Código Python**: É possivel escrever código em python para coleta de dados e adicionar como um nó executável.
@@ -28,7 +28,7 @@ Em seguida execute:
 pnpm dev
 ```
 
-Abra o nmg8 no http://localhost:5173
+Abra o spark-edge no http://localhost:5173
 
-# O que significa nmg8?
-Para ser curto, é uma sigla para "node monitor agent", a pronuncia rápida, em inglês, faz parecer que se fala n m agent.
+# O que significa Spark Edge?
+O nome Spark Edge simboliza o "faiscar" (spark) da energia e da inteligência processada na "borda" (edge) da rede, refletindo o foco da plataforma em processamento local e monitoramento eficiente de sistemas de energia.

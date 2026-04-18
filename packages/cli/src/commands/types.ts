@@ -1,4 +1,4 @@
-import { Constructable } from "@nmg8/di";
+import { Constructable } from "@spark-edge/di";
 
 
 export type CommandOptions = {
@@ -22,3 +22,4 @@ export type CommandEntry = {
 	description: string;
 	examples?: string[];
 };
+

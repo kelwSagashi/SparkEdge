@@ -1,5 +1,5 @@
 {
-	"extends": ["./tsconfig.json", "@nmg8/typescript-config/tsconfig.build.json"],
+	"extends": ["./tsconfig.json", "@spark-edge/typescript-config/tsconfig.build.json"],
 	"compilerOptions": {
 		"composite": true,
 		"rootDir": "src",
@@ -9,3 +9,4 @@
 	"include": ["src/**/*.ts"],
 	"exclude": ["test/**", "src/**/__tests__/**"]
 }
+

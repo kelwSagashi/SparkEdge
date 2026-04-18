@@ -1,5 +1,5 @@
 {
-  "extends": "@nmg8/typescript-config/tsconfig.common.json",
+  "extends": "../@spark-edge/typescript-config/tsconfig.common.json",
   "compilerOptions": {
     "lib": ["es2022"],
 		"rootDir": ".",
@@ -20,8 +20,6 @@
   "include": [
     "src/**/*.ts"
   ],
-  "exclude": [],
-  "references": [
-    { "path": "../workflow/tsconfig.build.esm.json" },
-  ]
+  "exclude": []
 }
+

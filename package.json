@@ -1,7 +1,7 @@
 {
-  "name": "nmg8-monorepo",
+  "name": "spark-edge-monorepo",
   "version": "1.0.0",
-  "description": "",
+  "description": "Spark Edge - Advanced Monitoring & Manager",
   "main": "index.js",
   "scripts": {
     "build": "turbo build",
@@ -15,16 +15,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kelwSagashi/nmg8.git"
+    "url": "git+https://github.com/kelwSagashi/SparkEdge.git"
   },
-  "keywords": [],
+  "keywords": [
+    "monitoring",
+    "automation",
+    "spark-edge"
+  ],
   "author": "KelwSagashi",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/kelwSagashi/nmg8/issues"
+    "url": "https://github.com/kelwSagashi/SparkEdge/issues"
   },
-  "homepage": "https://github.com/kelwSagashi/nmg8#readme",
+  "homepage": "https://github.com/kelwSagashi/SparkEdge#readme",
   "private": true,
   "engines": {
     "node": ">=22.16",
@@ -35,6 +39,7 @@
     "packages/*"
   ],
   "devDependencies": {
+    "@spark-edge/typescript-config": "workspace:*",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "nodemon": "^3.0.1",
@@ -69,7 +74,14 @@
       "y18n": "^5.0.8",
       "yargs": "^17.7.2",
       "yargs-parser": "^21.1.1"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@firebase/util",
+      "better-sqlite3",
+      "esbuild",
+      "msgpackr-extract",
+      "protobufjs"
+    ]
   },
   "dependencies": {
     "better-sqlite3": "^12.4.6",

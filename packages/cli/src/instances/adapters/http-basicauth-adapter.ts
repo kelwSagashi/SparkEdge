@@ -61,3 +61,4 @@ export class HttpBasicAuthAdapter extends BaseAdapter {
     return await this.driver.request({ method, path: '/' });
   }
 }
+

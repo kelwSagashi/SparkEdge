@@ -1,4 +1,4 @@
-import { Service } from "@nmg8/di";
+import { Service } from "@spark-edge/di";
 import { CommandEntry } from "./types";
 
 @Service()

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/server/server.service';
-import type { ServerReturningValues, ServerTypeReturningValues } from 'nmg8-db/src/types';
+import type { ServerReturningValues, ServerTypeReturningValues } from 'spark-edge-db/src/types';
 import type { ServerWithRelations } from '@/interfaces/servers';
 
 /**
@@ -97,6 +97,8 @@ export function useServersMock() {
       id: '1',
       name: 'Production API',
       type: 'rest-api',
+      server_type_id: 'api',
+      driver_key: 'http',
       base_url: 'https://api.production.com',
       credential_id: 'cred-1',
       headers: { 'X-API-Version': 'v1' },
@@ -125,6 +127,8 @@ export function useServersMock() {
       id: '2',
       name: 'Development Database',
       type: 'database',
+      server_type_id: 'database',
+      driver_key: 'postgres',
       base_url: 'postgresql://localhost:5432',
       credential_id: 'cred-2',
       headers: null,
@@ -153,6 +157,8 @@ export function useServersMock() {
       id: '3',
       name: 'Google Drive Integration',
       type: 'google-drive',
+      server_type_id: 'google-drive',
+      driver_key: 'google-drive',
       base_url: 'https://www.googleapis.com/drive/v3',
       credential_id: 'cred-3',
       headers: { 'Content-Type': 'application/json' },
@@ -227,3 +233,4 @@ export function useServersMock() {
     refresh,
   };
 }
+

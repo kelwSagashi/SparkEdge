@@ -1,4 +1,4 @@
-import { UserReturningValues } from "nmg8-db";
+import { UserReturningValues } from "spark-edge-db";
 
 export namespace AuthResponse {
     type ReturningResponse<T> = {

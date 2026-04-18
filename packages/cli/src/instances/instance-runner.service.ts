@@ -1,9 +1,9 @@
-import { Service } from '@nmg8/di';
-import { dbManager } from 'nmg8-db';
+import { Service } from '@spark-edge/di';
+import { dbManager } from 'spark-edge-db';
 import { PythonVenvService } from './python-venv.service';
 import { FallbackQueueService } from './fallback-queue.service';
 import { Logger } from '@/simple-logger';
-import type { InstanceReturningValues, InstanceDestinationReturningValues } from 'nmg8-db/src/types';
+import type { InstanceReturningValues, InstanceDestinationReturningValues } from 'spark-edge-db/src/types';
 import { nanoid } from 'nanoid';
 import path from 'node:path';
 import { JSONPath } from 'jsonpath-plus';
@@ -11,6 +11,7 @@ import { DestinationFactory } from './destination-adapters';
 import type { IExecutionContext } from './instance.types';
 
 import { TemplateResolver } from './template-resolver';
+import { resolveHomePath } from '../scripts/script.helper';
 
 type ExecutionTriggerType = 'interval' | 'webhook' | 'manual';
 type ExecutionStatus = 'running' | 'queued' | 'success' | 'failed' | 'timeout';
@@ -92,6 +93,9 @@ export class InstanceRunnerService {
         throw new Error(`Script ${script.id} venv is not ready. Please set up the venv first.`);
       }
 
+      const absoluteLocalPath = resolveHomePath(script.local_path)!;
+      const absoluteVenvPath = resolveHomePath(script.venv_path)!;
+
       // 2.5 Load device data and resolve parameters
       let deviceData: Record<string, unknown> | null = null;
       if (instance.device_id && instance.include_device_data) {
@@ -115,16 +119,16 @@ export class InstanceRunnerService {
       addLog('info', `Script parameters resolved successfully`);
 
       // 3. Execute the script
-      const scriptEntrypoint = path.join(script.local_path ?? '', script.main_file ?? 'main.py');
+      const scriptEntrypoint = path.join(absoluteLocalPath, script.main_file ?? 'main.py');
       const startTime = Date.now();
 
       addLog('info', `Executing python script: ${script.main_file}`);
 
-      // Passing arguments using the --input flag as expected by nmg8py SDK
+      // Passing arguments using the --input flag as expected by spark-edgepy SDK
       const scriptArgs = ['--input', JSON.stringify(resolvedParameters)];
 
       const result = await this.venvService.executeScript(
-        script.venv_path,
+        absoluteVenvPath,
         scriptEntrypoint,
         scriptArgs,
         60_000
@@ -429,3 +433,4 @@ export class InstanceRunnerService {
 }
 
 export default InstanceRunnerService;
+

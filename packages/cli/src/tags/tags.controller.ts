@@ -1,4 +1,4 @@
-import { Delete, Get, Post, RestController } from '@nmg8/di';
+import { Delete, Get, Post, RestController } from '@spark-edge/di';
 import { TagsService } from './tags.service';
 import TagsRequest from './tags.request';
 
@@ -32,3 +32,4 @@ export class TagsController {
     return { data: result.data, error: result.error };
   }
 }
+

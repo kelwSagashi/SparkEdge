@@ -1,4 +1,4 @@
-// entity.ts — Entidades de domínio do nmg8
+// entity.ts — Entidades de domínio do spark-edge
 // As entidades de workflow foram removidas. Adicionar novas entidades aqui conforme necessário.
 
 import type { InstanceReturningValues } from "./types";
@@ -42,3 +42,7 @@ export class InstanceEntity {
     this.created_by = values.created_by ?? null;
   }
 }
+
+
+
+

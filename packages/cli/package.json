@@ -1,7 +1,7 @@
 {
-  "name": "nmg8",
+  "name": "spark-edge",
   "version": "0.0.1",
-  "description": "",
+  "description": "Spark Edge CLI and Backend",
   "main": "dist/index",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,12 +11,12 @@
     "buildAndDev": "pnpm run build && pnpm run dev",
     "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 concurrently -k -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"pnpm watch\" \"nodemon\"",
     "start": "run-script-os",
-    "start:default": "cd bin && ./nmg8",
-    "start:windows": "cd bin && nmg8",
+    "start:default": "cd bin && ./spark-edge",
+    "start:windows": "cd bin && spark-edge",
     "watch": "cross-env NODE_OPTIONS=--max-old-space-size=4096 tsc-watch -p tsconfig.build.json --onCompilationComplete \"tsc-alias -p tsconfig.build.json\""
   },
   "bin": {
-    "nmg8": "./bin/nmg8"
+    "spark-edge": "./bin/spark-edge"
   },
   "engines": {
     "node": ">=20.19 <= 24.x"
@@ -26,7 +26,7 @@
     "dist"
   ],
   "devDependencies": {
-    "@nmg8/typescript-config": "workspace:*",
+    "@spark-edge/typescript-config": "workspace:*",
     "@types/adm-zip": "^0.5.8",
     "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.10",
@@ -42,7 +42,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@nmg8/di": "workspace:*",
+    "@spark-edge/di": "workspace:*",
     "adm-zip": "^0.5.17",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.61.0",
@@ -58,11 +58,10 @@
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.1",
     "multer": "^2.1.1",
-    "nmg8-core": "workspace:*",
-    "nmg8-db": "workspace:*",
-    "nmg8-nodes": "workspace:*",
-    "nmg8-workflow": "workspace:*",
     "pg": "^8.20.0",
+    "reflect-metadata": "catalog:",
+    "spark-edge-core": "workspace:*",
+    "spark-edge-db": "workspace:*",
     "zod": "^4.1.12",
     "zod-class": "^0.0.18"
   }

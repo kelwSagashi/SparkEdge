@@ -4,7 +4,7 @@ import {
     CredentialReturningValues, 
     ServerResourceReturningValues,
     ResourceOperationReturningValues
-} from 'nmg8-db';
+} from 'spark-edge-db';
 import { 
   AdapterRegistry, 
   DestinationAdapter 
@@ -36,3 +36,4 @@ export class DestinationFactory {
     return new Adapter(server, resource, operation, credentials, logger);
   }
 }
+

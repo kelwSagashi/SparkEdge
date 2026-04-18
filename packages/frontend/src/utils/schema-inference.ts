@@ -46,3 +46,4 @@ export function inferSchema(data: any): any {
 
   return { type: "string" };
 }
+

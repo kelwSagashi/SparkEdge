@@ -1,15 +1,15 @@
 import { api } from "@/server/server.service";
-import type { ServerReturningValues } from "nmg8-db/src/types";
+import type { ServerWithRelations } from "@/interfaces/servers";
 import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select";
 
 export default function GetService({
     setServerSelected
 }: {
-    setServerSelected: React.Dispatch<React.SetStateAction<ServerReturningValues | undefined>>
+    setServerSelected: React.Dispatch<React.SetStateAction<ServerWithRelations | undefined>>
 }) {
-    const [selection, setSelection] = useState<ServerReturningValues>();
-    const [servers, setServers] = useState<ServerReturningValues[]>([]);
+    const [selection, setSelection] = useState<ServerWithRelations>();
+    const [servers, setServers] = useState<ServerWithRelations[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +20,7 @@ export default function GetService({
             .then((res) => {
                 if (!mounted) return;
                 const data = res.data?.data ?? res.data ?? [];
-                setServers(data as ServerReturningValues[]);
+                setServers(data as ServerWithRelations[]);
             })
             .catch((err) => setError(err?.message ?? String(err)))
             .finally(() => setLoading(false));

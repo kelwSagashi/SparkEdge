@@ -1,11 +1,11 @@
 ![Banner image](assets/banner.png)
 
-# spark-edge - Agente de Automação de Monitoramento em Nó
+# SparkEdge
 
-O spark-edge é uma plataforma baseada em workflows de automação para monitoramento com nós, visando sistemas de energia fotovoltáicos on-grid e off-grid. A plataforma oferece e permite integração, automação e execução de código de baixo nível que fazem coleta de dados em dispositivos computadores conectados diretamente à sistemas de energia, seja por cabo ou rede, permitindo maior controle na automação de armazenamento e envio de dados.
+O SparkEdge é uma plataforma baseada de automação para monitoramento com node, visando sistemas de energia fotovoltáicos on-grid e off-grid. A plataforma oferece e permite integração, automação e execução de código para coleta de dados em sistemas de energia permitindo maior controle na automação e envio de dados.
 
 # Principais capacidades
-- **Integração com Código Python**: É possivel escrever código em python para coleta de dados e adicionar como um nó executável.
+- **Integração com Código Python**: É possivel usar código em python para coleta de dados e adicionar como uma instancia.
 - **Controle Total**: Você define o que fazer com os dados de monitoramento que foram coletados.
 - **Serviço local**: Permite rodar em sistemas mais criticos tendo flexibilidade em conseguir armazenar dados e enviar quando houver conexão.
 
@@ -28,7 +28,7 @@ Em seguida execute:
 pnpm dev
 ```
 
-Abra o spark-edge no http://localhost:5173
+Abra o SparkEdge no http://localhost:5173
 
-# O que significa Spark Edge?
-O nome Spark Edge simboliza o "faiscar" (spark) da energia e da inteligência processada na "borda" (edge) da rede, refletindo o foco da plataforma em processamento local e monitoramento eficiente de sistemas de energia.
+# O que significa SparkEdge?
+O nome SparkEdge simboliza o "faiscar" (spark) da energia e da inteligência processada na "borda" (edge) da rede, refletindo o foco da plataforma em processamento local e monitoramento eficiente de sistemas de energia.

@@ -50,7 +50,7 @@ export class ScriptsController {
             return;
         }
 
-        const localPath = resolveHomePath((scriptRes.data as any).local_path);
+        const localPath = resolveHomePath(scriptRes.data.local_path);
         if (!localPath) {
             res.status(400).json({ error: 'Script path not found' });
             return;

@@ -18,6 +18,8 @@ export function AddScriptDialog({ open, onOpenChange, onSuccess }: AddScriptDial
   const [file, setFile] = useState<File | null>(null);
   const [inspectData, setInspectData] = useState<{ tempFolder: string, pyFiles: string[] } | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [installError, setInstallError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ step: string, status: 'pending' | 'loading' | 'success' | 'error' }[]>([]);
 
   // Form states
   const [mainFile, setMainFile] = useState('');
@@ -36,26 +38,38 @@ export function AddScriptDialog({ open, onOpenChange, onSuccess }: AddScriptDial
     setAuthor('');
     setVersion('1.0.0');
     setUploading(false);
+    setInstallError(null);
+    setProgress([]);
   };
 
   const handleInspect = async () => {
     if (!file) return;
-    setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
+    setInstallError(null);
+    setProgress([
+      { step: 'Descompactando e Validando', status: 'loading' },
+      { step: 'Lendo Arquivos', status: 'pending' }
+    ]);
+
     try {
       const res: any = await scriptsApi.uploadInspect(formData);
       if (res.data) {
         setInspectData(res.data);
+        setProgress([
+          { step: 'Descompactando e Validando', status: 'success' },
+          { step: 'Lendo Arquivos', status: 'success' }
+        ]);
         if (res.data.pyFiles && res.data.pyFiles.length > 0) {
-            // auto select main.py if exists
             const hasMain = res.data.pyFiles.find((f:string) => f === 'main.py');
             setMainFile(hasMain || res.data.pyFiles[0]);
         }
-        setStep(2);
+        setTimeout(() => setStep(2), 600);
       }
-    } catch(err) {
-      console.error(err);
+    } catch(err: any) {
+      const msg = err.response?.data?.error || err.message;
+      setInstallError(msg);
+      setProgress(p => p.map(s => s.status === 'loading' ? { ...s, status: 'error' } : s));
     } finally {
       setUploading(false);
     }
@@ -64,7 +78,15 @@ export function AddScriptDialog({ open, onOpenChange, onSuccess }: AddScriptDial
   const handleFinalize = async () => {
     if (!inspectData?.tempFolder || !mainFile || !name) return;
     setUploading(true);
+    setInstallError(null);
+    setProgress([
+       { step: 'Criando Ambiente Virtual', status: 'loading' },
+       { step: 'Instalando Dependências (Sparkit)', status: 'pending' },
+       { step: 'Analisando Schema', status: 'pending' }
+    ]);
+
     try {
+      // Simulate/Show progress (backend currently does all in one call, but we can animate)
       await scriptsApi.uploadFinalize({
         tempFolder: inspectData.tempFolder,
         mainFile,
@@ -73,11 +95,22 @@ export function AddScriptDialog({ open, onOpenChange, onSuccess }: AddScriptDial
         author,
         version
       });
-      onSuccess();
-      onOpenChange(false);
-      reset();
-    } catch (err) {
-      console.error(err);
+      
+      setProgress([
+        { step: 'Criando Ambiente Virtual', status: 'success' },
+        { step: 'Instalando Dependências (Sparkit)', status: 'success' },
+        { step: 'Analisando Schema', status: 'success' }
+      ]);
+
+      setTimeout(() => {
+        onSuccess();
+        onOpenChange(false);
+        reset();
+      }, 1000);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message;
+      setInstallError(msg);
+      setProgress(p => p.map(s => s.status === 'loading' ? { ...s, status: 'error' } : s));
     } finally {
       setUploading(false);
     }
@@ -110,6 +143,24 @@ export function AddScriptDialog({ open, onOpenChange, onSuccess }: AddScriptDial
                  {!file && <p className="text-xs text-zinc-500">Deve conter o código Python</p>}
                </div>
             </div>
+            
+            {(uploading || installError || progress.length > 0) && (
+               <div className="mt-4 space-y-2 bg-white/[0.04] p-4 rounded-xl border border-white/[0.08]">
+                  {progress.map((p, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs">
+                       <span className={p.status === 'pending' ? 'text-zinc-600' : 'text-zinc-300'}>{p.step}</span>
+                       {p.status === 'loading' && <div className="w-3 h-3 border border-violet-400 border-t-transparent rounded-full animate-spin" />}
+                       {p.status === 'success' && <CheckCircle2 className="w-3 h-3 text-green-500" />}
+                       {p.status === 'error' && <X className="w-3 h-3 text-red-500" />}
+                    </div>
+                  ))}
+                  {installError && (
+                    <div className="mt-2 text-[10px] text-red-400 font-mono bg-red-400/10 p-2 rounded border border-red-400/20">
+                      {installError}
+                    </div>
+                  )}
+               </div>
+            )}
           </div>
         )}
 
@@ -169,6 +220,25 @@ export function AddScriptDialog({ open, onOpenChange, onSuccess }: AddScriptDial
                 className="bg-white/[0.04] border-white/[0.1] text-white"
               />
             </div>
+
+            {/* Progress / Error */}
+            {(uploading || installError || progress.length > 0) && (
+               <div className="mt-2 space-y-2 bg-white/[0.04] p-4 rounded-xl border border-white/[0.08]">
+                  {progress.map((p, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs">
+                       <span className={p.status === 'pending' ? 'text-zinc-600' : 'text-zinc-300'}>{p.step}</span>
+                       {p.status === 'loading' && <div className="w-3 h-3 border border-violet-400 border-t-transparent rounded-full animate-spin" />}
+                       {p.status === 'success' && <CheckCircle2 className="w-3 h-3 text-green-500" />}
+                       {p.status === 'error' && <X className="w-3 h-3 text-red-500" />}
+                    </div>
+                  ))}
+                  {installError && (
+                    <div className="mt-2 text-[10px] text-red-400 font-mono bg-red-400/10 p-2 rounded border border-red-400/20">
+                      {installError}
+                    </div>
+                  )}
+               </div>
+            )}
           </div>
         )}
 

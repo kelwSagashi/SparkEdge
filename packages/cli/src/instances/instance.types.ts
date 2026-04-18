@@ -6,6 +6,7 @@ import type {
   ResourceOperationReturningValues,
   DeviceReturningValues,
   DownloadedScriptReturningValues,
+  InstanceReturningValues,
 } from "nmg8-db/src/types";
 
 export type TriggerType = "interval" | "webhook" | "interval_and_webhook";
@@ -202,6 +203,7 @@ export interface IExecutionContext {
   instance_id: string;
   execution_id: string;
   device?: DeviceReturningValues;
+  instance?: InstanceReturningValues;
   script: DownloadedScriptReturningValues;
   script_parameters: Record<string, any>;
   trigger_type: ExecutionTriggerType;

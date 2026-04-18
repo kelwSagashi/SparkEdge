@@ -16,7 +16,7 @@ export async function ensureScriptsStorageDir() {
     }
 }
 
-export async function extractZipToTemp(zipFilePath: string): Promise<{ tempFolder: string, pyFiles: string[] }> {
+export async function extractZipToTemp(zipFilePath: string): Promise<{ tempFolder: string, pyFiles: string[], hasSparkit: boolean }> {
     const tempFolder = path.join(os.tmpdir(), `nmg8_script_${crypto.randomUUID()}`);
     fs.mkdirSync(tempFolder, { recursive: true });
 
@@ -24,6 +24,7 @@ export async function extractZipToTemp(zipFilePath: string): Promise<{ tempFolde
     zip.extractAllTo(tempFolder, true);
 
     const pyFiles: string[] = [];
+    let hasSparkit = false;
     
     // Recursive read to find .py files
     const scanDir = (dir: string) => {
@@ -34,12 +35,17 @@ export async function extractZipToTemp(zipFilePath: string): Promise<{ tempFolde
                 scanDir(fullPath);
             } else if (file.endsWith('.py')) {
                 pyFiles.push(path.relative(tempFolder, fullPath).replace(/\\/g, '/'));
+            } else if (file === 'requirements.txt') {
+                const content = fs.readFileSync(fullPath, 'utf8');
+                if (content.toLowerCase().includes('sparkit')) {
+                    hasSparkit = true;
+                }
             }
         }
     };
 
     scanDir(tempFolder);
-    return { tempFolder, pyFiles };
+    return { tempFolder, pyFiles, hasSparkit };
 }
 
 export async function setupScriptEnvironment(tempFolder: string, finalFolder: string, mainFile: string): Promise<{ schema: any, venvPath: string }> {
@@ -47,14 +53,23 @@ export async function setupScriptEnvironment(tempFolder: string, finalFolder: st
     if (!fs.existsSync(finalFolder)) {
         fs.mkdirSync(path.dirname(finalFolder), { recursive: true });
     }
+    
+    // Ensure finalFolder doesn't exist already (should be handled by UUID but anyway)
+    if (fs.existsSync(finalFolder)) {
+        fs.rmSync(finalFolder, { recursive: true, force: true });
+    }
     fs.renameSync(tempFolder, finalFolder);
 
     const venvPath = path.join(finalFolder, 'venv');
     const pythonExe = process.platform === 'win32' ? path.join(venvPath, 'Scripts', 'python.exe') : path.join(venvPath, 'bin', 'python');
     const pipExe = process.platform === 'win32' ? path.join(venvPath, 'Scripts', 'pip.exe') : path.join(venvPath, 'bin', 'pip');
 
-    // 2. Create venv
-    await execAsync(`python -m venv "${venvPath}"`);
+    // 2. Create venv (Try python then python3)
+    try {
+        await execAsync(`python -m venv "${venvPath}"`);
+    } catch {
+        await execAsync(`python3 -m venv "${venvPath}"`);
+    }
 
     // 3. Install requirements if present
     const reqPath = path.join(finalFolder, 'requirements.txt');
@@ -63,22 +78,17 @@ export async function setupScriptEnvironment(tempFolder: string, finalFolder: st
     }
 
     // 4. Get schema
-    const sdkPath = path.resolve(__dirname, '../../../../extensions/samples/nmg8_class_code/nmg8pySDK');
     const mainFilePath = path.join(finalFolder, mainFile);
     
-    // Inject SDK into PYTHONPATH
-    const env = { 
-        ...process.env, 
-        PYTHONPATH: process.env.PYTHONPATH ? `${sdkPath}${path.delimiter}${process.env.PYTHONPATH}` : sdkPath 
-    };
-
-    const { stdout } = await execAsync(`"${pythonExe}" "${mainFilePath}" --schema`, { env });
+    // We no longer inject a local SDK path. The script MUST have sparkit in requirements.txt
+    // as verified during the inspection step.
+    const { stdout } = await execAsync(`"${pythonExe}" "${mainFilePath}" --schema`);
     
     let schemaResult = { schema: { inputs: [], outputs: [] } };
     try {
         schemaResult = JSON.parse(stdout);
     } catch(err) {
-        throw new Error('Failed to parse schema from script stdout.');
+        throw new Error(`Failed to parse schema from script stdout. Stdout: ${stdout}`);
     }
 
     return { schema: schemaResult.schema, venvPath };
@@ -86,13 +96,7 @@ export async function setupScriptEnvironment(tempFolder: string, finalFolder: st
 
 export async function runPythonScript(scriptFolder: string, mainFile: string, venvPath: string, inputPayload: any): Promise<{ stdout: any, stderr: any }> {
     const pythonExe = process.platform === 'win32' ? path.join(venvPath, 'Scripts', 'python.exe') : path.join(venvPath, 'bin', 'python');
-    const sdkPath = path.resolve(__dirname, '../../../../extensions/samples/nmg8_class_code/nmg8pySDK');
     const mainFilePath = path.join(scriptFolder, mainFile);
-
-    const env = { 
-        ...process.env, 
-        PYTHONPATH: process.env.PYTHONPATH ? `${sdkPath}${path.delimiter}${process.env.PYTHONPATH}` : sdkPath 
-    };
 
     // We can pass the JSON input via `--input` flag payload formatted as a string.
     // Or we write it to a temp file and use `--input-file`. Using temp file avoids quote escapism issues.
@@ -100,7 +104,7 @@ export async function runPythonScript(scriptFolder: string, mainFile: string, ve
     fs.writeFileSync(tempInputFile, JSON.stringify(inputPayload), 'utf8');
 
     try {
-        const { stdout, stderr } = await execAsync(`"${pythonExe}" "${mainFilePath}" --input-file "${tempInputFile}"`, { env });
+        const { stdout, stderr } = await execAsync(`"${pythonExe}" "${mainFilePath}" --input-file "${tempInputFile}"`);
         try {
             const result = JSON.parse(stdout);
             return { stdout: result.stdout, stderr: result.stderr };

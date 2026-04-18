@@ -2,6 +2,7 @@ import { Delete, Get, Post, Put, RestController } from "@nmg8/di";
 import { InstanceService } from "./instance.service";
 import InstanceRequest from "./instance.request";
 import { InstanceRunnerService } from "./instance-runner.service";
+import { dbManager } from "nmg8-db";
 
 @RestController('/instances')
 export class InstanceController {
@@ -56,5 +57,11 @@ export class InstanceController {
     async triggerManual(req: InstanceRequest.TriggerManual) {
         const result = await this.instanceRunner.triggerManual(req.params.id);
         return { data: result };
+    }
+
+    @Get('/:id/executions')
+    async listExecutions(req: InstanceRequest.IdParam) {
+        const result = dbManager.instanceExecutions.listByInstance(req.params.id);
+        return { data: result.data, error: result.error };
     }
 }

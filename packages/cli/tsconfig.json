@@ -1,8 +1,5 @@
 {
-	"extends": [
-		"@nmg8/typescript-config/tsconfig.common.json",
-		"@nmg8/typescript-config/tsconfig.backend.json"
-	],
+	"extends": "../@nmg8/typescript-config/tsconfig.backend.json",
 	"compilerOptions": {
 		"rootDir": ".",
 		"emitDecoratorMetadata": true,

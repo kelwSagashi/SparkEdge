@@ -142,6 +142,7 @@ export class InstanceRunnerService {
         execution_id: executionId,
         instance_id: instance.id,
         device: deviceData as any,
+        instance: instance,
         script: script,
         script_parameters: resolvedParameters as any,
         trigger_type: triggerType,
@@ -248,11 +249,19 @@ export class InstanceRunnerService {
   ): Record<string, unknown> {
       // Preparation: Context for template resolution
       const resolveContext = {
+        // Root object for JSONPath ($)
+        "$": {
+          script: sourceJson, // The script execution result (stdout, stderr, etc)
+          device: context?.device || {},
+          instance: context?.instance || {},
+          timestamp: context?.timestamp || new Date().toISOString(),
+          execution_id: context?.execution_id
+        },
         device: context?.device || {},
-        script: context?.script || {},
+        script: context?.script || {}, // The script info/metadata
         instance: context?.instance || {},
         output: sourceJson,
-        ...sourceJson, // Support direct access to output fields like {{teste}}
+        ...sourceJson, // Support direct access to output fields like {{stdout}} for backward compatibility
         timestamp: context?.timestamp || new Date().toISOString(),
         execution_id: context?.execution_id
       };
@@ -266,8 +275,8 @@ export class InstanceRunnerService {
       Object.entries(mappingConfig).forEach(([target, source]) => {
         let value;
         if (typeof source === 'string' && source.startsWith('$')) {
-          // JSONPath resolution
-          value = this.resolvePath(source, sourceJson);
+          // JSONPath resolution using the full context if it starts with $
+          value = this.resolvePath(source, resolveContext as any);
         } else {
           // Template or literal resolution
           value = TemplateResolver.resolve(source, resolveContext);

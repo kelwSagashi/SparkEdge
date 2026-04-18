@@ -25,6 +25,17 @@ export class ScriptService {
   }
 
   async delete(id: string): Promise<ReturningQueries<unknown>> {
+    const scriptRes = await this.findById(id);
+    if (scriptRes.data && (scriptRes.data as any).local_path) {
+      try {
+        const fullPath = (scriptRes.data as any).local_path;
+        if (require('fs').existsSync(fullPath)) {
+          require('fs').rmSync(fullPath, { recursive: true, force: true });
+        }
+      } catch (err) {
+        console.error('Failed to delete script files:', err);
+      }
+    }
     return dbManager.downloadedScripts.delete(id);
   }
 }

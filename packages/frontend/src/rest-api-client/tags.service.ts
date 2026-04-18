@@ -1,4 +1,7 @@
 import { axios_api_instance } from '@/server/instance';
+import type { TagReturningValues } from 'nmg8-db/src/types';
+
+export type Tag = TagReturningValues;
 
 export const tagsApi = {
   list: () => axios_api_instance.get('/tags').then((res) => res.data),

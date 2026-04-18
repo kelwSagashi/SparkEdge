@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Package, Download, Search, Check, FolderGit2, Play, Plus, BookOpen, Clock, Activity, Code
 } from 'lucide-react';
@@ -13,6 +14,22 @@ import type { DownloadedScriptReturningValues } from 'nmg8-db/src/types';
 
 import ScriptPlayground from '@/components/ScriptPlayground';
 import { inferSchema } from '@/utils/schema-inference';
+import type { SchemaConfigIO } from 'nmg8-db/src/types';
+
+/**
+ * Converte um esquema JSON (inferido) para o formato SchemaConfigIO[]
+ */
+function jsonSchemaToFields(schema: any): SchemaConfigIO[] {
+  if (schema.type === "object" && schema.properties) {
+    return Object.entries(schema.properties).map(([name, config]: [string, any]) => ({
+      name,
+      type: config.type,
+      fields: config.type === "object" ? jsonSchemaToFields(config) : undefined,
+      required: schema.required?.includes(name)
+    }));
+  }
+  return [];
+}
 
 // Playground Dialog Component
 function ScriptPlaygroundDialog({ open, onOpenChange, script, sampleName }: { open: boolean, onOpenChange: (open: boolean) => void, script?: DownloadedScriptReturningValues, sampleName?: string }) {
@@ -60,20 +77,23 @@ function ScriptPlaygroundDialog({ open, onOpenChange, script, sampleName }: { op
     setLoading(true);
     try {
       const outputSchema = inferSchema(stdoutData);
+      const outputFields = jsonSchemaToFields(outputSchema);
       
-      // Auto-correção: Garantir que outputs seja um array se estiver como objeto
-      let currentOutputs = script.schema_config?.outputs;
-      if (currentOutputs && typeof currentOutputs === 'object' && !Array.isArray(currentOutputs)) {
-        currentOutputs = Object.values(currentOutputs).filter(v => typeof v === 'object' && v !== null && v.name);
+      const currentOutputs = Array.isArray(script.schema_config?.outputs) 
+        ? [...script.schema_config.outputs] 
+        : [];
+      
+      // Upsert stdout output
+      const stdoutIdx = currentOutputs.findIndex(o => o.name === 'stdout');
+      if (stdoutIdx >= 0) {
+        currentOutputs[stdoutIdx] = { ...currentOutputs[stdoutIdx], fields: outputFields };
+      } else {
+        currentOutputs.push({ name: 'stdout', type: 'object', fields: outputFields });
       }
 
       const newConfig = {
-        ...(script.schema_config || {}),
-        outputs: Array.isArray(currentOutputs) ? currentOutputs : (script.schema_config?.outputs || []),
-        output_schemas: {
-          ...(script.schema_config?.output_schemas || {}),
-          stdout: outputSchema
-        }
+        ...(script.schema_config || { inputs: [] }),
+        outputs: currentOutputs
       };
 
       await scriptsApi.update(script.id, {
@@ -93,19 +113,22 @@ function ScriptPlaygroundDialog({ open, onOpenChange, script, sampleName }: { op
     setLoading(true);
     try {
       const outputSchema = inferSchema(stderrData);
+      const outputFields = jsonSchemaToFields(outputSchema);
       
-      let currentOutputs = script.schema_config?.outputs;
-      if (currentOutputs && typeof currentOutputs === 'object' && !Array.isArray(currentOutputs)) {
-        currentOutputs = Object.values(currentOutputs).filter(v => typeof v === 'object' && v !== null && v.name);
+      const currentOutputs = Array.isArray(script.schema_config?.outputs) 
+        ? [...script.schema_config.outputs] 
+        : [];
+      
+      const stderrIdx = currentOutputs.findIndex(o => o.name === 'stderr');
+      if (stderrIdx >= 0) {
+        currentOutputs[stderrIdx] = { ...currentOutputs[stderrIdx], fields: outputFields };
+      } else {
+        currentOutputs.push({ name: 'stderr', type: 'object', fields: outputFields });
       }
 
       const newConfig = {
-        ...(script.schema_config || {}),
-        outputs: Array.isArray(currentOutputs) ? currentOutputs : (script.schema_config?.outputs || []),
-        output_schemas: {
-          ...(script.schema_config?.output_schemas || {}),
-          stderr: outputSchema
-        }
+        ...(script.schema_config || { inputs: [] }),
+        outputs: currentOutputs
       };
 
       await scriptsApi.update(script.id, {
@@ -145,22 +168,24 @@ function ScriptPlaygroundDialog({ open, onOpenChange, script, sampleName }: { op
 }
 
 
-function ScriptCard({ title, subtitle, info, badges, onPlay, onDelete }: { title: string, subtitle: string, info: string, badges: string[], onPlay: () => void, onDelete?: () => void }) {
+function ScriptCard({ id, title, subtitle, info, badges, onPlay, onDelete }: { id?: string, title: string, subtitle: string, info: string, badges: string[], onPlay: () => void, onDelete?: () => void }) {
+  const navigate = useNavigate();
   return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] rounded-xl p-5 transition-all duration-300 flex flex-col"
+      onClick={() => id && navigate(`/script-hub/${id}`)}
+      className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] rounded-xl p-5 transition-all duration-300 flex flex-col cursor-pointer group"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 border border-white/[0.08] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 border border-white/[0.08] flex items-center justify-center group-hover:scale-105 transition-transform">
             <Code size={18} className="text-violet-400" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">{title}</h3>
+            <h3 className="text-sm font-semibold text-white group-hover:text-violet-400 transition-colors">{title}</h3>
             <p className="text-[11px] text-zinc-500">{subtitle}</p>
           </div>
         </div>
@@ -176,11 +201,23 @@ function ScriptCard({ title, subtitle, info, badges, onPlay, onDelete }: { title
         </div>
       )}
       <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-        <Button size="sm" variant="outline" onClick={onPlay} className="gap-1.5 text-xs h-8 border-violet-500/20 text-violet-400 hover:bg-violet-500/10">
+        <Button 
+          size="sm" 
+          variant="outline" 
+          onClick={(e) => { e.stopPropagation(); onPlay(); }} 
+          className="gap-1.5 text-xs h-8 border-violet-500/20 text-violet-400 hover:bg-violet-500/10"
+        >
           <Play size={12} /> Playground
         </Button>
         {onDelete && (
-             <Button size="sm" variant="ghost" onClick={onDelete} className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs">Excluir</Button>
+             <Button 
+              size="sm" 
+              variant="ghost" 
+              onClick={(e) => { e.stopPropagation(); onDelete(); }} 
+              className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs"
+             >
+               Excluir
+             </Button>
         )}
       </div>
     </motion.div>
@@ -260,6 +297,7 @@ export default function ScriptHubPage() {
                         {filteredScripts.map(script => (
                             <ScriptCard 
                                 key={script.id} 
+                                id={script.id}
                                 title={script.name} 
                                 subtitle={`by ${script.author} v${script.version}`} 
                                 info={script.description || 'Sem descrição'} 

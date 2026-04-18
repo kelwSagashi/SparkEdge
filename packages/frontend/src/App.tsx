@@ -13,6 +13,8 @@ import InstanceCreatePage from './pages/InstanceCreatePage';
 import ExecutionHistoryPage from './pages/ExecutionHistory';
 import LocalDataPage from './pages/LocalData';
 import ScriptHubPage from './pages/ScriptHub';
+import ScriptDetailsPage from './pages/ScriptDetailsPage';
+import ScriptEditPage from './pages/ScriptEditPage';
 import ServersPage from './pages/Servers';
 import ServerCreatePage from './pages/ServerCreatePage';
 import ServerEditPage from './pages/ServerEditPage';
@@ -81,6 +83,8 @@ function App() {
 
               {/* Script Hub */}
               <Route path="/script-hub" element={<ProtectedRoute><ScriptHubPage /></ProtectedRoute>} />
+              <Route path="/script-hub/:id" element={<ProtectedRoute><ScriptDetailsPage /></ProtectedRoute>} />
+              <Route path="/script-hub/:id/edit" element={<ProtectedRoute><ScriptEditPage /></ProtectedRoute>} />
 
               {/* Local Data */}
               <Route path="/data" element={<ProtectedRoute><LocalDataPage /></ProtectedRoute>} />

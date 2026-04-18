@@ -28,7 +28,7 @@ export default function InstanceLogsPage() {
       ]);
 
       if (resInstance.data?.data) {
-        setInstance(resInstance.data.data.instance);
+        setInstance(resInstance.data.data);
       }
       
       setExecutions(resExecutions.data?.data || []);

@@ -1,7 +1,7 @@
 import { Delete, Get, Post, Put, RestController } from "@nmg8/di";
-// trigger restart
 import { ScriptService } from "./script.service";
 import ScriptRequest from "./script.request";
+import { PythonVenvService } from "../instances/python-venv.service";
 import multer from 'multer';
 import { Request, Response } from "express";
 import { 
@@ -21,7 +21,8 @@ const upload = multer({ dest: path.join(os.tmpdir(), "nmg8_uploads") });
 @RestController('/scripts')
 export class ScriptsController {
     constructor(
-        private readonly scriptService: ScriptService
+        private readonly scriptService: ScriptService,
+        private readonly venvService: PythonVenvService
     ) {}
 
     @Get('/')
@@ -34,6 +35,33 @@ export class ScriptsController {
     async getOne(req: ScriptRequest.IdParam) {
         const result = await this.scriptService.findById(req.params.id);
         return { data: result.data, error: result.error };
+    }
+
+    @Get('/:id/contents/:filename(*)')
+    async getFileContent(req: Request, res: Response) {
+        const id = req.params.id;
+        const filename = req.params.filename;
+        const scriptRes = await this.scriptService.findById(id);
+        
+        if (!scriptRes.data) {
+            res.status(404).json({ error: 'Script not found' });
+            return;
+        }
+
+        const localPath = (scriptRes.data as any).local_path;
+        if (!localPath) {
+            res.status(400).json({ error: 'Script path not found' });
+            return;
+        }
+
+        const filePath = path.join(localPath, filename);
+        if (!fs.existsSync(filePath)) {
+            res.status(404).json({ error: 'File not found' });
+            return;
+        }
+
+        const content = fs.readFileSync(filePath, 'utf8');
+        res.status(200).json({ data: content });
     }
 
     @Post('/')
@@ -63,9 +91,15 @@ export class ScriptsController {
 
                 try {
                     const zipPath = req.file.path;
-                    const { tempFolder, pyFiles } = await extractZipToTemp(zipPath);
+                    const { tempFolder, pyFiles, hasSparkit } = await extractZipToTemp(zipPath);
                     // remove uploaded original zip
                     fs.unlinkSync(zipPath);
+
+                    if (!hasSparkit) {
+                        // Limpar pasta temporária se não for válido
+                        fs.rmSync(tempFolder, { recursive: true, force: true });
+                        return res.status(400).json({ error: 'O script é inválido. É obrigatório ter um arquivo requirements.txt contendo a biblioteca "sparkit".' });
+                    }
 
                     res.status(200).json({ data: { tempFolder, pyFiles } });
                 } catch(e: any) {

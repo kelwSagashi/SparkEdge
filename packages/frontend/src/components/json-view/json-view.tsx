@@ -27,6 +27,7 @@ export function JsonViewMain({
     expandOnce = true,
     filter,
     draggableValue = true,
+    rootPath = '',
     ...props
 }: React.ComponentProps<"div"> & {
     mainClassName?: string,
@@ -48,6 +49,7 @@ export function JsonViewMain({
         boolean?: React.ReactNode;
     };
     draggableValue?: boolean;
+    rootPath?: string;
 }) {
     const [_expandOnce, setExpandOnce] = React.useState(expandOnce)
     const isArray = Array.isArray(data);
@@ -63,7 +65,7 @@ export function JsonViewMain({
                                     key={name}
                                     name={name}
                                     value={value}
-                                    path={name}
+                                    path={rootPath ? `${rootPath}.${name}` : name}
                                     level={0}
                                     expandOnce={!_expandOnce}
                                     setExpandOnce={setExpandOnce}

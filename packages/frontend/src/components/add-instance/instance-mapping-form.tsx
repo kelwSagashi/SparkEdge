@@ -61,21 +61,23 @@ export function InstanceMappingForm({
   };
 
   // Adicionar campos do script baseados nos esquemas salvos (stdout/stderr)
-  const config = selectedScript?.schema_config;
-  const stdoutProps = config?.output_schemas?.stdout?.properties || config?.outputs?.stdout?.properties || config?.output_schemas?.stdout || config?.outputs?.stdout;
-  const stderrProps = config?.output_schemas?.stderr?.properties || config?.output_schemas?.stderr;
+  const outputs = Array.isArray(selectedScript?.schema_config?.outputs) 
+    ? selectedScript?.schema_config.outputs 
+    : [];
 
-  if (stdoutProps && typeof stdoutProps === "object") {
-    const props = stdoutProps.properties || stdoutProps;
-    Object.keys(props).forEach((key) => {
-      sourceData.script[key] = `{{script.stdout.${key}}}`;
+  const stdoutOutput = outputs.find(o => o.name === 'stdout');
+  const stderrOutput = outputs.find(o => o.name === 'stderr');
+
+  if (stdoutOutput?.fields && Array.isArray(stdoutOutput.fields)) {
+    stdoutOutput.fields.forEach((field) => {
+      sourceData.script[field.name] = `{{$.script.stdout.${field.name}}}`;
     });
   }
-  if (stderrProps && typeof stderrProps === "object") {
-    const props = stderrProps.properties || stderrProps;
-    sourceData.script.stderr = {};
-    Object.keys(props).forEach((key) => {
-      sourceData.script.stderr[key] = `{{script.stderr.${key}}}`;
+
+  if (stderrOutput?.fields && Array.isArray(stderrOutput.fields)) {
+    if (!sourceData.script.stderr) sourceData.script.stderr = {};
+    stderrOutput.fields.forEach((field) => {
+      sourceData.script.stderr[field.name] = `{{$.script.stderr.${field.name}}}`;
     });
   }
 
@@ -242,6 +244,7 @@ export function InstanceMappingForm({
                     <JsonViewMain
                       data={sourceData}
                       draggableValue={true}
+                      rootPath="$"
                       pProps={{
                         className: "bg-transparent border-none text-xs text-primary"
                       }}

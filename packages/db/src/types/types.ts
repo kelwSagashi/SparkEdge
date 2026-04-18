@@ -92,15 +92,4 @@ export type SchemaConfigIO = {
 export type SchemaConfig = {
   inputs: SchemaConfigIO[];
   outputs: SchemaConfigIO[];
-  output_schemas: {
-    stdout: {
-      type: string;
-      properties: {
-        [x: string]: {
-          type: string;
-        }
-      },
-      required: string[];
-    }
-  }
 }

@@ -97,7 +97,8 @@ export default function ScriptPlayground({
                             "border-none break-all w-full text-sm py-1 px-2 rounded bg-accent"
                         )
                         }}
-                        draggableValue={false}
+                        draggableValue={true}
+                        rootPath="$.script"
                         data={output}
                     />
                 ) : (

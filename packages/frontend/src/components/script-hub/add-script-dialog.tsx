@@ -87,7 +87,7 @@ export function AddScriptDialog({ open, onOpenChange, onSuccess }: AddScriptDial
 
     try {
       // Simulate/Show progress (backend currently does all in one call, but we can animate)
-      await scriptsApi.uploadFinalize({
+      const res: any = await scriptsApi.uploadFinalize({
         tempFolder: inspectData.tempFolder,
         mainFile,
         name,
@@ -95,6 +95,10 @@ export function AddScriptDialog({ open, onOpenChange, onSuccess }: AddScriptDial
         author,
         version
       });
+
+      if (res.error) {
+        throw new Error(res.error);
+      }
       
       setProgress([
         { step: 'Criando Ambiente Virtual', status: 'success' },

@@ -75,7 +75,7 @@ export const DataMappingSchema = z.object({
 
 export const InstanceDestinationSchema = z.object({
   resourceOperationId: z.string().min(1, "Operação é obrigatória"),
-  serverId: z.string().min(1, "Servidor é obrigatório"),
+  serverId: z.string().optional().nullable(),
   enabled: z.boolean(),
   priority: z.number(),
   retryPolicy: RetryPolicySchema.optional(),

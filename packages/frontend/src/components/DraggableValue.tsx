@@ -7,17 +7,18 @@ interface DraggableValueProps {
     value: string;
     type: string,
     isDropped: boolean;
+    data?: any;
     children?: React.ReactNode;
 }
 
-const DraggableValue: React.FC<DraggableValueProps> = React.memo(function Box({ value, type, isDropped, children }) {
+const DraggableValue: React.FC<DraggableValueProps> = React.memo(function Box({ value, type, isDropped, data, children }) {
     const [{ isDragging }, drag] = useDrag(() => ({
         type: type,
-        item: { value }, 
+        item: { value, data }, 
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
         }),
-    }), [value, type]);
+    }), [value, type, data]);
 
     return (
         <div

@@ -143,7 +143,7 @@ export function InstanceFallbackForm() {
                   min="1"
                   placeholder="Deixe vazio para ilimitado"
                   {...register("fallbackConfig.max_retries", {
-                    valueAsNumber: true,
+                    setValueAs: (v) => (v === "" || isNaN(v) ? null : parseInt(v, 10)),
                   })}
                   className="text-primary"
                 />
@@ -253,7 +253,7 @@ export function InstanceFallbackForm() {
                 min="1"
                 placeholder="3"
                 {...register("errorConfig.max_retries", {
-                  valueAsNumber: true,
+                  setValueAs: (v) => (v === "" || isNaN(v) ? null : parseInt(v, 10)),
                 })}
                 className="text-primary"
               />

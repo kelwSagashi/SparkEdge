@@ -35,7 +35,7 @@ export async function extractZipToTemp(zipFilePath: string): Promise<{ tempFolde
                 scanDir(fullPath);
             } else if (file.endsWith('.py')) {
                 pyFiles.push(path.relative(tempFolder, fullPath).replace(/\\/g, '/'));
-            } else if (file === 'requirements.txt') {
+            } else if (file.toLowerCase() === 'requirements.txt') {
                 const content = fs.readFileSync(fullPath, 'utf8');
                 if (content.toLowerCase().includes('sparkit')) {
                     hasSparkit = true;
@@ -72,8 +72,24 @@ export async function setupScriptEnvironment(tempFolder: string, finalFolder: st
     }
 
     // 3. Install requirements if present
-    const reqPath = path.join(finalFolder, 'requirements.txt');
-    if (fs.existsSync(reqPath)) {
+    let reqPath: string | null = null;
+    const scanDirReq = (dir: string) => {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            const fullPath = path.join(dir, file);
+            if (fs.statSync(fullPath).isDirectory()) {
+                // Ignore the virtual environment folder we just created
+                if (file !== 'venv') {
+                    scanDirReq(fullPath);
+                }
+            } else if (file.toLowerCase() === 'requirements.txt') {
+                reqPath = fullPath;
+            }
+        }
+    };
+    scanDirReq(finalFolder);
+
+    if (reqPath && fs.existsSync(reqPath)) {
         await execAsync(`"${pipExe}" install -r "${reqPath}"`);
     }
 
@@ -94,7 +110,7 @@ export async function setupScriptEnvironment(tempFolder: string, finalFolder: st
     return { schema: schemaResult.schema, venvPath };
 }
 
-export async function runPythonScript(scriptFolder: string, mainFile: string, venvPath: string, inputPayload: any): Promise<{ stdout: any, stderr: any }> {
+export async function runPythonScript(scriptFolder: string, mainFile: string, venvPath: string, inputPayload: any): Promise<any> {
     const pythonExe = process.platform === 'win32' ? path.join(venvPath, 'Scripts', 'python.exe') : path.join(venvPath, 'bin', 'python');
     const mainFilePath = path.join(scriptFolder, mainFile);
 
@@ -107,7 +123,7 @@ export async function runPythonScript(scriptFolder: string, mainFile: string, ve
         const { stdout, stderr } = await execAsync(`"${pythonExe}" "${mainFilePath}" --input-file "${tempInputFile}"`);
         try {
             const result = JSON.parse(stdout);
-            return { stdout: result.stdout, stderr: result.stderr };
+            return result;
         } catch(e) {
             return { stdout: null, stderr: { type: 'ParseError', message: stdout } };
         }

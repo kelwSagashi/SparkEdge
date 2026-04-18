@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { InstanceReturningValues } from 'nmg8-db/src/types';
+import { cn } from '@/lib/utils';
 
 const statusConfig: Record<InstanceReturningValues['status'], { label: string; color: string; dotColor: string }> = {
   idle:    { label: 'Idle',    color: 'text-zinc-400', dotColor: 'bg-zinc-400' },
@@ -26,13 +27,13 @@ function StatusBadge({ status }: { status: InstanceReturningValues['status'] }) 
   );
 }
 
-function InstanceCard({ instance, onTrigger, onDelete }: {
-  instance: InstanceReturningValues;
+function InstanceCard({ instance, onTrigger, onDelete, onUpdateActive }: {
+  instance: any;
   onTrigger: (id: string) => void;
   onDelete: (id: string) => void;
+  onUpdateActive: (id: string, active: boolean) => void;
 }) {
   const navigate = useNavigate();
-  const [showActions, setShowActions] = useState(false);
 
   return (
     <motion.div
@@ -41,9 +42,7 @@ function InstanceCard({ instance, onTrigger, onDelete }: {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
       transition={{ duration: 0.2 }}
-      className="group relative bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] rounded-xl p-5 transition-all duration-300"
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+      className="group relative flex flex-col bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] rounded-xl p-5 transition-all duration-300"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
@@ -79,50 +78,60 @@ function InstanceCard({ instance, onTrigger, onDelete }: {
         </div>
       </div>
 
-      {/* Hover actions */}
-      <AnimatePresence>
-        {showActions && (
-          <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
-            className="absolute top-3 right-3 flex items-center gap-1"
+      {/* Footer / Actions */}
+      <div className="flex justify-between items-center pt-4 mt-auto border-t border-white/[0.06]">
+        <div className="flex gap-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdateActive(instance.id, !instance.active);
+            }}
+            className={cn(
+              "p-2 rounded-lg transition-colors border",
+              !instance.active
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20"
+                : "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
+            )}
+            title={instance.active ? "Desativar (Pausar agendamento)" : "Ativar (Retomar agendamento)"}
           >
-            <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/instances/${instance.id}/edit`);
-                }}
-                className="p-1.5 rounded-md hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
-                title="Editar"
-              >
-                <Settings size={14} />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onTrigger(instance.id);
-                }}
-                className="p-1.5 rounded-md hover:bg-white/10 text-zinc-400 hover:text-emerald-400 transition-colors"
-                title="Executar agora"
-              >
-                <Play size={14} />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(instance.id);
-                }}
-                className="p-1.5 rounded-md hover:bg-white/10 text-zinc-400 hover:text-red-400 transition-colors"
-                title="Excluir"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {instance.active ? <Pause size={14} /> : <Play size={14} />}
+          </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onTrigger(instance.id);
+            }}
+            className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-white transition-colors"
+            title="Executar forçadamente agora"
+          >
+            <Zap size={14} />
+          </button>
+        </div>
+
+        <div className="flex gap-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/instances/${instance.id}/edit`);
+            }}
+            className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+            title="Editar Instância"
+          >
+            <Settings size={14} />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(instance.id);
+            }}
+            className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-red-400 transition-colors"
+            title="Excluir"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
 
       {/* Running glow */}
       {instance.status === 'running' && (
@@ -133,7 +142,7 @@ function InstanceCard({ instance, onTrigger, onDelete }: {
 }
 
 export default function InstancesPage() {
-  const { instances, loading, fetchAll, triggerInstance, deleteInstance } = useInstancesStore();
+  const { instances, loading, fetchAll, triggerInstance, deleteInstance, updateInstance } = useInstancesStore();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<InstanceReturningValues['status'] | 'all'>('all');
@@ -262,6 +271,7 @@ export default function InstancesPage() {
                 instance={instance}
                 onTrigger={triggerInstance}
                 onDelete={deleteInstance}
+                onUpdateActive={(id, active) => updateInstance(id, { active })}
               />
             ))}
           </AnimatePresence>

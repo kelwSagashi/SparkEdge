@@ -4,11 +4,13 @@ import { axios_api_instance } from '@/server/instance';
 export namespace InstanceRequest {
 
   export interface InstancePayload {
-    instance: InstanceUpsertValues;
-    destinations: {
-      destination: Omit<InstanceDestinationUpsertValues, 'instance_id'>;
-      mapping?: Omit<DataMappingUpsertValues, 'instance_destination_id'>;
-    }[];
+    instance?: Partial<InstanceUpsertValues>;
+    destinations?: any[];
+    active?: boolean;
+    name?: string;
+    description?: string;
+    status?: 'idle' | 'running' | 'paused' | 'error';
+    [key: string]: any;
   }
 
   export type Create = InstancePayload;
@@ -24,9 +26,9 @@ export const instancesApi = {
 
   get: (id: string) => axios_api_instance.get<ReturningQueries<InstanceReturningValues>>(`/instances/${id}`),
 
-  create: (data: InstanceRequest.Create) => axios_api_instance.post('/instances', data),
+  create: (data: InstanceRequest.Create) => axios_api_instance.post<ReturningQueries<InstanceReturningValues>>('/instances', data),
 
-  update: (id: string, data: InstanceRequest.Update) => axios_api_instance.put(`/instances/${id}`, data),
+  update: (id: string, data: InstanceRequest.Update) => axios_api_instance.put<ReturningQueries<InstanceReturningValues>>(`/instances/${id}`, data),
 
   delete: (id: string) => axios_api_instance.delete(`/instances/${id}`),
 

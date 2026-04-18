@@ -12,9 +12,6 @@ import type {
 import { InstanceRequest } from "./instance.request";
 import type { 
   IDataMapping, 
-  IFallbackConfig, 
-  IErrorConfig,
-  IInstanceDestination
 } from "./instance.types";
 
 interface NormalizedInstancePayload {
@@ -67,23 +64,71 @@ export class InstanceService {
   }
 
   async update(id: string, payload: Partial<InstanceRequest.InstancePayload>) {
-    const normalized = this.normalizePayload(payload);
+    // If we have destinations, it's a full config update (e.g. from Edit screen)
+    if (payload.destinations && Array.isArray(payload.destinations)) {
+      const normalized = this.normalizePayload(payload);
+      normalized.instance.id = id;
 
-    // Ensure the ID is preserved in the instance upsert values
-    normalized.instance.id = id;
+      let tagIds: string[] | undefined;
+      if (payload.tags && Array.isArray(payload.tags)) {
+        tagIds = await this.tagsService.findOrCreateByNames(
+          payload.tags,
+          normalized.instance.project_id || undefined,
+        );
+      }
 
-    let tagIds: string[] | undefined;
-    if (payload.tags && Array.isArray(payload.tags)) {
-      tagIds = await this.tagsService.findOrCreateByNames(
-        payload.tags,
-        normalized.instance.project_id || undefined,
-      );
+      return dbManager.registerInstance({
+        ...normalized,
+        tagIds,
+      });
     }
 
-    return dbManager.registerInstance({
-      ...normalized,
-      tagIds,
-    });
+    // Otherwise, it's a partial update (e.g. Pause/Resume)
+    // We map only the fields that are actually provided in the payload
+    const updateData: Partial<InstanceUpsertValues> = {};
+    
+    if (payload.name !== undefined) updateData.name = payload.name;
+    if (payload.description !== undefined) updateData.description = payload.description;
+    if (payload.active !== undefined) updateData.active = payload.active;
+    if (payload.status !== undefined) updateData.status = payload.status as any;
+    if (payload.trigger_type !== undefined || payload.triggerType !== undefined) 
+        updateData.trigger_type = payload.trigger_type ?? payload.triggerType;
+    if (payload.trigger_config !== undefined || payload.triggerConfig !== undefined)
+        updateData.trigger_config = payload.trigger_config ?? payload.triggerConfig;
+    if (payload.include_device_data !== undefined || payload.includeDeviceData !== undefined)
+        updateData.include_device_data = payload.include_device_data ?? payload.includeDeviceData;
+    if (payload.device_id !== undefined || payload.deviceId !== undefined)
+        updateData.device_id = payload.device_id ?? payload.deviceId;
+    if (payload.script_id !== undefined || payload.scriptId !== undefined)
+        updateData.script_id = payload.script_id ?? payload.scriptId;
+    if (payload.project_id !== undefined || payload.projectId !== undefined)
+        updateData.project_id = payload.project_id ?? payload.projectId;
+
+    // Handle nested configs if provided
+    const fc = payload.fallback_config || payload.fallbackConfig;
+    if (fc) {
+        if (fc.enabled !== undefined) updateData.fallback_enabled = fc.enabled;
+        if (fc.strategy !== undefined) updateData.fallback_strategy = fc.strategy as any;
+        if (fc.retry_interval_seconds !== undefined || (fc as any).retryIntervalSeconds !== undefined)
+            updateData.fallback_retry_interval_seconds = fc.retry_interval_seconds ?? (fc as any).retryIntervalSeconds;
+    }
+
+    const ec = payload.error_config || payload.errorConfig;
+    if (ec) {
+        if (ec.action !== undefined) updateData.on_error_action = ec.action as any;
+        if (ec.notify_url !== undefined || (ec as any).notifyUrl !== undefined)
+            updateData.on_error_config = { 
+                ...((updateData.on_error_config as any) || {}), 
+                notify_url: ec.notify_url ?? (ec as any).notifyUrl 
+            };
+    }
+
+    // Special case for script parameters if provided as object or array
+    if (payload.script_inputs || payload.scriptInputs) {
+        updateData.script_parameters = payload.script_inputs || payload.scriptInputs;
+    }
+
+    return dbManager.instances.update(id, updateData);
   }
 
   private normalizePayload(
@@ -118,7 +163,7 @@ export class InstanceService {
     }
 
     // 3. Trigger configuration
-    const trigger_config = payload.trigger_config || payload.triggerType || {};
+    const trigger_config = payload.trigger_config || payload.triggerConfig || {};
     
     // 4. Fallback and Error mapping
     const fallback_enabled = payload.fallback_config?.enabled ?? payload.fallbackConfig?.enabled ?? false;

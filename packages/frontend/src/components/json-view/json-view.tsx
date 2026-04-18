@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Input } from '../ui/input';
-import { Box, ChevronRight, Quote, Plus, Trash2, List, MoveDown, HelpCircle, GripVertical } from 'lucide-react';
+import { Box, ChevronRight, Quote, Plus, Trash2, List, MoveDown, HelpCircle, GripVertical, Check } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { cn } from '@/lib/utils';
 import DraggableValue from '../DraggableValue';
@@ -108,10 +108,10 @@ function AddFieldRow({ onAdd, isArray, data }: { onAdd: (key: string, type: Json
                 placeholder="Nova chave..." 
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
-                className="h-6 text-[10px] bg-zinc-800 border-white/10 w-24 text-zinc-300 placeholder:text-zinc-600"
+                className="h-9 text-[10px] bg-zinc-800 border-white/10 w-24 text-zinc-300 placeholder:text-zinc-600"
             />}
             <Select value={type} onValueChange={(v) => setType(v as any)}>
-                <SelectTrigger className="h-6 text-[10px] bg-zinc-800 border-white/10 w-20 px-2 text-zinc-300">
+                <SelectTrigger className="h-9 text-[10px] bg-zinc-800 border-white/10 w-full px-2 text-zinc-300">
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-900 border-white/10">
@@ -126,9 +126,9 @@ function AddFieldRow({ onAdd, isArray, data }: { onAdd: (key: string, type: Json
                 type="button"
                 size="icon"
                 onClick={handleAdd}
-                className="h-6 w-6 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border-none"
+                className="h-9 w-9 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border-none"
             >
-                <Plus className="w-3 h-3" />
+                <Check className="w-9 h-9" />
             </Button>
         </div>
     );
@@ -198,15 +198,28 @@ export function JsonView({
 
     const [{ isOver }, drop] = useDrop(() => ({
         accept: ItemTypes.OUTPUT_VALUE,
-        drop: (item: { value: string }) => {
+        drop: (item: { value: string, data?: any }) => {
             if (onParamChange) {
-                onParamChange(path.split('.').slice(0, -1).join('.'), name, `{{${item.value}}}`);
+                const parentPath = path.split('.').slice(0, -1).join('.');
+                if (isObject) {
+                    if (item.data && typeof item.data === 'object') {
+                        onParamChange(parentPath, name, item.data);
+                    } else {
+                        onParamChange(parentPath, name, `{{${item.value}}}`);
+                    }
+                } else {
+                    if (item.data && typeof item.data === 'object' && typeof value === 'string') {
+                        onParamChange(parentPath, name, JSON.stringify(item.data, null, 2));
+                    } else {
+                        onParamChange(parentPath, name, `{{${item.value}}}`);
+                    }
+                }
             }
         },
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
         }),
-    }), [name, path, onParamChange]);
+    }), [name, path, onParamChange, isObject, value]);
 
     const handleSetExpand = React.useCallback((value: boolean) => {
         setExpandOnce(false);
@@ -257,7 +270,7 @@ export function JsonView({
                             ) : (
                                 <div className="flex flex-col min-w-0">
                                     {draggableValue ? (
-                                        <DraggableValue type={ItemTypes.OUTPUT_VALUE} isDropped={false} value={path}>
+                                        <DraggableValue type={ItemTypes.OUTPUT_VALUE} isDropped={false} value={path} data={value}>
                                             <p className="text-emerald-400 font-mono text-[10px] truncate max-w-[150px]">{String(value)}</p>
                                         </DraggableValue>
                                     ) : (
@@ -301,12 +314,29 @@ export function JsonView({
                 onOpenChange={handleSetExpand}
                 className="group/collapsible [&[data-state=open]>div>button>svg:first-child]:rotate-90"
             >
-                <div className="flex items-center group/item">
+                <div 
+                    ref={onParamChange ? drop as any : undefined}
+                    className={cn(
+                        "flex items-center group/item rounded transition-colors",
+                         isOver && "bg-violet-500/20 ring-1 ring-violet-500/50"
+                    )}
+                >
                     <CollapsibleTrigger asChild>
-                        <JsonButtonView className="flex-1">
-                            <ChevronRight className="transition-transform w-3 h-3 text-zinc-600" />
-                            {icon}
-                            <span className="text-zinc-400 font-medium text-[11px]">{name}</span>
+                        <JsonButtonView className="flex-1 flex flex-row items-center gap-1">
+                            <ChevronRight className="transition-transform w-3 h-3 text-zinc-600 shrink-0" />
+                            {draggableValue ? (
+                                <DraggableValue type={ItemTypes.OUTPUT_VALUE} isDropped={false} value={path} data={value}>
+                                    <div className="flex items-center gap-1.5 w-full">
+                                        {icon}
+                                        <span className="text-zinc-400 font-medium text-[11px]">{name}</span>
+                                    </div>
+                                </DraggableValue>
+                            ) : (
+                                <div className="flex items-center gap-1.5 w-full">
+                                    {icon}
+                                    <span className="text-zinc-400 font-medium text-[11px]">{name}</span>
+                                </div>
+                            )}
                         </JsonButtonView>
                     </CollapsibleTrigger>
                     
@@ -375,4 +405,4 @@ export function JsonView({
         </div>
     )
 }
-
+

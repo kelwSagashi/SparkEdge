@@ -60,9 +60,13 @@ export const useInstancesStore = create<InstancesState>((set, get) => ({
 
   updateInstance: async (id, data) => {
     try {
-      await instancesApi.update(id, data);
+      const res = await instancesApi.update(id, data);
+      if (res.data.error) {
+        set({ error: typeof res.data.error === 'string' ? res.data.error : JSON.stringify(res.data.error) });
+        return;
+      }
       set({
-        instances: get().instances.map(i => i.id === id ? { ...i, ...data } : i),
+        instances: get().instances.map(i => i.id === id ? res.data.data : i),
       });
     } catch (err: any) {
       set({ error: err.message });

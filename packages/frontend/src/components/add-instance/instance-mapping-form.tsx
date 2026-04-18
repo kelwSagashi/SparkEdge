@@ -9,6 +9,7 @@ import type {
   ResourceOperationReturningValues,
   DownloadedScriptReturningValues,
   DeviceReturningValues,
+  SchemaConfigIO,
 } from "nmg8-db/src/types";
 import type { InstanceFormValues } from "./instance-form.schemas";
 import { useEffect } from "react";
@@ -60,26 +61,25 @@ export function InstanceMappingForm({
     },
   };
 
-  // Adicionar campos do script baseados nos esquemas salvos (stdout/stderr)
+  // Transform outputs recursively to build dynamic source pattern
+  const buildOutputTree = (fields: SchemaConfigIO[], prefix = '$.script') => {
+    const tree: any = {};
+    fields.forEach((field) => {
+      if (field.fields && Array.isArray(field.fields) && field.fields.length > 0) {
+        tree[field.name] = buildOutputTree(field.fields, `${prefix}.${field.name}`);
+      } else {
+        tree[field.name] = `{{${prefix}.${field.name}}}`;
+      }
+    });
+    return tree;
+  };
+
   const outputs = Array.isArray(selectedScript?.schema_config?.outputs) 
     ? selectedScript?.schema_config.outputs 
     : [];
 
-  const stdoutOutput = outputs.find(o => o.name === 'stdout');
-  const stderrOutput = outputs.find(o => o.name === 'stderr');
+  sourceData.script = buildOutputTree(outputs);
 
-  if (stdoutOutput?.fields && Array.isArray(stdoutOutput.fields)) {
-    stdoutOutput.fields.forEach((field) => {
-      sourceData.script[field.name] = `{{$.script.stdout.${field.name}}}`;
-    });
-  }
-
-  if (stderrOutput?.fields && Array.isArray(stderrOutput.fields)) {
-    if (!sourceData.script.stderr) sourceData.script.stderr = {};
-    stderrOutput.fields.forEach((field) => {
-      sourceData.script.stderr[field.name] = `{{$.script.stderr.${field.name}}}`;
-    });
-  }
 
   // 2. Efeito para inicializar o payloadTemplate baseado no esquema da operação
   useEffect(() => {

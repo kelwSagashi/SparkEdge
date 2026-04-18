@@ -37,7 +37,7 @@ export class ScriptsController {
         return { data: result.data, error: result.error };
     }
 
-    @Get('/:id/contents/:filename(*)')
+    @Get('/:id/contents/:filename')
     async getFileContent(req: Request, res: Response) {
         const id = req.params.id;
         const filename = req.params.filename;
@@ -114,10 +114,12 @@ export class ScriptsController {
         const { tempFolder, mainFile, name, description, tags, author, version } = req.body;
         if (!tempFolder || !mainFile) return { error: 'Missing tempFolder or mainFile' };
 
+        let finalFolder: string | undefined;
+
         try {
             await ensureScriptsStorageDir();
             const finalId = crypto.randomUUID();
-            const finalFolder = path.join(SCRIPTS_STORAGE_DIR, finalId);
+            finalFolder = path.join(SCRIPTS_STORAGE_DIR, finalId);
 
             const { schema, venvPath } = await setupScriptEnvironment(tempFolder, finalFolder, mainFile);
 
@@ -139,9 +141,13 @@ export class ScriptsController {
             // Adicionar schema formatado a resposta
             return { data: { script: result.data, schema } };
         } catch (e: any) {
+            if (finalFolder && fs.existsSync(finalFolder)) {
+                fs.rmSync(finalFolder, { recursive: true, force: true });
+            }
             return { error: e.message };
         }
     }
+
 
     @Get('/samples/list')
     async listSamples() {

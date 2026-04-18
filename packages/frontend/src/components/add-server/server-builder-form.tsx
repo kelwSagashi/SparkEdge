@@ -94,6 +94,12 @@ export const ServerBuilderForm: React.FC<ServerBuilderFormProps> = ({
 
   const quickAdd = (res: any) => {
     const resourceId = uuidv4();
+    const opField = selectedMetadata?.operationFields?.[0];
+    const opKey = opField?.key || "operation";
+    const defaultVal = opField?.options?.find(o => String(o.label).toLowerCase().includes('select') || String(o.label).toLowerCase().includes('find'))?.value 
+      || opField?.options?.[0]?.value 
+      || (id === "mongo" ? "find" : "select");
+
     appendResource({
       id: resourceId,
       name: res.name,
@@ -106,9 +112,9 @@ export const ServerBuilderForm: React.FC<ServerBuilderFormProps> = ({
         {
           id: uuidv4(),
           name: "Listar Registros",
-          type: id === "mongo" ? "find" : "select",
+          type: defaultVal,
           config: {
-            operation: id === "mongo" ? "find" : "select",
+            [opKey]: defaultVal,
           },
         },
       ],
@@ -132,6 +138,13 @@ export const ServerBuilderForm: React.FC<ServerBuilderFormProps> = ({
     ) {
       initializedFor.current = id;
       const resId = uuidv4();
+      
+      const opField = selectedMetadata?.operationFields?.[0];
+      const opKey = opField?.key || "operation";
+      const defaultVal = opField?.options?.find(o => String(o.label).toLowerCase().includes('insert') || String(o.label).toLowerCase().includes('create'))?.value 
+        || opField?.options?.[0]?.value 
+        || (id === "mongo" ? "insertOne" : "insert");
+        
       appendResource({
         id: resId,
         name: "Recurso Principal",
@@ -141,9 +154,9 @@ export const ServerBuilderForm: React.FC<ServerBuilderFormProps> = ({
           {
             id: uuidv4(),
             name: "Operação Principal",
-            type: id,
+            type: defaultVal,
             config: {
-              operation: id === "mongo" ? "insertOne" : "insert",
+              [opKey]: defaultVal,
             },
           },
         ],
@@ -302,12 +315,18 @@ const ResourceItem = ({
   });
 
   const handleAddOperation = () => {
+    const opField = metadata?.operationFields?.[0];
+    const opKey = opField?.key || "operation";
+    const defaultVal = opField?.options?.find(o => String(o.label).toLowerCase().includes('select') || String(o.label).toLowerCase().includes('find'))?.value 
+      || opField?.options?.[0]?.value 
+      || (serverType === "mongo" ? "find" : "select");
+
     appendOperation({
       id: uuidv4(),
       name: `Operação ${operationFields.length + 1}`,
-      type: serverType === "mongo" ? "find" : "select",
+      type: defaultVal,
       config: {
-        operation: serverType === "mongo" ? "find" : "select",
+        [opKey]: defaultVal,
       },
     });
   };

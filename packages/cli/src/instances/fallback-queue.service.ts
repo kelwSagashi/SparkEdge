@@ -18,17 +18,19 @@ export class FallbackQueueService {
   /**
    * Enqueue data to fallback storage for a given instance.
    */
-  async enqueue(instanceId: string, payload: unknown): Promise<void> {
+  async enqueue(instanceId: string, payload: unknown, executionId?: string, destinationId?: string): Promise<void> {
     const now = new Date();
     dbManager.localFallback.create({
       instance_id: instanceId,
+      destination_id: destinationId,
+      execution_id: executionId,
       payload: typeof payload === 'string' ? payload : JSON.stringify(payload),
       status: 'pending',
       retry_count: 0,
       created_at: now.toISOString(),
       updated_at: now.toISOString(),
     });
-    this.logger.log(`[FallbackQueue] Enqueued data for instance ${instanceId}`);
+    this.logger.log(`[FallbackQueue] Enqueued data for instance ${instanceId} (Execution: ${executionId || 'none'}, Destination: ${destinationId || 'none'})`);
   }
 
   /**
@@ -36,15 +38,26 @@ export class FallbackQueueService {
    * The sendFn should attempt to send the data to the destination.
    * Returns the number of successfully sent items.
    */
-  async flush(sendFn: (instanceId: string, payload: string) => Promise<boolean>): Promise<number> {
+  async flush(sendFn: (instanceId: string, payload: string, destinationId?: string) => Promise<boolean>): Promise<number> {
     const pendingRes = dbManager.localFallback.listPending();
     if (pendingRes.error || !pendingRes.data.length) return 0;
 
+    // Sort by created_at to maintain order for 'active_queue' strategy
+    const sortedPending = pendingRes.data.sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
     let sent = 0;
-    for (const item of pendingRes.data) {
+    for (const item of sortedPending) {
+      // Find instance to check its retry config
+      const instanceRes = dbManager.instances.findById(item.instance_id);
+      const instance = instanceRes.data;
+      
+      const maxRetries = instance?.on_error_config?.max_retries ?? this.maxRetries;
+
       // Skip items that exceeded max retries
-      if ((item.retry_count ?? 0) >= this.maxRetries) {
-        this.logger.log(`[FallbackQueue] Item ${item.id} exceeded max retries, skipping`);
+      if ((item.retry_count ?? 0) >= maxRetries) {
+        this.logger.log(`[FallbackQueue] Item ${item.id} exceeded max retries (${maxRetries}), skipping`);
         continue;
       }
 
@@ -52,7 +65,7 @@ export class FallbackQueueService {
       dbManager.localFallback.markAsSending(item.id);
 
       try {
-        const success = await sendFn(item.instance_id, item.payload);
+        const success = await sendFn(item.instance_id, item.payload, item.destination_id ?? undefined);
         if (success) {
           dbManager.localFallback.markAsSent(item.id);
           sent++;

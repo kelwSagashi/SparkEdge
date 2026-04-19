@@ -191,29 +191,34 @@ export class InstanceRunnerService {
             const msg = sendErr instanceof Error ? sendErr.message : String(sendErr);
             addLog('warn', `Destination ${dest.id} dispatch failed: ${msg}`);
             
-            // Fallback
-            if (instance.fallback_enabled) {
-               addLog('info', `Enqueuing destination ${dest.id} into fallback storage`);
-               await this.fallbackQueue.enqueue(instance.id, JSON.stringify(parsedOutput));
-               fallbackUsed = true;
-            }
+             // Fallback
+             if (instance.fallback_enabled) {
+                addLog('info', `Enqueuing destination ${dest.id} into fallback storage`);
+                await this.fallbackQueue.enqueue(instance.id, JSON.stringify(parsedOutput), executionId, dest.id);
+                fallbackUsed = true;
+             }
           }
         }
         
         destinationSent = sentCount > 0;
         addLog('info', `Dispatched to ${sentCount} destinations`);
+
+        // After all destinations, if we have active_queue strategy and some succeeded, 
+        // we might want to try flushing the fallback queue for this instance.
+        if (destinationSent && instance.fallback_enabled && instance.fallback_strategy === 'active_queue') {
+           this.logger.log(`[InstanceRunner] Success detected with active_queue strategy. Triggering flush for instance ${instance.id}`);
+           this.fallbackQueue.flush(async (instId, payload, destId) => {
+              if (instId !== instance.id) return false;
+              if (!destId) return false;
+              return this.resendFallbackItem(destId, payload);
+           });
+        }
       } else {
-        addLog('info', `No active destinations configured for this instance.`);
+        destinationSent = true;
+        addLog('info', 'No active destinations configured for this instance');
       }
 
-      // 5. Record success
-      const finalStatus = (destinationSent ? 'success' : 'failed') as ExecutionStatus;
-      if (finalStatus === 'success') {
-          addLog('info', `Execution fully completed with success`);
-      } else {
-          addLog('warn', `Execution finished but no destinations were successfully dispatched`);
-      }
-
+      const finalStatus: ExecutionStatus = destinationSent ? 'success' : (fallbackUsed ? 'success' : 'failed');
       this.finishExecution(instance, executionId, finalStatus, durationMs, finishedAt, result.stdout, destinationSent, fallbackUsed, executionLogs);
 
       return { executionId, status: finalStatus, output: result.stdout };
@@ -227,6 +232,31 @@ export class InstanceRunnerService {
     } finally {
       // 6. Reset instance status to idle (always)
       dbManager.instances.updateStatus(instance.id, 'idle');
+    }
+  }
+
+  /**
+   * Public method to resend a fallback item using its saved payload.
+   */
+  async resendFallbackItem(destId: string, payload: string): Promise<boolean> {
+    try {
+      const destRes = dbManager.instanceDestinations.findById(destId);
+      if (destRes.error || !destRes.data) return false;
+      
+      const parsedPayload = JSON.parse(payload);
+      // We use a dummy context for mapping as it's already applied to the saved payload
+      // But we need some basic context for the adapter
+      const dest = destRes.data;
+      const context: any = {
+        execution_id: 'resend-' + nanoid(6),
+        timestamp: new Date().toISOString(),
+      };
+
+      await this.sendToDestination(dest, parsedPayload, context, () => {});
+      return true;
+    } catch (error) {
+      this.logger.log(`[InstanceRunner] Failed to resend item to destination ${destId}: ${error}`);
+      return false;
     }
   }
 

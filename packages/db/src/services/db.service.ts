@@ -29,6 +29,7 @@ import { InstanceTagsRepository } from '../repositories/instanceTags.repository'
 import { InstanceDestinationsRepository } from '../repositories/instanceDestinations.repository';
 import { DataMappingsRepository } from '../repositories/dataMappings.repository';
 import { AuthorizationsTypeRepository } from "../repositories/authorizationTypes.repository";
+import { EdgeRepository } from "../repositories/edge.repository";
 import type { InstanceUpsertValues, InstanceDestinationUpsertValues, DataMappingUpsertValues, InstanceReturningValues, InstanceDestinationReturningValues, DataMappingReturningValues } from '../types';
 import { eq, inArray, notInArray, and } from 'drizzle-orm';
 
@@ -71,6 +72,7 @@ export class DatabaseService {
   // Tags
   private tagsRepo?: TagsRepository;
   private instanceTagsRepo?: InstanceTagsRepository;
+  private edgeRepo?: EdgeRepository;
 
   private constructor(db: DBType | undefined) {
     this.db = db;
@@ -204,6 +206,12 @@ export class DatabaseService {
     if (!this.db) throw Error('The database has not been instantiated.');
     if (!this.instanceTagsRepo) this.instanceTagsRepo = new InstanceTagsRepository(this.db);
     return this.instanceTagsRepo;
+  }
+
+  public get edge() {
+    if (!this.db) throw Error('The database has not been instantiated.');
+    if (!this.edgeRepo) this.edgeRepo = new EdgeRepository(this.db);
+    return this.edgeRepo;
   }
 
   // ─── Composite Operations ─────────────────────────────────────────────────────

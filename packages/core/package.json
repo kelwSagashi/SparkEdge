@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@spark-edge/typescript-config": "workspace:*",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/cors": "^2.8.19",
     "@types/lodash": "^4.17.20",
     "@types/lodash.get": "^4.4.9",
@@ -39,9 +40,9 @@
     "cors": "^2.8.5",
     "fast-glob": "^3.3.3",
     "lodash": "^4.17.21",
+    "mqtt": "^5.15.1",
+    "p-cancelable": "^4.0.1",
     "spark-edge-db": "workspace:*",
-    "p-cancelable": "^4.0.1"
+    "uuid": "^13.0.0"
   }
 }
-
-

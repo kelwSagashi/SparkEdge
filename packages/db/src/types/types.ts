@@ -74,6 +74,23 @@ export type TagReturningValues = typeof Tables.TagsTable.$inferSelect;
 export type InstanceTagUpsertValues = typeof Tables.InstanceTagsTable.$inferInsert;
 export type InstanceTagReturningValues = typeof Tables.InstanceTagsTable.$inferSelect;
 
+// ─── Edge & MQTT ─────────────────────────────────────────────────────────────
+
+export type EdgeIdentityUpsertValues = typeof Tables.EdgeIdentityTable.$inferInsert;
+export type EdgeIdentityReturningValues = typeof Tables.EdgeIdentityTable.$inferSelect;
+
+export type EdgeCredentialsUpsertValues = typeof Tables.EdgeCredentialsTable.$inferInsert;
+export type EdgeCredentialsReturningValues = typeof Tables.EdgeCredentialsTable.$inferSelect;
+
+export type MqttCommandUpsertValues = typeof Tables.MqttCommandsTable.$inferInsert;
+export type MqttCommandReturningValues = typeof Tables.MqttCommandsTable.$inferSelect;
+
+export type MqttQueueUpsertValues = typeof Tables.MqttQueueTable.$inferInsert;
+export type MqttQueueReturningValues = typeof Tables.MqttQueueTable.$inferSelect;
+
+export type EdgeConfigUpsertValues = typeof Tables.EdgeConfigTable.$inferInsert;
+export type EdgeConfigReturningValues = typeof Tables.EdgeConfigTable.$inferSelect;
+
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
 export type ReturningQueries<T> = {

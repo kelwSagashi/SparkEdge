@@ -17,6 +17,7 @@ import type {
   AuthorizationsTypeReturningValues,
   InstanceReturningValues,
   DownloadedScriptReturningValues,
+  InstanceDestinationReturningValues,
 } from "spark-edge-db/src/types";
 import { axios_api_instance } from "./instance";
 
@@ -196,7 +197,7 @@ export class API {
   }
 
   async getInstanceById(id: string) {
-    return axios_api_instance.get<ReturningQueries<InstanceReturningValues>>(
+    return axios_api_instance.get<ReturningQueries<{ destinations: InstanceDestinationReturningValues[]; instance: InstanceReturningValues}>>(
       `/instances/${id}`,
     );
   }

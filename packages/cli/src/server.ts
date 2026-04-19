@@ -22,6 +22,7 @@ import '@/fallback/fallback.controller';
 import '@/projects/projects.controller';
 import '@/webhook/webhook.controller';
 import '@/instances/adapters.controller';
+import '@/integrations/mqtt/cli.controller';
 
 import { ServerTypeRegistry } from './instances/server-types';
 import { AdapterRegistry } from './instances/destination-adapters';
@@ -30,6 +31,13 @@ import './instances/server-types';
 import './instances/destination-adapters';
 import { InstanceSchedulerService } from './instances/instance-scheduler.service';
 
+// ─── MQTT (optional) ─────────────────────────────────────────────────────────
+// Loaded lazily so a missing broker never blocks the server from starting.
+async function startMqttIfEnabled(): Promise<void> {
+  if (!process.env.MQTT_URL) return;
+  const { initSafe } = await import('./integrations/mqtt/mqtt.bootstrap');
+  await initSafe();
+}
 
 @Service()
 export class Server {
@@ -137,6 +145,11 @@ export class Server {
 
         // Start the instance execution scheduler
         Container.get(InstanceSchedulerService).start();
+
+        // Start MQTT integration (non-blocking — offline mode is fine)
+        startMqttIfEnabled().catch((err) =>
+          this.logger.log(`[Mqtt] Startup warning: ${err.message}`)
+        );
 
         this.app.listen(port, () => {
             this.logger.log(`🚀 Servidor rodando em http://localhost:${port}`);

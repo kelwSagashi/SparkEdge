@@ -328,6 +328,7 @@ export const LocalFallbackStorageTable = sqliteTable('local_fallback_storage', {
   id: text('id').primaryKey().$defaultFn(() => nanoid()),
 
   instance_id: text('instance_id').notNull().references(() => InstancesTable.id, { onDelete: 'cascade' }),
+  destination_id: text('destination_id').references(() => InstanceDestinationsTable.id, { onDelete: 'cascade' }),
   execution_id: text('execution_id').references(() => InstanceExecutionsTable.id, { onDelete: 'set null' }),
 
   status: text('status', { enum: FallbackItemStatuses }).notNull().default('pending'),
@@ -354,3 +355,63 @@ export const LocalFallbackStorageTable = sqliteTable('local_fallback_storage', {
 
 
 
+// --- MQTT Commands ---
+
+export const MqttCommandStatuses = ['pending', 'running', 'done', 'error', 'ignored'] as const;
+
+export const MqttCommandsTable = sqliteTable('mqtt_commands', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  command_id: text('command_id').notNull().unique(),
+  type: text('type').notNull(),
+  payload: text('payload', { mode: 'json' }).$type<Record<string, any>>().$defaultFn(() => ({})),
+  status: text('status', { enum: MqttCommandStatuses }).notNull().default('pending'),
+  result: text('result', { mode: 'json' }).$type<Record<string, any>>(),
+  error: text('error'),
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  started_at: text('started_at'),
+  finished_at: text('finished_at'),
+});
+
+// --- MQTT Offline Queue ---
+
+export const MqttQueueTable = sqliteTable('mqtt_queue', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  topic: text('topic').notNull(),
+  payload: text('payload').notNull(),
+  attempts: integer('attempts').notNull().default(0),
+  last_attempt_at: text('last_attempt_at'),
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// --- Edge Config ---
+
+export const EdgeConfigTable = sqliteTable('edge_config', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  lat: text('lat'),
+  lng: text('lng'),
+  location_source: text('location_source').default('manual'),
+  updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// --- Edge Identity ---
+
+export const EdgeIdentityTable = sqliteTable('edge_identity', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  edge_id: text('edge_id').notNull().unique(),
+  edge_name: text('edge_name'),
+  provisioned: integer('provisioned').notNull().default(0),
+  created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// --- Edge Credentials ---
+
+export const EdgeCredentialTypes = ['mqtt'] as const;
+
+export const EdgeCredentialsTable = sqliteTable('edge_credentials', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  type: text('type', { enum: EdgeCredentialTypes }).notNull().default('mqtt'),
+  broker_url: text('broker_url'),
+  username: text('username'),
+  password: text('password'),
+  updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
+});

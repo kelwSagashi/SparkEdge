@@ -12,6 +12,7 @@ import InstancesPage from './pages/Instances';
 import InstanceCreatePage from './pages/InstanceCreatePage';
 import ExecutionHistoryPage from './pages/ExecutionHistory';
 import LocalDataPage from './pages/LocalData';
+import { Toaster } from 'sonner';
 import ScriptHubPage from './pages/ScriptHub';
 import ScriptDetailsPage from './pages/ScriptDetailsPage';
 import ScriptEditPage from './pages/ScriptEditPage';
@@ -28,6 +29,7 @@ import DeviceCreationPage from './pages/DeviceCreatePage';
 import DeviceEditPage from './pages/DeviceEditPage';
 import InstanceEditPage from './pages/InstanceEditPage';
 import InstanceLogsPage from './pages/InstanceLogsPage';
+import CloudSettingsPage from './pages/CloudSettings';
 
 function App() {
   const loadMe = useAuthStore((s) => s.loadMe);
@@ -104,6 +106,7 @@ function App() {
 
               {/* Settings */}
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+              <Route path="/settings/cloud" element={<ProtectedRoute><CloudSettingsPage /></ProtectedRoute>} />
 
               {/* Legacy redirect */}
               <Route path="/workflow" element={<Navigate to="/instances" replace />} />
@@ -114,6 +117,7 @@ function App() {
         </SidebarInset>
       </div>
       </SidebarProvider>
+      <Toaster position="top-right" expand={false} richColors theme="dark" />
     </DndProvider>
   );
 }

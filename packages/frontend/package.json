@@ -36,7 +36,6 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.25.0",
     "lucide-react": "^0.544.0",
-    "spark-edge-db": "workspace:*",
     "react": "^19.1.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
@@ -45,6 +44,8 @@
     "react-markdown": "^9.0.3",
     "react-resizable-panels": "^3.0.6",
     "react-router-dom": "^7.9.3",
+    "sonner": "^2.0.7",
+    "spark-edge-db": "workspace:*",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.14",
     "uuid": "^13.0.0",
@@ -72,4 +73,3 @@
     "vite": "^7.1.7"
   }
 }
-

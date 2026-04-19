@@ -33,7 +33,7 @@ export default function GetService({
 
     return (
         <div className='w-full'>
-            <span className="font-medium text-muted-foreground">Escolha o serviço</span>
+            <span className="font-medium text-secondary">Escolha o serviço</span>
             <Select onValueChange={(val) => {
                 const selectedServer = servers.find(s => s.id === val);
                 if (selectedServer) setSelection(selectedServer);
@@ -44,13 +44,13 @@ export default function GetService({
                 <SelectContent>
                     <SelectGroup>
                         <SelectLabel>Servidores</SelectLabel>
-                        {loading && <div className='p-4 text-muted-foreground'>Loading...</div>}
+                        {loading && <div className='p-4 text-secondary'>Loading...</div>}
                         {error && <div className='p-4 text-destructive text-sm'>{error}</div>}
                         {!loading && !error && servers.map(item => (
                             <SelectItem key={item.id} id={item.id} value={item.id} className='w-full justify-start p-6'>
                                 <div className="text-left">
                                     <p className="font-semibold text-primary">{item.name}</p>
-                                    <p className="text-sm text-muted-foreground">{item.base_url}</p>
+                                    <p className="text-sm text-secondary">{item.base_url}</p>
                                 </div>
                             </SelectItem>
                         ))}

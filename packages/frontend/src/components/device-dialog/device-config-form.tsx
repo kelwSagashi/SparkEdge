@@ -59,7 +59,7 @@ export default function DeviceConfigForm({
         <form id="device_form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
             {/* Campos Padrão */}
             <div>
-                <label className="text-muted-foreground text-sm" htmlFor="device-id">ID</label>
+                <label className="text-secondary text-sm" htmlFor="device-id">ID</label>
                 <DroppableInput
                     id="device-id"
                     placeholder="ID único do dispositivo"
@@ -71,7 +71,7 @@ export default function DeviceConfigForm({
                 {form.formState.errors.id && <p className="text-destructive text-sm mt-1">{form.formState.errors.id.message}</p>}
             </div>
             <div>
-                <label className="text-muted-foreground text-sm" htmlFor="device-name">Nome</label>
+                <label className="text-secondary text-sm" htmlFor="device-name">Nome</label>
                 <DroppableInput
                     id="device-name"
                     placeholder="Nome do dispositivo (ex: Inversor 1)"
@@ -83,7 +83,7 @@ export default function DeviceConfigForm({
                 {form.formState.errors.name && <p className="text-destructive text-sm mt-1">{form.formState.errors.name.message}</p>}
             </div>
             <div>
-                <label className="text-muted-foreground text-sm" htmlFor="device-brand">Marca</label>
+                <label className="text-secondary text-sm" htmlFor="device-brand">Marca</label>
                 <DroppableInput
                     id="device-brand"
                     placeholder="Marca do dispositivo (ex: Intelbras)"
@@ -95,7 +95,7 @@ export default function DeviceConfigForm({
                 {form.formState.errors.brand && <p className="text-destructive text-sm mt-1">{form.formState.errors.brand.message}</p>}
             </div>
             <div>
-                <label className="text-muted-foreground text-sm" htmlFor="device-description">Descrição</label>
+                <label className="text-secondary text-sm" htmlFor="device-description">Descrição</label>
                 <DroppableInput
                     id="device-description"
                     placeholder="Descrição do dispositivo"
@@ -107,7 +107,7 @@ export default function DeviceConfigForm({
                 {form.formState.errors.description && <p className="text-destructive text-sm mt-1">{form.formState.errors.description.message}</p>}
             </div>
             <div>
-                <label className="text-muted-foreground text-sm" htmlFor="device-ip_address">Endereço IP</label>
+                <label className="text-secondary text-sm" htmlFor="device-ip_address">Endereço IP</label>
                 <DroppableInput
                     id="device-ip_address"
                     placeholder="Endereço IP do dispositivo"
@@ -119,7 +119,7 @@ export default function DeviceConfigForm({
                 {form.formState.errors.ip_address && <p className="text-destructive text-sm mt-1">{form.formState.errors.ip_address.message}</p>}
             </div>
             <div>
-                <label className="text-muted-foreground text-sm" htmlFor="device-location">Locação</label>
+                <label className="text-secondary text-sm" htmlFor="device-location">Locação</label>
                 <DroppableInput
                     id="device-location"
                     placeholder="Onde está o dispositivo?"
@@ -131,7 +131,7 @@ export default function DeviceConfigForm({
                 {form.formState.errors.location && <p className="text-destructive text-sm mt-1">{form.formState.errors.location.message}</p>}
             </div>
             <div>
-                <label className="text-muted-foreground text-sm" htmlFor={`connection`}>Tipo</label>
+                <label className="text-secondary text-sm" htmlFor={`connection`}>Tipo</label>
                 <Select onValueChange={(val: DeviceConnectionFormValues) => form.setValue(`connection`, val)} defaultValue={form.watch(`connection`)}>
                     <SelectTrigger className="w-30 text-primary">
                         <SelectValue placeholder="Selecionar tipo" />
@@ -155,7 +155,7 @@ export default function DeviceConfigForm({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+                        className="absolute top-2 right-2 text-secondary hover:text-destructive"
                         onClick={() => remove(index)}
                     >
                         <Trash className="h-4 w-4" />
@@ -196,7 +196,7 @@ export default function DeviceConfigForm({
                             </div>
                             <div>
                                 <div className='h-9 py-1'>
-                                    <label className="text-muted-foreground text-sm" htmlFor={`others-${index}-type`}>Tipo</label>
+                                    <label className="text-secondary text-sm" htmlFor={`others-${index}-type`}>Tipo</label>
                                 </div>
                                 <Select onValueChange={(val: "text" | "number") => form.setValue(`others.${index}.type`, val)} defaultValue={form.watch(`others.${index}.type`)}>
                                     <SelectTrigger className="w-30 text-primary">

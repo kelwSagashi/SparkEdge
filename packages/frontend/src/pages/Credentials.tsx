@@ -40,7 +40,7 @@ export default function CredentialsPage() {
           </div>
         </div>
         <Button onClick={handleNew} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
-            <Plus className="w-4 h-4" /> Nova Credencial
+          Nova Credencial
         </Button>
       </div>
 
@@ -77,7 +77,7 @@ export default function CredentialsPage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
-                className="group bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] rounded-xl p-5 transition-all duration-300 flex flex-col"
+                className="group bg-foreground hover:bg-muted-foreground border border-border rounded-xl p-5 transition-all duration-300"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -85,8 +85,7 @@ export default function CredentialsPage() {
                       <KeyRound size={16} />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold text-white">{cred.name}</h3>
-                      <span className="text-[10px] uppercase tracking-wider text-zinc-500"></span>
+                      <h3 className="text-sm font-semibold text-primary">{cred.name}</h3>
                     </div>
                   </div>
                 </div>

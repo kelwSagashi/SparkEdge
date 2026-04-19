@@ -110,26 +110,26 @@ function InstanceCard({ instance, onTrigger, onDelete, onUpdateActive }: {
         </div>
 
         <div className="flex gap-1">
-          <button
+          <Button 
+            size="sm" variant="ghost"
+            className="h-8 text-xs text-secondary hover:text-primary"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/instances/${instance.id}/edit`);
+              navigate(`/instances/${instance.id}`)
             }}
-            className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
-            title="Editar Instância"
           >
-            <Settings size={14} />
-          </button>
-          <button
+            Editar
+          </Button>
+          <Button 
+            size="sm" variant="ghost"
+            className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(instance.id);
             }}
-            className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-red-400 transition-colors"
-            title="Excluir"
           >
-            <Trash2 size={14} />
-          </button>
+            Excluir
+          </Button>
         </div>
       </div>
 
@@ -176,9 +176,8 @@ export default function InstancesPage() {
         </div>
         <Button
           onClick={() => navigate('/instances/new')}
-          className="gap-2 bg-white text-zinc-900 hover:bg-zinc-200 font-medium"
+          className="bg-violet-600 hover:bg-violet-700 text-white gap-2"
         >
-          <Plus size={16} />
           Nova Instância
         </Button>
       </div>

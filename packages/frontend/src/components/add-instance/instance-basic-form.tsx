@@ -49,7 +49,7 @@ export function InstanceBasicForm({
             id="name"
             placeholder="Ex: Monitoramento Solar"
             {...register("name")}
-            className={`text-primary ${errors.name ? "border-destructive" : ""}`}
+            className={`text-primary placeholder:text-secondary ${errors.name ? "border-destructive" : ""}`}
           />
           {errors.name && (
             <p className="text-sm text-destructive">{errors.name.message}</p>
@@ -64,7 +64,7 @@ export function InstanceBasicForm({
             placeholder="Descreva o propósito desta instância..."
             rows={4}
             {...register("description")}
-            className="text-primary"
+            className="text-primary placeholder:text-secondary"
           />
         </div>
 
@@ -76,12 +76,12 @@ export function InstanceBasicForm({
             control={control}
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger id="project_id" className="text-primary">
+                <SelectTrigger id="project_id" className="text-primary placeholder:text-secondary">
                   <SelectValue placeholder="Selecione um projeto" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Projetos</SelectLabel>
+                  <SelectGroup className="text-primary">
+                    <SelectLabel className="text-secondary">Projetos</SelectLabel>
                     {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.name}
@@ -113,7 +113,7 @@ export function InstanceBasicForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Dispositivos Disponíveis</SelectLabel>
+                    <SelectLabel className="text-secondary">Dispositivos Disponíveis</SelectLabel>
                     {devices.map((device) => (
                       <SelectItem className="text-primary" key={device.id} value={device.id}>
                         {device.name}
@@ -147,7 +147,7 @@ export function InstanceBasicForm({
               Incluir dados do dispositivo no envio
             </Label>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-secondary">
             Quando habilitado, os dados do dispositivo serão incluídos junto com
             os dados do script.
           </p>

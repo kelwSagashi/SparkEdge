@@ -29,8 +29,8 @@ export default function ProjectsPage() {
           <h1 className="text-2xl font-semibold text-white tracking-tight">Projetos</h1>
           <p className="text-sm text-zinc-500 mt-1">Organize suas instâncias em projetos.</p>
         </div>
-        <Button onClick={() => setShowCreate(true)} className="gap-2 bg-white text-zinc-900 hover:bg-zinc-200 font-medium">
-          <Plus size={16} /> Novo Projeto
+        <Button onClick={() => setShowCreate(true)} className="bg-violet-600 hover:bg-violet-700 text-primary gap-2">
+          Novo Projeto
         </Button>
       </div>
 
@@ -50,7 +50,7 @@ export default function ProjectsPage() {
                   <input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Meu Projeto" className={inputClasses} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Chave *</label>
+                  <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Tag *</label>
                   <input type="text" value={newKey} onChange={e => setNewKey(e.target.value.toUpperCase())} placeholder="PROJ" className={inputClasses} />
                 </div>
               </div>
@@ -105,16 +105,24 @@ export default function ProjectsPage() {
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/[0.06] text-zinc-400 mt-1">{project.key}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => deleteProject(project.id)}
-                    className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"
-                  >
-                    <Trash2 size={12} />
-                  </button>
                 </div>
-                {project.description && (
-                  <p className="text-xs text-zinc-500 mt-3">{project.description}</p>
-                )}
+                <p className="text-xs text-zinc-500 mt-3 h-8">{project.description ?? ""}</p>
+                <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
+                  <Button 
+                    size="sm" variant="ghost"
+                    className="h-8 text-xs text-secondary hover:text-primary"
+                    onClick={() => {}}
+                  >
+                    Editar
+                  </Button>
+                  <Button 
+                    size="sm" variant="ghost"
+                    className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs"
+                    onClick={() => deleteProject(project.id)}
+                  >
+                    Excluir
+                  </Button>
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>

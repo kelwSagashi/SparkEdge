@@ -17,7 +17,7 @@
   -moz-osx-font-smoothing: grayscale;
   --radius: 0.625rem;
   --background: rgb(23, 23, 23);
-  --foreground: rgb(29, 29, 29);
+  --foreground: oklch(23.075% 0.00003 271.152);
   --card: oklch(28.094% 0.00003 271.152);
   --card-foreground: oklch(0.145 0 0);
   --popover: rgb(23, 23, 23);
@@ -26,12 +26,12 @@
   --primary-foreground: rgb(219, 219, 219);
   --secondary: oklch(90.67% 0.0001 271.152);
   --secondary-foreground: rgb(148, 154, 156);
-  --muted: oklch(73.324% 0.00227 15.193);
-  --muted-foreground: oklch(0.867 0 89.876);
+  --muted: oklch(29.238% 0.01448 285.446);
+  --muted-foreground: oklch(26.448% 0.00003 271.152);
   --accent: oklch(20.976% 0.02088 267.661);
   --accent-foreground: oklch(0.71 0.18 29.77);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.42 0.008 233.827);
+  --border: oklch(37.53% 0.00004 271.152);
   --input: oklch(27.274% 0.00003 271.152);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);

@@ -108,13 +108,13 @@ function AddFieldRow({ onAdd, isArray, data }: { onAdd: (key: string, type: Json
                 placeholder="Nova chave..." 
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
-                className="h-9 text-[10px] bg-zinc-800 border-white/10 w-24 text-zinc-300 placeholder:text-zinc-600"
+                className="h-9 text-[10px] bg-input border-border w-24 text-primary placeholder:text-secondary"
             />}
             <Select value={type} onValueChange={(v) => setType(v as any)}>
-                <SelectTrigger className="h-9 text-[10px] bg-zinc-800 border-white/10 w-full px-2 text-zinc-300">
+                <SelectTrigger className="h-9 text-[10px] bg-input border-border w-full px-2 text-primary">
                     <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-white/10">
+                <SelectContent className="bg-zinc-900 border-border">
                     <SelectItem value="string" className="text-zinc-300">Texto</SelectItem>
                     <SelectItem value="number" className="text-zinc-300">Número</SelectItem>
                     <SelectItem value="boolean" className="text-zinc-300">Booleano</SelectItem>
@@ -262,7 +262,7 @@ export function JsonView({
                                      <Input
                                         value={value === null || value === undefined ? "" : value}
                                         onChange={(e) => onParamChange(path.split('.').slice(0, -1).join('.'), name, e.target.value)}
-                                        className="h-7 text-[10px] py-1 bg-black/20 border-white/10 text-emerald-400 font-mono focus:ring-violet-500/30"
+                                        className="h-7 text-[10px] py-1 bg-input border-border text-primary placeholder:text-secondary font-mono focus:ring-violet-500/30"
                                         placeholder="Valor ou {{path}}"
                                         {...inputProps}
                                     />

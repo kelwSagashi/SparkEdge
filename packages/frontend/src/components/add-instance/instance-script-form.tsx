@@ -132,10 +132,6 @@ export function InstanceScriptForm({
         currentInputs = updateNestedValue(currentInputs, parentPath ? `${parentPath}.${childKey}` : childKey, childValue);
     });
     
-    // Remover o objeto original? O usuário pediu para "desestruturar", geralmente implica expandir e talvez remover ou manter.
-    // Vamos manter por segurança, ou remover se for o comportamento esperado. 
-    // Por enquanto, vamos apenas adicionar os campos.
-    
     setValue("scriptInputs", currentInputs);
   };
 
@@ -144,18 +140,18 @@ export function InstanceScriptForm({
       <div className="pr-4 space-y-6">
         <div className="md:col-span-1 space-y-4">
           <div className="space-y-1">
-            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Execução Requerida
+            <Label className="text-[10px] font-bold text-primary uppercase tracking-wider">
+              Script
             </Label>
             <Controller
               name="script_id"
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="bg-black/20 border-border text-primary h-9">
+                  <SelectTrigger className="border-border text-primary h-9">
                     <SelectValue placeholder="Selecione um script" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#09090b] border-border text-primary">
+                  <SelectContent className="border-border text-primary">
                     {scripts.map((script) => (
                       <SelectItem key={script.id} value={script.id}>
                         {script.name}
@@ -173,17 +169,12 @@ export function InstanceScriptForm({
           </div>
 
           {selectedScript && (
-            <Card className="p-3 bg-violet-500/5 border-violet-500/20 space-y-2">
+            <Card className="p-3 bg-violet-500/5 border-violet-500/20">
               <div className="flex items-center gap-2">
                 <Play className="w-3 h-3 text-violet-400" />
                 <span className="text-xs font-semibold text-violet-300">
                   {selectedScript.name}
                 </span>
-              </div>
-              <p className="text-[10px] text-violet-300/70 line-clamp-2">
-                {selectedScript.description || "Sem descrição disponível."}
-              </p>
-              <div className="flex flex-wrap gap-1">
                 <span className="text-[8px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20">
                   {selectedScript.language || "python"}
                 </span>
@@ -191,6 +182,9 @@ export function InstanceScriptForm({
                   v{selectedScript.version || "1.0.0"}
                 </span>
               </div>
+              <p className="text-[10px] text-violet-300/70 line-clamp-2">
+                {selectedScript.description || "Sem descrição disponível."}
+              </p>
             </Card>
           )}
         </div>
@@ -205,17 +199,17 @@ export function InstanceScriptForm({
 
             {!selectedScript ? (
               <Card className="p-8 bg-black/20 border-border border-dashed text-center flex flex-col items-center justify-center gap-3">
-                <Settings2 className="w-8 h-8 text-muted-foreground/30" />
-                <p className="text-xs text-muted-foreground max-w-[200px]">
+                <Settings2 className="w-8 h-8 text-secondary" />
+                <p className="text-xs text-secondary max-w-[200px]">
                   Selecione um script para configurar as entradas de execução.
                 </p>
               </Card>
             ) : (
               <div className="grid grid-cols-2 gap-4 h-[400px]">
                 {/* FONTE DE DADOS */}
-                <Card className="flex flex-col bg-black/20 border-border overflow-hidden">
-                  <div className="p-2 border-b border-border bg-muted/30 flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                <Card className="flex flex-col bg-foreground border-border overflow-hidden py-0">
+                  <div className="p-2 border-b border-border bg-muted flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">
                       Fonte de Dados
                     </span>
                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20">
@@ -235,9 +229,9 @@ export function InstanceScriptForm({
                 </Card>
 
                 {/* ENTRADAS DO SCRIPT */}
-                <Card className="flex flex-col bg-black/40 border-border overflow-hidden">
-                  <div className="p-2 border-b border-border bg-muted/30 flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                <Card className="flex flex-col bg-foreground border-border overflow-hidden py-0">
+                  <div className="p-2 border-b border-border bg-muted flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">
                       Argumentos do Script
                     </span>
                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -303,7 +297,7 @@ export function InstanceScriptForm({
             <Info className="w-4 h-4 text-violet-400 mt-0.5" />
             <div className="space-y-1">
               <p className="text-xs text-primary font-medium">Instruções de Mapeamento</p>
-              <p className="text-[10px] text-muted-foreground leading-relaxed">
+              <p className="text-[10px] text-secondary leading-relaxed">
                 As entradas do script podem ser mapeadas dinamicamente usando a sintaxe <code className="text-violet-400">{"{{device.ip_address}}"}</code>.
                 O sistema substituirá esses valores em tempo de execução com os dados reais do dispositivo monitorado.
               </p>

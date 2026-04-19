@@ -190,13 +190,13 @@ export default function DeviceForm({
                     </div>
                     <div>
                         <h2 className="text-lg font-semibold leading-none">Auxiliar de Dados</h2>
-                        <p className="text-xs text-muted-foreground mt-1">Busque dados de um servidor para preencher o formulário</p>
+                        <p className="text-xs text-secondary mt-1">Busque dados de um servidor para preencher o formulário</p>
                     </div>
                 </div>
 
                 <div className="space-y-4 mb-4">
                     <div>
-                        <label className="text-xs text-muted-foreground mb-1 block">Servidor/Serviço</label>
+                        <label className="text-xs text-secondary mb-1 block">Servidor/Serviço</label>
                         <Select value={selectedServerId} onValueChange={setSelectedServerId}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecione um servidor" />
@@ -214,7 +214,7 @@ export default function DeviceForm({
                     {selectedServerId && (
                         <div className="grid grid-cols-2 gap-2">
                             <div>
-                                <label className="text-xs text-muted-foreground mb-1 block">Recurso</label>
+                                <label className="text-xs text-secondary mb-1 block">Recurso</label>
                                 <Select value={selectedResourceId} onValueChange={setSelectedResourceId} disabled={loadingResources}>
                                     <SelectTrigger>
                                         <SelectValue placeholder={loadingResources ? "Carregando..." : "Selecione"} />
@@ -229,7 +229,7 @@ export default function DeviceForm({
                                 </Select>
                             </div>
                             <div>
-                                <label className="text-xs text-muted-foreground mb-1 block">Operação</label>
+                                <label className="text-xs text-secondary mb-1 block">Operação</label>
                                 <Select value={selectedOperationId} onValueChange={setSelectedOperationId} disabled={!selectedResourceId}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecione" />
@@ -250,14 +250,14 @@ export default function DeviceForm({
                 <div className="flex-1 flex flex-col min-h-0 bg-accent/30 rounded-lg p-4 border border-border">
                     {!selectedOperationId ? (
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-6 empty-state">
-                            <Info className="w-10 h-10 text-muted-foreground/30 mb-2" />
-                            <p className="text-sm text-muted-foreground">Selecione uma operação para começar a buscar dados</p>
+                            <Info className="w-10 h-10 text-secondary/30 mb-2" />
+                            <p className="text-sm text-secondary">Selecione uma operação para começar a buscar dados</p>
                         </div>
                     ) : (
                         <div className="flex flex-col min-h-0">
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Execução</h3>
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-secondary">Execução</h3>
                                     <Button 
                                         size="sm" 
                                         onClick={handleExecute} 
@@ -275,7 +275,7 @@ export default function DeviceForm({
                                 <div className="space-y-4">
                                     {selectedOperation?.input_schema && (
                                         <div>
-                                            <span className="text-[10px] text-muted-foreground font-mono mb-1 block">PARÂMETROS DE ENTRADA</span>
+                                            <span className="text-[10px] text-secondary font-mono mb-1 block">PARÂMETROS DE ENTRADA</span>
                                             <JsonViewMain 
                                                 data={executionInput}
                                                 onParamChange={(name, param, val) => {

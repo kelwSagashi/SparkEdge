@@ -141,10 +141,10 @@ export function ServerEndpointForm({ form }: { form: UseFormReturn<FullServerVal
     <div className="gap-6 pt-4">
       <div className="col-span-3 space-y-4">
         <div className="space-y-4">
-          <h3 className="text-muted-foreground text-lg font-medium">Configurar Endpoints</h3>
+          <h3 className="text-secondary text-lg font-medium">Configurar Endpoints</h3>
           {fields.map((field, index) => (
             <div key={field.id} className="p-4 border border-white/[0.08] bg-white/[0.02] rounded-xl flex flex-col gap-4 relative">
-              <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-muted-foreground hover:text-destructive" onClick={() => remove(index)}>
+              <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-secondary hover:text-destructive" onClick={() => remove(index)}>
                 <Trash className="h-4 w-4" />
               </Button>
               <Controller

@@ -15,7 +15,7 @@ export function CredentialSelecion({ form }: { form: UseFormReturn<any> }) {
         <ScrollArea className='h-full w-full'>
             <div className="space-y-6 max-w-xl p-4">
                 <div>
-                    <h3 className="text-muted-foreground text-lg font-medium">Credencial de Autorização</h3>
+                    <h3 className="text-secondary text-lg font-medium">Credencial de Autorização</h3>
                     <p className="text-sm text-zinc-400 mt-1">
                     Selecione a credencial que este servidor deve usar para se autenticar. 
                     </p>

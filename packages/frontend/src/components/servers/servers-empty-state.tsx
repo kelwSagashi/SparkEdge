@@ -14,7 +14,7 @@ export function ServersEmptyState({ onAddServer }: ServersEmptyStateProps) {
       <h3 className="text-xl font-semibold text-primary mb-2">
         No servers found
       </h3>
-      <p className="text-muted-foreground text-center mb-6 max-w-md">
+      <p className="text-secondary text-center mb-6 max-w-md">
         Get started by connecting your first server. You can integrate REST APIs, databases, and other services.
       </p>
       <Button onClick={onAddServer} size="lg">

@@ -17,8 +17,8 @@ export default function ServersPage() {
           <h1 className="text-2xl font-semibold text-white tracking-tight">Servidores</h1>
           <p className="text-sm text-zinc-500 mt-1">Gerencie os servidores de destino dos dados.</p>
         </div>
-        <Button onClick={() => navigate('/servers/new')} className="gap-2 bg-white text-zinc-900 hover:bg-zinc-200 font-medium">
-          <Plus size={16} /> Novo Servidor
+        <Button onClick={() => navigate('/servers/new')} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
+          Novo Servidor
         </Button>
       </div>
 
@@ -47,7 +47,7 @@ export default function ServersPage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
-                className="group bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] rounded-xl p-5 transition-all duration-300"
+                className="group bg-foreground hover:bg-muted-foreground border border-border rounded-xl p-5 transition-all duration-300"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -66,7 +66,7 @@ export default function ServersPage() {
                 </div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-                  <Button size="sm" variant="ghost" onClick={() => navigate(`/servers/${server.id}`)} className="h-8 text-xs text-zinc-300 hover:text-white">Editar</Button>
+                  <Button size="sm" variant="ghost" onClick={() => navigate(`/servers/${server.id}`)} className="h-8 text-xs text-secondary hover:text-primary">Editar</Button>
                   <Button size="sm" variant="ghost" onClick={() => deleteServer(server.id)} className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs">Excluir</Button>
                 </div>
               </motion.div>

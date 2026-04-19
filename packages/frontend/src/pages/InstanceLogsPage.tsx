@@ -7,6 +7,7 @@ import {
 import { ExecutionRow, type InstanceExecution } from '@/components/executions/execution-row';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 export default function InstanceLogsPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,8 +28,9 @@ export default function InstanceLogsPage() {
         api.listInstanceExecutions(id)
       ]);
 
+      console.log(resInstance)
       if (resInstance.data?.data) {
-        setInstance(resInstance.data.data);
+        setInstance(resInstance.data.data.instance);
       }
       
       setExecutions(resExecutions.data?.data || []);
@@ -81,9 +83,9 @@ export default function InstanceLogsPage() {
             size="sm"
             onClick={loadData}
             disabled={loading}
-            className="gap-2"
+            className="gap-2 text-secondary"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={14} className={cn(loading ? 'animate-spin' : '')} />
             Recarregar
           </Button>
           <Button

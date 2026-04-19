@@ -36,7 +36,7 @@ export function InstanceFallbackForm() {
           <h3 className="font-medium text-primary flex items-center gap-2">
             <Database size={18} /> Configuração de Fallback
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-secondary">
             Define o comportamento quando o envio de dados para o servidor
             falhar.
           </p>
@@ -76,7 +76,7 @@ export function InstanceFallbackForm() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectGroup>
+                        <SelectGroup className="text-primary">
                           <SelectItem value="background_job">
                             Armazenamento Local (Melhor Esforço)
                           </SelectItem>
@@ -91,8 +91,8 @@ export function InstanceFallbackForm() {
               </div>
 
               {/* Descrição da estratégia */}
-              <Card className="p-3 bg-muted border-muted-foreground/20 text-muted-foreground">
-                <p className="text-xs text-muted-foreground">
+              <Card className="p-3 bg-muted border-muted-foreground/20 text-secondary">
+                <p className="text-xs text-secondary">
                   {fallbackStrategy === "background_job" ? (
                     <>
                       <strong>Melhor Esforço:</strong> Os dados são salvos
@@ -126,7 +126,7 @@ export function InstanceFallbackForm() {
                   })}
                   className="text-primary"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-secondary">
                   Tempo de espera entre tentativas de reenvio. Mínimo: 60
                   segundos.
                 </p>
@@ -147,7 +147,7 @@ export function InstanceFallbackForm() {
                   })}
                   className="text-primary"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-secondary">
                   Número máximo de vezes para tentar reenviar. Deixe vazio para
                   tentar indefinidamente.
                 </p>
@@ -161,7 +161,7 @@ export function InstanceFallbackForm() {
           <h3 className="font-bold text-xs uppercase text-primary tracking-widest bg-primary/10 w-fit px-2 py-0.5 rounded flex items-center gap-2">
             <AlertCircle size={14} /> Tratamento de Erros
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-secondary">
             Define o comportamento quando ocorrem erros durante a execução.
           </p>
 
@@ -194,8 +194,8 @@ export function InstanceFallbackForm() {
           </div>
 
           {/* Descrição da ação */}
-          <Card className="p-3 bg-muted border-muted-foreground/20 text-muted-foreground">
-            <p className="text-xs text-muted-foreground">
+          <Card className="p-3 bg-muted border-muted-foreground/20 text-secondary">
+            <p className="text-xs text-secondary">
               {errorAction === "log_only" && (
                 <>
                   <strong>Log Only:</strong> Registra o erro mas continua a
@@ -286,7 +286,7 @@ export function InstanceFallbackForm() {
           </div>
 
           <Card className="p-3 bg-muted/40 border-border">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-secondary">
               <strong>💡 Dica:</strong> Desabilite a instância temporariamente
               se precisar fazer manutenção sem deletá-la.
             </p>
@@ -300,17 +300,17 @@ export function InstanceFallbackForm() {
           </p>
           <div className="text-xs text-primary space-y-1">
             <div>
-              <span className="text-muted-foreground">Fallback:</span>{" "}
+              <span className="text-secondary">Fallback:</span>{" "}
               <span className="text-primary font-medium">
                 {fallbackEnabled ? `${fallbackStrategy}` : "Desabilitado"}
               </span>
             </div>
             <div>
-              <span className="text-muted-foreground">Tratamento de Erros:</span>{" "}
+              <span className="text-secondary">Tratamento de Erros:</span>{" "}
               <span className="text-primary font-medium">{errorAction}</span>
             </div>
             <div>
-              <span className="text-muted-foreground">Status:</span>{" "}
+              <span className="text-secondary">Status:</span>{" "}
               <span
                 className={`font-semibold ${watch("active") ? "text-green-400" : "text-yellow-400"}`}
               >

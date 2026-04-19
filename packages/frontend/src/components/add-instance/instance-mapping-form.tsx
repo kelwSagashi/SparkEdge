@@ -218,14 +218,14 @@ export function InstanceMappingForm({
              <ArrowRightLeft className="w-4 h-4 text-violet-400" />
              <h3 className="font-medium text-primary uppercase text-xs tracking-wider">Mapeamento Unificado de Destinos</h3>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-secondary">
             Mapeie os dados para todos os destinos em uma única visualização. 
             Arraste os nomes dos campos da esquerda para os valores da direita.
           </p>
         </div>
 
         {(!destinations || destinations.length === 0) ? (
-          <Card className="p-6 bg-muted/40 border-border text-muted-foreground text-center">
+          <Card className="p-6 bg-muted/40 border-border text-secondary text-center">
             <p className="text-sm">
               Adicione destinos primeiro para configurar o mapeamento de dados.
             </p>
@@ -235,9 +235,9 @@ export function InstanceMappingForm({
             {/* GRID PRINCIPAL DE MAPEAMENTO */}
             <div className="grid grid-cols-2 gap-4 h-[500px]">
               {/* LADO ESQUERDO: FONTE DE DADOS UNIFICADA */}
-              <Card className="flex flex-col bg-black/20 border-border overflow-hidden">
-                <div className="p-2 border-b border-border bg-muted/30 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Fonte de Dados Disponível</span>
+              <Card className="flex flex-col bg-foreground border-border overflow-hidden py-0 scroll-smooth scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                <div className="p-2 border-b border-border bg-muted flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">Fonte de Dados Disponível</span>
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20">Read Only</span>
                 </div>
                 <div className="flex-1 overflow-auto p-2">
@@ -253,9 +253,9 @@ export function InstanceMappingForm({
               </Card>
 
               {/* LADO DIREITO: PAYLOAD GLOBAL (TODOS OS DESTINOS) */}
-              <Card className="flex flex-col bg-black/40 border-border overflow-hidden">
-                <div className="p-2 border-b border-border bg-muted/30 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Payload de Todos os Destinos</span>
+              <Card className="flex flex-col bg-foreground border-border overflow-hidden py-0 scroll-smooth scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                <div className="p-2 border-b border-border bg-muted flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">Payload de Todos os Destinos</span>
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Unified View</span>
                 </div>
                 <div className="flex-1 overflow-auto p-2">
@@ -336,12 +336,12 @@ export function InstanceMappingForm({
 
             {/* SEÇÃO DE SCRIPTS DE TRANFORMAÇÃO (POR DESTINO) */}
             <div className="space-y-4">
-               <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Scripts de Pós-Processamento</h4>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <h4 className="text-[10px] font-bold text-secondary uppercase tracking-widest px-1">Scripts de Pós-Processamento</h4>
+               <div className="grid grid-cols-1  gap-4">
                   {destinations.map((dest: any, idx: number) => {
                     const op = allOperations.find(o => o.id === dest.resourceOperationId);
                     return (
-                      <Card key={idx} className="p-4 bg-black/20 border-border space-y-3">
+                      <Card key={idx} className="p-4 bg-foreground border-border space-y-3">
                          <div className="flex items-center gap-2">
                            <span className="w-5 h-5 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center text-[9px] font-bold border border-violet-500/20">
                              {idx + 1}
@@ -369,7 +369,7 @@ export function InstanceMappingForm({
           <Info className="w-4 h-4 text-violet-400 mt-0.5" />
           <div className="space-y-1">
              <p className="text-xs text-primary font-medium">Dica de Mapeamento</p>
-             <p className="text-[11px] text-muted-foreground leading-relaxed">
+             <p className="text-[11px] text-secondary leading-relaxed">
                 Cada destino aparece como um objeto numerado no painel à direita. 
                 Mudanças feitas em cada sub-objeto serão salvas automaticamente no respectivo destino.
              </p>

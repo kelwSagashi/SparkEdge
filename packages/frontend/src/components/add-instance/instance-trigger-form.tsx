@@ -54,8 +54,8 @@ export function InstanceTriggerForm() {
         </div>
 
         {/* Descrição do tipo selecionado */}
-        <Card className="p-4 bg-muted/40 border-border">
-          <p className="text-sm text-muted-foreground">
+        <Card className="p-4 bg-accent border-border">
+          <p className="text-sm text-secondary">
             {triggerType === "interval" &&
               "A instância será executada automaticamente em intervalos regulares."}
             {triggerType === "webhook" &&
@@ -87,7 +87,7 @@ export function InstanceTriggerForm() {
                 {errors.triggerConfig.interval_seconds.message}
               </p>
             )}
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-secondary">
               Mínimo de 60 segundos (1 minuto). Recomendado: 300 segundos (5
               minutos).
             </p>
@@ -111,7 +111,7 @@ export function InstanceTriggerForm() {
                   {errors.triggerConfig.webhook_path.message}
                 </p>
               )}
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-secondary">
                 O caminho será exposto em http://seu-servidor{"{"}webhook_path
                 {"}"}.
               </p>
@@ -128,7 +128,7 @@ export function InstanceTriggerForm() {
                 {...register("triggerConfig.webhook_secret")}
                 className="text-primary"
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-secondary">
                 Use um secret para validar requisições provenientes da sua
                 fonte.
               </p>
@@ -138,7 +138,7 @@ export function InstanceTriggerForm() {
               <p className="text-sm font-medium text-foreground mb-2">
                 Informações do Webhook
               </p>
-              <div className="space-y-1 text-sm text-muted-foreground">
+              <div className="space-y-1 text-sm text-secondary">
                 <p>
                   URL:{" "}
                   <code className="text-foreground bg-muted/50 px-1 rounded">
@@ -180,7 +180,7 @@ export function InstanceTriggerForm() {
               >
                 Salvar Execução no Servidor
               </Label>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-secondary">
                 Se ativado, cada execução será registrada no histórico do
                 servidor para auditoria e logs.
               </p>
@@ -189,8 +189,8 @@ export function InstanceTriggerForm() {
         </div>
 
         {/* Informações gerais */}
-        <Card className="p-4 bg-muted border-muted-foreground/20 text-muted-foreground">
-          <p className="text-sm text-muted-foreground">
+        <Card className="p-4 bg-muted border-muted-foreground/20 text-secondary">
+          <p className="text-sm text-secondary">
             💡 <strong>Dica:</strong> Configure as credenciais e permissões de
             rede adequadamente para que a execução remota funcione corretamente
             em sua infraestrutura.

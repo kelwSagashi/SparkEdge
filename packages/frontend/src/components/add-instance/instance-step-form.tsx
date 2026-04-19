@@ -433,6 +433,7 @@ export default function InstanceStepForm({ instanceId, onClose }: Props) {
                 }
               }}
               disabled={activeTab === "basic"}
+              className="text-secondary"
             >
               ← Anterior
             </Button>
@@ -455,6 +456,7 @@ export default function InstanceStepForm({ instanceId, onClose }: Props) {
                 }
               }}
               disabled={activeTab === "fallback"}
+              className="text-secondary"
             >
               Próximo →
             </Button>
@@ -462,7 +464,7 @@ export default function InstanceStepForm({ instanceId, onClose }: Props) {
             <Button
               type="submit"
               disabled={submitting}
-              className="gap-2"
+              className="gap-2 text-secondary"
             >
               {submitting && <Loader2 className="animate-spin" size={16} />}
               <Save size={16} />

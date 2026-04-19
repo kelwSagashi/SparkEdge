@@ -22,14 +22,14 @@ function ServerHeaderForm({ form }: {form: UseFormReturn<FullServerValues> }) {
     <div className="gap-6 pt-4">
       <div className="col-span-3 space-y-4">
         <div className="space-y-4">
-          <h3 className="text-muted-foreground text-lg font-medium">Configurar Cabeçalhos</h3>
+          <h3 className="text-secondary text-lg font-medium">Configurar Cabeçalhos</h3>
             {fields.map((field, index) => (
               <div key={field.id} className="flex flex-col gap-2 p-3 border border-border rounded-md relative">
                 <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+                    className="absolute top-2 right-2 text-secondary hover:text-destructive"
                     onClick={() => remove(index)}
                 >
                     <Trash className="h-4 w-4" />
@@ -68,7 +68,7 @@ function ServerHeaderForm({ form }: {form: UseFormReturn<FullServerValues> }) {
                         </div>
                         <div>
                             <div className='h-9 py-1'>
-                                <label className="text-muted-foreground text-sm" htmlFor={`server-header-${index}-type`}>Tipo</label>
+                                <label className="text-secondary text-sm" htmlFor={`server-header-${index}-type`}>Tipo</label>
                             </div>
                             <Select onValueChange={(val: "text" | "number") => form.setValue(`server.header.${index}.type`, val)} defaultValue={form.watch(`server.header.${index}.type`)}>
                                 <SelectTrigger className="w-30 text-primary">

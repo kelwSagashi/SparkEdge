@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Cpu, Package, FileText, History, Server, Smartphone, 
-  FolderKanban, Settings, LogOut, ChevronRight, Clock, ShieldAlert
+  FolderKanban, Settings, LogOut, ChevronRight, Clock, ShieldAlert, Zap
 } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarRail } from './ui/sidebar';
 import { NavMain } from './nav-main';
@@ -24,6 +24,7 @@ const managementNav = [
   { url: '/servers', icon: <Server size={18} className="text-orange-400" />, title: 'Servidores' },
   { url: '/devices', icon: <Smartphone size={18} className="text-pink-400" />, title: 'Dispositivos' },
   { url: '/projects', icon: <FolderKanban size={18} className="text-cyan-400" />, title: 'Projetos' },
+  { url: '/settings/cloud', icon: <Zap size={18} className="text-emerald-400" />, title: 'Conectar ao Spark' },
 ];
 
 export default function SideBar({ ...props }: React.ComponentProps<typeof Sidebar>) {

@@ -370,7 +370,7 @@ export function InstanceDestinationsForm({
           </div>
         ) : (
           <Card className="p-6 bg-muted/40 border-border text-center">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-secondary mb-4">
               Nenhum destino adicionado ainda
             </p>
           </Card>

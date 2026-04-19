@@ -51,8 +51,8 @@ export default function DevicesPage() {
           <h1 className="text-2xl font-semibold text-white tracking-tight">Dispositivos</h1>
           <p className="text-sm text-zinc-500 mt-1">Gerencie os dispositivos monitorados pelo sistema.</p>
         </div>
-        <Button onClick={() => navigate("/devices/new")} className="gap-2 bg-white text-zinc-900 hover:bg-zinc-200 font-medium">
-          <Plus size={16} /> Novo Dispositivo
+        <Button onClick={() => navigate("/devices/new")} className="bg-violet-600 hover:bg-violet-700 text-white gap-2">
+          Novo Dispositivo
         </Button>
       </div>
 
@@ -78,7 +78,7 @@ export default function DevicesPage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
-                className="group bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] rounded-xl p-5 transition-all duration-300"
+                className="group bg-foreground hover:bg-muted-foreground border border-border rounded-xl p-5 transition-all duration-300"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 rounded-lg bg-pink-500/10 text-pink-400">
@@ -89,31 +89,21 @@ export default function DevicesPage() {
                     {device.brand && <span className="text-[10px] uppercase tracking-wider text-zinc-500">{device.brand}</span>}
                   </div>
                 </div>
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.05]">
-                  {device.ip_address ? (
-                    <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-                      <Wifi size={11} />
-                      <span>{device.ip_address}</span>
-                    </div>
-                  ) : <div />}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="w-8 h-8 text-zinc-400 hover:text-white hover:bg-white/[0.05]"
-                      onClick={() => navigate(`/devices/${device.id}`)}
-                    >
-                      <Pencil size={14} />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="w-8 h-8 text-zinc-400 hover:text-red-400 hover:bg-red-500/10"
-                      onClick={() => handleDelete(device.id, device.name)}
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  </div>
+                <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
+                  <Button 
+                    size="sm" variant="ghost"
+                    className="h-8 text-xs text-secondary hover:text-primary"
+                    onClick={() => navigate(`/devices/${device.id}`)}
+                  >
+                    Editar
+                  </Button>
+                  <Button 
+                    size="sm" variant="ghost"
+                    className="text-red-400 hover:text-red-300 hover:bg-red-400/10 h-8 text-xs"
+                    onClick={() => handleDelete(device.id, device.name)}
+                  >
+                    Excluir
+                  </Button>
                 </div>
               </motion.div>
             ))}

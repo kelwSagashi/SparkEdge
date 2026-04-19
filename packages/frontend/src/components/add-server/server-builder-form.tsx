@@ -169,7 +169,7 @@ export const ServerBuilderForm: React.FC<ServerBuilderFormProps> = ({
   if (!id) {
     return (
       <div className="flex items-center justify-center h-64 border-2 border-dashed border border-input rounded-lg">
-        <p className="text-muted-foreground">
+        <p className="text-secondary">
           Selecione um tipo de servidor e credencial para começar.
         </p>
       </div>
@@ -183,7 +183,7 @@ export const ServerBuilderForm: React.FC<ServerBuilderFormProps> = ({
           <h3 className="text-lg font-medium text-primary">
             Recursos e Operações
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-secondary">
             Configure as tabelas, tópicos ou endpoints que você deseja acessar.
           </p>
         </div>
@@ -208,7 +208,7 @@ export const ServerBuilderForm: React.FC<ServerBuilderFormProps> = ({
             variant="outline"
             size="sm"
             onClick={handleAddResource}
-            className="h-7 text-xs bg-muted border-muted-foreground/20 text-muted-foreground"
+            className="h-7 text-xs bg-muted border-muted-foreground/20 text-secondary"
           >
             <Plus className="w-4 h-4 mr-2" />
             Adicionar Manualmente
@@ -353,7 +353,7 @@ const ResourceItem = ({
               <p className="font-medium text-primary">
                 {resourceName || "Sem nome"}
               </p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              <p className="text-[10px] text-secondary uppercase tracking-wider">
                 {metadata?.name || "Recurso"}
               </p>
             </div>
@@ -364,7 +364,7 @@ const ResourceItem = ({
           variant="ghost"
           size="icon"
           onClick={() => remove(index)}
-          className="text-muted-foreground hover:text-destructive"
+          className="text-secondary hover:text-destructive"
         >
           <Trash2 className="w-4 h-4" />
         </Button>
@@ -373,7 +373,7 @@ const ResourceItem = ({
       <CollapsibleContent className="pb-6 space-y-6 pt-2">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2 col-span-2">
-            <Label className="text-muted-foreground text-xs">
+            <Label className="text-secondary text-xs">
               NOME EXIBIÇÃO NO SPARK EDGE
             </Label>
             <Input
@@ -387,7 +387,7 @@ const ResourceItem = ({
         {/* Dynamic Resource Fields */}
         {metadata?.resourceFields && metadata.resourceFields.length > 0 && (
           <div className="space-y-4 pt-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-2">
+            <h4 className="text-xs font-semibold text-secondary uppercase flex items-center gap-2">
               <Settings2 className="w-3 h-3" />
               Parâmetros do Recurso
             </h4>
@@ -406,7 +406,7 @@ const ResourceItem = ({
         {/* Operations */}
         <div className="space-y-4 pt-4 border-t border-white/[0.05]">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-2">
+            <h4 className="text-xs font-semibold text-secondary uppercase flex items-center gap-2">
               <Activity className="w-3 h-3" />
               Ações Disponíveis
             </h4>
@@ -595,12 +595,12 @@ const OperationItem = ({
   return (
     <Card className="bg-foreground border-none text-primary-foreground">
       <CardHeader className="py-3 px-4 flex-row items-center space-y-0 gap-2">
-        <div className="flex-1 flex items-center bg-muted border-muted-foreground/20 text-muted-foreground rounded-lg px-3 group transition-colors">
+        <div className="flex-1 flex items-center bg-muted border-muted-foreground/20 text-secondary rounded-lg px-3 group transition-colors">
           <Input
             {...control.register(
               `resources.${resourceIndex}.operations.${index}.name`,
             )}
-            className={`bg-input text-secondary h-8 font-medium p-0 border-none bg-transparent focus-visible:ring-0 shadow-none text-sm placeholder:text-muted-foreground`}
+            className={`bg-input text-secondary h-8 font-medium p-0 border-none bg-transparent focus-visible:ring-0 shadow-none text-sm placeholder:text-secondary`}
             placeholder="Nome da Ação (Ex: Listar Usuários)"
           />
           <Button
@@ -608,7 +608,7 @@ const OperationItem = ({
             variant="ghost"
             size="icon"
             onClick={() => remove(index)}
-            className={`h-7 w-7 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity`}
+            className={`h-7 w-7 text-secondary hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity`}
           >
             <Trash2 className="w-3.5 h-3.5" />
           </Button>
@@ -649,7 +649,7 @@ const OperationItem = ({
                 Esquema de Entrada
               </Label>
               <div
-                className={`min-h-[100px] rounded-lg p-2 bg-muted border-muted-foreground/20 text-muted-foreground`}
+                className={`min-h-[100px] rounded-lg p-2 bg-muted border-muted-foreground/20 text-secondary`}
               >
                 <JsonViewMain
                   data={inputSchema}
@@ -672,7 +672,7 @@ const OperationItem = ({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className={`flex-1 text-[10px] text-muted-foreground h-7`}
+                      className={`flex-1 text-[10px] text-secondary h-7`}
                       onClick={() =>
                         setValue(
                           `resources.${resourceIndex}.operations.${index}.input_schema` as any,
@@ -686,7 +686,7 @@ const OperationItem = ({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className={`flex-1 text-[10px] text-muted-foreground h-7`}
+                      className={`flex-1 text-[10px] text-secondary h-7`}
                       onClick={() =>
                         setValue(
                           `resources.${resourceIndex}.operations.${index}.input_schema` as any,
@@ -705,7 +705,7 @@ const OperationItem = ({
                 Esquema de Saída
               </Label>
               <div
-                className={`min-h-[100px] rounded-lg p-2 bg-muted border-muted-foreground/20 text-muted-foreground`}
+                className={`min-h-[100px] rounded-lg p-2 bg-muted border-muted-foreground/20 text-secondary`}
               >
                 <JsonViewMain
                   data={outputSchema}
@@ -728,7 +728,7 @@ const OperationItem = ({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className={`flex-1 text-[10px] text-muted-foreground h-7`}
+                      className={`flex-1 text-[10px] text-secondary h-7`}
                       onClick={() =>
                         setValue(
                           `resources.${resourceIndex}.operations.${index}.output_schema` as any,
@@ -742,7 +742,7 @@ const OperationItem = ({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className={`flex-1 text-[10px] text-muted-foreground h-7`}
+                      className={`flex-1 text-[10px] text-secondary h-7`}
                       onClick={() =>
                         setValue(
                           `resources.${resourceIndex}.operations.${index}.output_schema` as any,

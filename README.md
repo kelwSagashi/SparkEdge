@@ -1,5 +1,3 @@
-![Banner image](assets/banner.png)
-
 # SparkEdge
 
 O SparkEdge é uma plataforma baseada de automação para monitoramento com node, visando sistemas de energia fotovoltáicos on-grid e off-grid. A plataforma oferece e permite integração, automação e execução de código para coleta de dados em sistemas de energia permitindo maior controle na automação e envio de dados.
@@ -28,7 +26,7 @@ Em seguida execute:
 pnpm dev
 ```
 
-Abra o SparkEdge no http://localhost:5173
+Abra o SparkEdge no modo dev em http://localhost:5173
 
 # O que significa SparkEdge?
 O nome SparkEdge simboliza o "faiscar" (spark) da energia e da inteligência processada na "borda" (edge) da rede, refletindo o foco da plataforma em processamento local e monitoramento eficiente de sistemas de energia.

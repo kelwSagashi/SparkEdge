@@ -1,4 +1,4 @@
-import { getOrCreateEdgeId } from './edge.identity';
+import { getEdgeId } from './edge.identity';
 import { getMqttCredentials } from './edge.credentials';
 
 export interface MqttConfig {
@@ -25,10 +25,15 @@ export interface MqttConfigResult {
  * - Credentials come from DB; fall back to .env for dev.
  * - Returns { enabled: false } if no valid config is available.
  */
-export function loadMqttConfig(): MqttConfigResult {
-  const edgeId = getOrCreateEdgeId();
-  const credentials = getMqttCredentials();
+export async function loadMqttConfig(): Promise<MqttConfigResult> {
+  const edgeId = await getEdgeId();
+  if (!edgeId) {
+    const reason = 'MQTT disabled: no system identity found (unprovisioned)';
+    console.log(`[Mqtt] ${reason}`);
+    return { enabled: false, reason };
+  }
 
+  const credentials = await getMqttCredentials();
   if (!credentials) {
     const reason = 'MQTT disabled: missing credentials (run `spark-edge provision` to configure)';
     console.log(`[Mqtt] ${reason}`);

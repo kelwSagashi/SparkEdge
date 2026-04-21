@@ -7,33 +7,32 @@ import { v4 as uuidv4 } from 'uuid';
  */
 
 /** Check if the edge has been provisioned (linked to Spark Cloud) */
-export function isProvisioned(): boolean {
+export async function isProvisioned(): Promise<boolean> {
   const identity = dbManager.edge.getIdentity().data;
   return !!identity?.provisioned;
 }
 
-/** Get or create a local Edge ID. This ID is used as clientId if not provisioned. */
-export function getOrCreateEdgeId(): string {
-  const identity = dbManager.edge.getIdentity().data;
-  
-  if (identity?.edge_id) {
-    return identity.edge_id;
-  }
+/** Get the full system identity details. Includes name and provisioned status. */
+export async function getSystemIdentity(): Promise<{ edge_id: string | null; edge_name: string | null; provisioned: boolean }> {
+  const { data: identity } = dbManager.edge.getIdentity();
+  return {
+    edge_id: identity?.edge_id || null,
+    edge_name: identity?.edge_name || null,
+    provisioned: !!identity?.provisioned
+  };
+}
 
-  const newId = `edge-${uuidv4()}`;
-  dbManager.edge.upsertIdentity({ 
-    edge_id: newId, 
-    provisioned: 0 
-  });
-  
-  return newId;
+/** Get the current Edge ID from persistence. Returns null if not provisioned. */
+export async function getEdgeId(): Promise<string | null> {
+  const identity = await getSystemIdentity();
+  return identity.edge_id;
 }
 
 /** 
  * Link this Edge with a permanent ID from Spark Cloud.
  * This effectively marks the device as 'Provisioned'.
  */
-export function setCloudEdgeId(edgeId: string, edgeName: string): void {
+export async function setCloudEdgeId(edgeId: string, edgeName: string): Promise<void> {
   dbManager.edge.upsertIdentity({
     edge_id: edgeId,
     edge_name: edgeName,
@@ -41,7 +40,19 @@ export function setCloudEdgeId(edgeId: string, edgeName: string): void {
   });
 }
 
+/** Update the local display name for this Edge */
+// Removed as requested
+
 /** Remove the identity (on disconnect/reset) */
-export function clearEdgeIdentity(): void {
+export async function clearEdgeIdentity(): Promise<void> {
   dbManager.edge.clearIdentity();
+}
+
+/** 
+ * Force regenerate the local Edge ID.
+ * Warning: This will break existing cloud links if provisioned.
+ */
+export async function regenerateEdgeId(): Promise<string | null> {
+  await clearEdgeIdentity();
+  return await getEdgeId();
 }

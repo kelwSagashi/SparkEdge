@@ -70,6 +70,11 @@ export async function registerEdge(
     userToken: string;
     edgeName: string;
     sparkApiUrl?: string;
+    metadata?: {
+      lat?: string | null;
+      lng?: string | null;
+      tags?: string[];
+    };
   }
 ): Promise<EdgeRegistrationResult> {
   const sparkApiUrl = options.sparkApiUrl ?? DEFAULT_SPARK_URL;
@@ -83,7 +88,11 @@ export async function registerEdge(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${options.userToken}`,
       },
-      body: JSON.stringify({ name: options.edgeName, user_token: options.userToken }),
+      body: JSON.stringify({ 
+        name: options.edgeName, 
+        user_token: options.userToken,
+        ...options.metadata 
+      }),
     });
   } catch (err: any) {
     throw new Error(`[Cloud] Cannot reach Spark API: ${err.message}`);

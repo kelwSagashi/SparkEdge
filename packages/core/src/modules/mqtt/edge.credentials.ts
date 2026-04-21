@@ -12,18 +12,27 @@ export interface MqttCredentials {
 }
 
 /** Save MQTT credentials received from Spark Cloud provisioning */
-export function saveMqttCredentials(creds: MqttCredentials): void {
-  dbManager.edge.upsertMqttCredentials({
+export async function saveMqttCredentials(creds: MqttCredentials): Promise<void> {
+  const result = dbManager.edge.upsertMqttCredentials({
     broker_url: creds.brokerUrl,
     username: creds.username || null,
     password: creds.password || null,
   });
+  if (result.error) {
+    console.error("[EdgeCredentials] Failed to save credentials:", result.error);
+  }
 }
 
 /** Retrieve credentials for MQTT connection */
-export function getMqttCredentials(): MqttCredentials | null {
-  const data = dbManager.edge.getMqttCredentials().data;
+export async function getMqttCredentials(): Promise<MqttCredentials | null> {
+  const result = dbManager.edge.getMqttCredentials();
+  const data = result.data;
   
+  if (result.error) {
+    console.error("[EdgeCredentials] Failed to get credentials:", result.error);
+  }
+
+  // Return null if no credentials exist in DB
   if (!data || !data.broker_url) {
     return null;
   }
@@ -35,7 +44,15 @@ export function getMqttCredentials(): MqttCredentials | null {
   };
 }
 
+/** 
+ * Ensure default credentials exist if none are set.
+ */
+export async function ensureDefaultMqttCredentials(): Promise<void> {
+  // No longer auto-creates credentials as per refactor request.
+  // Must be provisioned via Spark Cloud.
+}
+
 /** Clear credentials (on disconnect/reset) */
-export function clearMqttCredentials(): void {
+export async function clearMqttCredentials(): Promise<void> {
   dbManager.edge.clearMqttCredentials();
 }

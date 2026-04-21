@@ -1,0 +1,10 @@
+{
+  "edge_id": "edge-0e7e3db0",
+  "edge_name": "casa",
+  "mqtt": {
+    "url": "mqtt://localhost:1883",
+    "username": "spark-user-edge-0e7e3db0",
+    "password": "spark-pass-2f106975"
+  },
+  "provisioned": true
+}

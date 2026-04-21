@@ -64,6 +64,7 @@
     "reflect-metadata": "catalog:",
     "spark-edge-core": "workspace:*",
     "spark-edge-db": "workspace:*",
+    "uuid": "^13.0.0",
     "zod": "^4.1.12",
     "zod-class": "^0.0.18"
   }

@@ -22,7 +22,7 @@ export class ConnectCommand implements ICommand {
     const { mqttClient, mqttSubscriber } = await import('spark-edge-core');
 
     // Guard: block re-registration without disconnect first
-    if (isProvisioned()) {
+    if (await isProvisioned()) {
       console.error('\n✗ This Edge is already connected to Spark.');
       console.error('  Run `spark-edge disconnect` first to re-register.\n');
       process.exit(1);
@@ -58,7 +58,7 @@ export class ConnectCommand implements ICommand {
       });
 
     try {
-      const sparkApiUrl = process.env.SPARK_API_URL;
+      const sparkApiUrl = process.env.SPARK_API_URL || 'http://localhost:3009/api/spark-cloud';
       const email = await ask('  Spark email: ');
       if (!email.trim()) { console.error('\n✗ Email is required.\n'); return; }
 
@@ -85,8 +85,8 @@ export class ConnectCommand implements ICommand {
       console.log(' ✓');
 
       // Step 3: Save identity and credentials locally
-      setCloudEdgeId(registration.edge_id, registration.edge_name);
-      saveMqttCredentials({
+      await setCloudEdgeId(registration.edge_id, registration.edge_name);
+      await saveMqttCredentials({
         brokerUrl: registration.mqtt.url,
         username: registration.mqtt.username,
         password: registration.mqtt.password,

@@ -23,6 +23,7 @@ import '@/projects/projects.controller';
 import '@/webhook/webhook.controller';
 import '@/instances/adapters.controller';
 import '@/integrations/mqtt/cli.controller';
+import '@/integrations/spark-cloud/spark-cloud.controller';
 
 import { ServerTypeRegistry } from './instances/server-types';
 import { AdapterRegistry } from './instances/destination-adapters';
@@ -33,10 +34,16 @@ import { InstanceSchedulerService } from './instances/instance-scheduler.service
 
 // ─── MQTT (optional) ─────────────────────────────────────────────────────────
 // Loaded lazily so a missing broker never blocks the server from starting.
-async function startMqttIfEnabled(): Promise<void> {
-  if (!process.env.MQTT_URL) return;
-  const { initSafe } = await import('./integrations/mqtt/mqtt.bootstrap');
-  await initSafe();
+// ─── Spark Edge Lifecycle ────────────────────────────────────────────────────
+async function bootstrapSparkEdge(): Promise<void> {
+  const { lifecycleService } = await import('spark-edge-core');
+  
+  // 1. Register CLI integration command handlers (local to CLI package)
+  const { registerMqttCommandHandlers } = await import('./integrations/mqtt/mqtt.commands');
+  registerMqttCommandHandlers();
+
+  // 2. Run core boot sequence (auto-connect if provisioned)
+  await lifecycleService.boot();
 }
 
 @Service()
@@ -146,9 +153,9 @@ export class Server {
         // Start the instance execution scheduler
         Container.get(InstanceSchedulerService).start();
 
-        // Start MQTT integration (non-blocking — offline mode is fine)
-        startMqttIfEnabled().catch((err) =>
-          this.logger.log(`[Mqtt] Startup warning: ${err.message}`)
+        // Start Spark Edge lifecycle (non-blocking)
+        bootstrapSparkEdge().catch((err: any) =>
+          this.logger.log(`[Lifecycle] Startup warning: ${err.message}`)
         );
 
         this.app.listen(port, () => {
@@ -172,8 +179,8 @@ export class Server {
     activate(): ReturnType<typeof Router> {
         const router = Router();
 
-        const handler = async (req: Request, res: Response) => {
-            return await {
+        const handler = async (_req: Request) => {
+            return {
                 status: 'OK',
                 id: '',
                 app: ''

@@ -9,10 +9,9 @@ import type { ICommand } from './types';
  */
 export class ReconnectCommand implements ICommand {
   async run(): Promise<void> {
-    const { mqttClient, mqttService, mqttSubscriber } = await import('spark-edge-core');
-    const { isProvisioned } = await import('spark-edge-core');
+    const { mqttClient, mqttService, mqttSubscriber, isProvisioned } = await import('spark-edge-core');
 
-    if (!isProvisioned()) {
+    if (!(await isProvisioned())) {
       console.error('\n✗ Edge is not provisioned. Run `spark-edge connect` first.\n');
       process.exit(1);
     }

@@ -1,27 +1,70 @@
-import { Get, Post, RestController } from '@spark-edge/di';
+import { Get, Post, Put, RestController } from '@spark-edge/di';
 import { Request, Response } from 'express';
 
 /**
  * /api/cli/* — Edge Cloud Management endpoints
  *
  * Consumed only by the local frontend UI.
- * Credentials are NEVER returned or logged in responses.
  */
 @RestController('/cli')
 export class CliController {
+
+  /** GET /api/cli/onboarding — check if local onboarding is complete */
+  @Get('/onboarding')
+  async getOnboarding(_req: Request, res: Response) {
+    try {
+      const { dbManager } = await import('spark-edge-db');
+      const { data: config } = dbManager.edge.getEdgeConfig();
+      
+      const isComplete = !!(config?.name && config?.lat && config?.lng);
+
+      return res.json({
+        complete: isComplete,
+        data: config ? {
+          name: config.name,
+          lat: config.lat,
+          lng: config.lng,
+          tags: config.tags || [],
+        } : null
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  /** POST /api/cli/onboarding — save local onboarding data */
+  @Post('/onboarding')
+  async saveOnboarding(req: Request, res: Response) {
+    try {
+      const { name, lat, lng, tags } = req.body ?? {};
+      const { dbManager } = await import('spark-edge-db');
+      
+      dbManager.edge.upsertEdgeConfig({
+        name,
+        lat: String(lat),
+        lng: String(lng),
+        tags: Array.isArray(tags) ? tags : [],
+        location_source: 'manual'
+      });
+
+      return res.json({ success: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
 
   /** GET /api/cli/status — check provisioning + MQTT connection state */
   @Get('/status')
   async getStatus(_req: Request, res: Response) {
     try {
-      const { isProvisioned, getOrCreateEdgeId, mqttClient } = await import('spark-edge-core');
-      const provisioned = isProvisioned();
-      const edgeId = provisioned ? getOrCreateEdgeId() : null;
+      const { provisionService, mqttClient } = await import('spark-edge-core');
+      const edgeData = await provisionService.load();
       const mqttConnected = mqttClient.isConnected();
 
       return res.json({
-        connected: provisioned,
-        edge_id: edgeId,
+        connected: !!edgeData?.provisioned,
+        edge_id: edgeData?.edge_id || null,
+        edge_name: edgeData?.edge_name || null,
         mqtt: { connected: mqttConnected },
       });
     } catch (err: any) {
@@ -33,84 +76,75 @@ export class CliController {
   @Post('/connect')
   async connect(req: Request, res: Response) {
     try {
-      const { email, password, edge_name } = req.body ?? {};
+      const { email, password } = req.body ?? {};
 
       if (!email || !password) {
         return res.status(400).json({ message: 'email e password são obrigatórios.' });
       }
 
       const {
-        isProvisioned,
-        setCloudEdgeId,
-        saveMqttCredentials,
+        provisionService,
         cloudLogin,
         registerEdge,
-        mqttClient,
-        mqttSubscriber,
-        mqttService,
+        lifecycleService,
       } = await import('spark-edge-core');
 
-      if (isProvisioned()) {
-        return res.status(409).json({
-          message: 'Este Edge já está conectado ao Spark. Execute disconnect primeiro.',
-        });
+      const { dbManager } = await import('spark-edge-db');
+      const { data: config } = dbManager.edge.getEdgeConfig();
+
+      if (!config?.name) {
+        return res.status(400).json({ message: 'Onboarding incompleto. Defina o nome e localização do Edge primeiro.' });
       }
 
-      const sparkApiUrl = process.env.SPARK_API_URL;
+      const sparkApiUrl = process.env.SPARK_API_URL || 'http://localhost:3009/api/spark-cloud';
 
-      // Step 1: Authenticate — ephemeral JWT (never stored)
+      // Step 1: Authenticate — ephemeral JWT
       const { token } = await cloudLogin(email, password, sparkApiUrl);
 
-      // Step 2: Register edge with cloud
-      const resolvedName = edge_name?.trim() || `Edge ${new Date().toLocaleDateString('pt-BR')}`;
+      // Step 2: Register edge with cloud (sending onboarding data)
       const registration = await registerEdge({
         userToken: token,
-        edgeName: resolvedName,
+        edgeName: config.name,
         sparkApiUrl,
-      });
-
-      // Step 3: Persist identity and credentials locally
-      setCloudEdgeId(registration.edge_id, registration.edge_name);
-      saveMqttCredentials({
-        brokerUrl: registration.mqtt.url,
-        username: registration.mqtt.username,
-        password: registration.mqtt.password,
-      });
-
-      // Step 4: Start MQTT immediately
-      let mqttConnected = false;
-      try {
-        const client = await mqttClient.connect();
-        if (client) {
-          await mqttSubscriber.subscribe();
-          await mqttService.publishStatus();
-          mqttService.startHeartbeat();
-          mqttService.startQueueRetry();
-          mqttConnected = true;
+        metadata: {
+          lat: config.lat,
+          lng: config.lng,
+          tags: config.tags || [],
         }
-      } catch {
-        // MQTT failure is non-fatal — edge is registered, will retry
-      }
+      });
+
+      // Step 3: Persist identity and credentials locally (JSON + DB)
+      await provisionService.save({
+        edge_id: registration.edge_id,
+        edge_name: registration.edge_name,
+        mqtt: {
+          url: registration.mqtt.url,
+          username: registration.mqtt.username,
+          password: registration.mqtt.password,
+        },
+        provisioned: true,
+      });
+
+      // Step 4: Start MQTT using the lifecycle service
+      await lifecycleService.handleReconnect();
 
       return res.json({
         success: true,
         edge_id: registration.edge_id,
         edge_name: registration.edge_name,
-        mqtt: { connected: mqttConnected },
       });
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }
   }
 
-  /** POST /api/cli/disconnect — remove credentials and stop MQTT */
+  /** POST /api/cli/disconnect — stop MQTT but KEEP credentials */
   @Post('/disconnect')
   async disconnect(_req: Request, res: Response) {
     try {
-      const { isProvisioned, clearEdgeIdentity, clearMqttCredentials, mqttClient, mqttService } =
-        await import('spark-edge-core');
+      const { provisionService, mqttClient, mqttService } = await import('spark-edge-core');
 
-      if (!isProvisioned()) {
+      if (!(await provisionService.isProvisioned())) {
         return res.json({ success: true, message: 'Não estava conectado.' });
       }
 
@@ -119,10 +153,10 @@ export class CliController {
         await mqttClient.disconnect();
       }
 
-      clearMqttCredentials();
-      clearEdgeIdentity();
+      // Note: We NO LONGER clear credentials. 
+      // Disconnect just stops the active connection.
 
-      return res.json({ success: true });
+      return res.json({ success: true, message: 'Edge desconectado (identidade preservada).' });
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }
@@ -132,24 +166,19 @@ export class CliController {
   @Post('/reconnect')
   async reconnect(_req: Request, res: Response) {
     try {
-      const { isProvisioned, mqttClient, mqttSubscriber, mqttService } =
-        await import('spark-edge-core');
+      const { provisionService, lifecycleService } = await import('spark-edge-core');
 
-      if (!isProvisioned()) {
-        return res.status(400).json({ message: 'Edge não provisionado. Execute connect primeiro.' });
+      if (!(await provisionService.isProvisioned())) {
+        return res.status(400).json({ message: 'Edge não provisionado. Conecte-se ao Spark Cloud primeiro.' });
       }
 
-      const client = await mqttClient.reconnectWithNewCredentials();
-      if (!client) {
-        return res
-          .status(503)
-          .json({ message: 'Não foi possível conectar ao broker. Verifique as credenciais.' });
+      const success = await lifecycleService.handleReconnect();
+      
+      if (!success) {
+        return res.status(503).json({ message: 'Falha ao conectar. Verifique sua conexão.' });
       }
 
-      await mqttSubscriber.subscribe();
-      await mqttService.publishStatus();
-
-      return res.json({ success: true, mqtt: { connected: true } });
+      return res.json({ success: true });
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }

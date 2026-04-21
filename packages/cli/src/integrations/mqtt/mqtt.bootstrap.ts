@@ -1,6 +1,7 @@
-import { mqttClient, mqttSubscriber } from 'spark-edge-core';
-import { registerMqttCommandHandlers } from './mqtt.commands';
+import { mqttClient, mqttSubscriber, ensureDefaultMqttCredentials } from 'spark-edge-core';
+export { ensureDefaultMqttCredentials };
 import { attachLifecycleHooks, onStart } from './mqtt.lifecycle';
+import { registerMqttCommandHandlers } from './mqtt.commands';
 
 const { connect } = mqttClient;
 const { subscribe } = mqttSubscriber;

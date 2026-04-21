@@ -15,7 +15,7 @@ export class DisconnectCommand implements ICommand {
     const { isProvisioned, clearEdgeIdentity } = await import('spark-edge-core');
     const { clearMqttCredentials, mqttClient, mqttService } = await import('spark-edge-core');
 
-    if (!isProvisioned()) {
+    if (!(await isProvisioned())) {
       console.log('\n  Edge is not connected to Spark — nothing to do.\n');
       return;
     }
@@ -37,8 +37,8 @@ export class DisconnectCommand implements ICommand {
     }
 
     // Step 2: Clear local data
-    clearMqttCredentials();
-    clearEdgeIdentity();
+    await clearMqttCredentials();
+    await clearEdgeIdentity();
 
     console.log('\n✓ Edge disconnected and credentials removed.');
     console.log('  Run `spark-edge connect` to re-register.\n');

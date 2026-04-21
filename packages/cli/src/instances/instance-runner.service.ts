@@ -241,18 +241,49 @@ export class InstanceRunnerService {
   async resendFallbackItem(destId: string, payload: string): Promise<boolean> {
     try {
       const destRes = dbManager.instanceDestinations.findById(destId);
-      if (destRes.error || !destRes.data) return false;
+      if (destRes.error || !destRes.data) {
+        this.logger.log(`[InstanceRunner] Destination ${destId} not found for fallback re-send`);
+        return false;
+      }
       
-      const parsedPayload = JSON.parse(payload);
-      // We use a dummy context for mapping as it's already applied to the saved payload
-      // But we need some basic context for the adapter
       const dest = destRes.data;
-      const context: any = {
+      const instanceRes = dbManager.instances.findById(dest.instance_id);
+      if (instanceRes.error || !instanceRes.data) {
+        this.logger.log(`[InstanceRunner] Instance ${dest.instance_id} not found for fallback re-send`);
+        return false;
+      }
+      const instance = instanceRes.data;
+
+      // Reconstruct device context if needed
+      let deviceData: any = null;
+      if (instance.device_id && instance.include_device_data) {
+        const deviceRes = dbManager.devices.findById(instance.device_id);
+        if (!deviceRes.error && deviceRes.data) {
+          deviceData = deviceRes.data;
+        }
+      }
+
+      const scriptRes = instance.script_id ? dbManager.downloadedScripts.findById(instance.script_id) : { data: null };
+      const script = scriptRes.data;
+
+      const parsedPayload = JSON.parse(payload);
+      
+      // Reconstruct full execution context for mapping resolution
+      const context: IExecutionContext = {
         execution_id: 'resend-' + nanoid(6),
+        instance_id: instance.id,
+        device: deviceData,
+        instance: instance,
+        script: script as any,
+        script_parameters: (instance.script_parameters as any) || {},
+        trigger_type: 'manual', // Fallback re-sends are treated as manual-ish
         timestamp: new Date().toISOString(),
       };
 
-      await this.sendToDestination(dest, parsedPayload, context, () => {});
+      await this.sendToDestination(dest, parsedPayload, context, (level, msg) => {
+        this.logger.log(`[InstanceRunner] [FallbackResend] [${level.toUpperCase()}] ${msg}`);
+      });
+      
       return true;
     } catch (error) {
       this.logger.log(`[InstanceRunner] Failed to resend item to destination ${destId}: ${error}`);

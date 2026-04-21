@@ -2,6 +2,7 @@ import { Service } from '@spark-edge/di';
 import { dbManager } from 'spark-edge-db';
 import { InstanceRunnerService } from './instance-runner.service';
 import { Logger } from '@/simple-logger';
+import FallbackQueueService from './fallback-queue.service';
 
 @Service()
 export class InstanceSchedulerService {
@@ -11,6 +12,7 @@ export class InstanceSchedulerService {
 
   constructor(
     private readonly instanceRunner: InstanceRunnerService,
+    private readonly fallbackQueue: FallbackQueueService,
     private readonly logger: Logger
   ) {}
 
@@ -23,14 +25,33 @@ export class InstanceSchedulerService {
     this.logger.log('[InstanceScheduler] Starting interval-based scheduler...');
     this.timer = setInterval(() => this.poll(), this.pollingIntervalMs);
     
+    // Start fallback queue retry loop
+    this.fallbackQueue.startRetryLoop(async (_instanceId: string, payload: string, destId?: string) => {
+      if (!destId) return false;
+      return this.instanceRunner.resendFallbackItem(destId, payload);
+    });
+
     // Run an initial poll immediately
     this.poll();
+  }
+
+  /**
+   * Manually trigger a flush of the fallback queue.
+   * Useful on reconnection events.
+   */
+  public async triggerFallbackFlush(): Promise<void> {
+    this.logger.log('[InstanceScheduler] Triggering manual fallback queue flush...');
+    await this.fallbackQueue.flush(async (_instanceId: string, payload: string, destId?: string) => {
+      if (!destId) return false;
+      return this.instanceRunner.resendFallbackItem(destId, payload);
+    });
   }
 
   /**
    * Stop the scheduler polling loop.
    */
   public stop(): void {
+    this.fallbackQueue.stopRetryLoop();
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = null;

@@ -1,5 +1,4 @@
 import { mqttClient, mqttService, mqttQueue, mqttSubscriber } from 'spark-edge-core';
-import { getLocation } from './mqtt.status';
 
 const { getClient, isConnected, disconnect } = mqttClient;
 const { publishStatus, publishOfflineStatus, startHeartbeat, startQueueRetry, stopTimers } = mqttService;
@@ -12,8 +11,7 @@ const { resubscribe } = mqttSubscriber;
  */
 
 export async function onStart(): Promise<void> {
-  const location = getLocation();
-  await publishStatus(location);
+  await publishStatus();
   startHeartbeat();
   startQueueRetry();
   console.log('[Mqtt] Lifecycle: started');
@@ -34,9 +32,13 @@ export async function onShutdown(): Promise<void> {
 export function onReconnect(): void {
   console.log('[Mqtt] Lifecycle: reconnected — re-subscribing and re-syncing...');
   resubscribe().catch((err) => console.error('[Mqtt] Re-subscribe failed:', err.message));
-  const location = getLocation();
-  publishStatus(location).catch(() => {});
+  publishStatus().catch(() => {});
   retryAll().catch(() => {});
+  
+  // Trigger fallback queue flush on reconnection
+  const { Container } = require('@spark-edge/di');
+  const { InstanceSchedulerService } = require('../../instances/instance-scheduler.service');
+  Container.get(InstanceSchedulerService).triggerFallbackFlush().catch(() => {});
 }
 
 export function onDisconnect(): void {

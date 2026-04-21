@@ -387,9 +387,11 @@ export const MqttQueueTable = sqliteTable('mqtt_queue', {
 
 export const EdgeConfigTable = sqliteTable('edge_config', {
   id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  name: text('name'),
   lat: text('lat'),
   lng: text('lng'),
   location_source: text('location_source').default('manual'),
+  tags: text('tags', { mode: 'json' }).$type<string[]>().$defaultFn(() => []),
   updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 

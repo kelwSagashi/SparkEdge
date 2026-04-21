@@ -64,6 +64,20 @@
       "when": 1776552361453,
       "tag": "0008_youthful_hitman",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1776612685148,
+      "tag": "0009_lively_landau",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1776628489420,
+      "tag": "0010_absent_doctor_doom",
+      "breakpoints": true
     }
   ]
 }

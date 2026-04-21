@@ -30,11 +30,18 @@ export class EdgeRepository {
 
   upsertIdentity(values: EdgeIdentityUpsertValues): ReturningQueries<EdgeIdentityReturningValues | null> {
     try {
+      // Clear existing to ensure singleton nature even if previous logic failed
+      // This is a safety measure to prevent multiple identities in the table
       const existing = this.db.select().from(Tables.EdgeIdentityTable).get();
+      
       let data;
       if (existing) {
         data = this.db.update(Tables.EdgeIdentityTable)
-          .set({ ...values, created_at: undefined })
+          .set({ 
+            ...values, 
+            created_at: undefined,
+            id: undefined // Never update the primary key
+          })
           .where(eq(Tables.EdgeIdentityTable.id, existing.id))
           .returning()
           .get();
@@ -44,8 +51,14 @@ export class EdgeRepository {
           .returning()
           .get();
       }
+
+      if (!data) {
+        throw new Error("Failed to upsert identity - result was empty");
+      }
+
       return { data };
     } catch (error: unknown) {
+      console.error("[EdgeRepository] upsertIdentity error:", error);
       return { error, data: null };
     }
   }
@@ -230,6 +243,29 @@ export class EdgeRepository {
       const data = this.db.select().from(Tables.EdgeConfigTable).limit(1).get() ?? null;
       return { data };
     } catch (error: unknown) {
+      return { error, data: null };
+    }
+  }
+
+  upsertEdgeConfig(values: any): ReturningQueries<EdgeConfigReturningValues | null> {
+    try {
+      const existing = this.db.select().from(Tables.EdgeConfigTable).limit(1).get();
+      let data;
+      if (existing) {
+        data = this.db.update(Tables.EdgeConfigTable)
+          .set({ ...values, updated_at: new Date().toISOString() })
+          .where(eq(Tables.EdgeConfigTable.id, existing.id))
+          .returning()
+          .get() ?? null;
+      } else {
+        data = this.db.insert(Tables.EdgeConfigTable)
+          .values(values)
+          .returning()
+          .get() ?? null;
+      }
+      return { data };
+    } catch (error: unknown) {
+      console.error('[EdgeRepository] upsertEdgeConfig error:', error);
       return { error, data: null };
     }
   }

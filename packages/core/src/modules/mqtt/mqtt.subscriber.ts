@@ -1,13 +1,18 @@
 import { getClient } from './mqtt.client';
 import { getCommandTopic } from './mqtt.topics';
-import { getOrCreateEdgeId } from './edge.identity';
+import { getEdgeId } from './edge.identity';
 import { handleCommand } from './mqtt.handlers';
 
 /**
  * Subscribe to the command topic and forward incoming messages to the handler.
  */
 export async function subscribe(): Promise<void> {
-  const edgeId = getOrCreateEdgeId();
+  const edgeId = await getEdgeId();
+  if (!edgeId) {
+    console.log('[Mqtt] Edge not provisioned. Skipping subscription.');
+    return;
+  }
+  
   const commandTopic = getCommandTopic(edgeId);
   const client = getClient();
 

@@ -69,6 +69,9 @@ class ContainerClass {
 	 * @throws {DIError} If circular dependencies are detected or if the type is not injectable
 	 */
 	get<T>(type: ServiceIdentifier<T>): T {
+		if (!type) {
+			throw new DIError('Cannot resolve undefined type. This usually happens due to circular dependencies or missing imports.');
+		}
 		const { resolutionStack } = this;
 		const metadata = instances.get(type) as Metadata<T>;
 		if (!metadata) {

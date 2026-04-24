@@ -36,11 +36,12 @@ export class DisconnectCommand implements ICommand {
       console.log(' ✓');
     }
 
-    // Step 2: Clear local data
-    await clearMqttCredentials();
-    await clearEdgeIdentity();
+    // Step 2: Note about persistence
+    // We NO LONGER clear credentials during a simple disconnect.
+    // This allows `spark-edge reconnect` or auto-reconnect to work.
 
-    console.log('\n✓ Edge disconnected and credentials removed.');
-    console.log('  Run `spark-edge connect` to re-register.\n');
+    console.log('\n✓ MQTT connection stopped.');
+    console.log('  Edge identity is preserved. Run `spark-edge reconnect` to start again.');
+    console.log('  To completely remove this edge, run `spark-edge remove`.\n');
   }
 }

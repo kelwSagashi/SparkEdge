@@ -11,6 +11,7 @@ import type {
   MqttCommandReturningValues,
   MqttQueueUpsertValues,
   MqttQueueReturningValues,
+  EdgeConfigUpsertValues,
   EdgeConfigReturningValues
 } from '../types';
 
@@ -247,7 +248,7 @@ export class EdgeRepository {
     }
   }
 
-  upsertEdgeConfig(values: any): ReturningQueries<EdgeConfigReturningValues | null> {
+  upsertEdgeConfig(values: EdgeConfigUpsertValues): ReturningQueries<EdgeConfigReturningValues | null> {
     try {
       const existing = this.db.select().from(Tables.EdgeConfigTable).limit(1).get();
       let data;
@@ -266,6 +267,15 @@ export class EdgeRepository {
       return { data };
     } catch (error: unknown) {
       console.error('[EdgeRepository] upsertEdgeConfig error:', error);
+      return { error, data: null };
+    }
+  }
+
+  clearEdgeConfig(): ReturningQueries<unknown> {
+    try {
+      const data = this.db.delete(Tables.EdgeConfigTable).run();
+      return { data };
+    } catch (error: unknown) {
       return { error, data: null };
     }
   }

@@ -9,6 +9,7 @@ export * as mqttTopics from './modules/mqtt/mqtt.topics';
 export * as mqttConfig from './modules/mqtt/mqtt.config';
 export { provisionService } from './modules/mqtt/provision.service';
 export { lifecycleService } from './modules/mqtt/lifecycle.service';
+export * as systemStats from './modules/system/stats.collector';
 
 // Named type re-exports
 export type { MqttCommand } from './modules/mqtt/mqtt.handlers';
@@ -22,4 +23,8 @@ export { getSystemIdentity, getEdgeId, isProvisioned, setCloudEdgeId, clearEdgeI
 export { getMqttCredentials, saveMqttCredentials, clearMqttCredentials, ensureDefaultMqttCredentials } from './modules/mqtt/edge.credentials';
 
 // Cloud API client
-export { cloudLogin, registerEdge } from './modules/mqtt/edge.cloud';
+export { cloudLogin, registerEdge, pairWithToken, unpairWithCloud } from './modules/mqtt/edge.cloud';
+
+// System
+export { collectSystemMetadata } from './modules/system/metadata';
+export type { SystemMetadata } from './modules/system/metadata';

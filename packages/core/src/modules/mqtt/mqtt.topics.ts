@@ -16,7 +16,11 @@ export function getCommandTopic(edgeId: string): string {
 }
 
 export function getResponseTopic(edgeId: string): string {
-  return `spark/${edgeId}/responses`;
+  return `spark/${edgeId}/response`;
+}
+
+export function getMetaTopic(edgeId: string): string {
+  return `spark/${edgeId}/meta`;
 }
 
 export function getLogTopic(edgeId: string): string {
@@ -26,3 +30,12 @@ export function getLogTopic(edgeId: string): string {
 export function getMetricsTopic(edgeId: string): string {
   return `spark/${edgeId}/metrics`;
 }
+
+export function getStatsTopic(edgeId: string): string {
+  return `spark/${edgeId}/stats`;
+}
+
+export function getContextTopic(edgeId: string): string {
+  return `spark/${edgeId}/context`;
+}
+

@@ -1,5 +1,6 @@
 import { Get, Post, Put, RestController } from '@spark-edge/di';
 import { Request, Response } from 'express';
+import { sparkEdgeCloudApiUrl } from '../constants';
 
 /**
  * /api/cli/* — Edge Cloud Management endpoints
@@ -16,12 +17,13 @@ export class CliController {
       const { dbManager } = await import('spark-edge-db');
       const { data: config } = dbManager.edge.getEdgeConfig();
       
-      const isComplete = !!(config?.name && config?.lat && config?.lng);
+      const isComplete = !!(config?.edge_name && config?.lat && config?.lng);
 
       return res.json({
         complete: isComplete,
         data: config ? {
-          name: config.name,
+          name: config.edge_name,
+          description: config.description,
           lat: config.lat,
           lng: config.lng,
           tags: config.tags || [],
@@ -36,13 +38,14 @@ export class CliController {
   @Post('/onboarding')
   async saveOnboarding(req: Request, res: Response) {
     try {
-      const { name, lat, lng, tags } = req.body ?? {};
+      const { name, description, lat, lng, tags } = req.body ?? {};
       const { dbManager } = await import('spark-edge-db');
       
       dbManager.edge.upsertEdgeConfig({
-        name,
-        lat: String(lat),
-        lng: String(lng),
+        edge_name: name,
+        description: description || null,
+        lat: lat ? String(lat) : null,
+        lng: lng ? String(lng) : null,
         tags: Array.isArray(tags) ? tags : [],
         location_source: 'manual'
       });
@@ -72,6 +75,71 @@ export class CliController {
     }
   }
 
+  /** POST /api/cli/pair — pair this edge using a cloud-generated token */
+  @Post('/pair')
+  async pair(req: Request, res: Response) {
+    try {
+      const { token, name } = req.body ?? {};
+
+      if (!token) {
+        return res.status(400).json({ message: 'O token é obrigatório.' });
+      }
+
+      const {
+        provisionService,
+        pairWithToken,
+        lifecycleService,
+      } = await import('spark-edge-core');
+
+      const { dbManager } = await import('spark-edge-db');
+      const { data: config } = dbManager.edge.getEdgeConfig();
+
+      // Collect system metadata (lazy as well)
+      const { collectSystemMetadata } = await import('spark-edge-core');
+      const { version } = require('../../../package.json');
+      const systemMetadata = await collectSystemMetadata(version);
+
+      const metadata = {
+        lat: config?.lat,
+        lng: config?.lng,
+        tags: config?.tags || [],
+        description: config?.description,
+        os: systemMetadata.os,
+        os_version: systemMetadata.os_version,
+        edge_version: systemMetadata.edge_version,
+        hardware: systemMetadata.hardware,
+        environment: 'production'
+      };
+
+      // Use the token to pair with cloud
+      const registration = await pairWithToken(token, name || config?.edge_name, metadata);
+
+      // Persist identity and credentials
+      await provisionService.save({
+        edge_id: registration.edge_id,
+        edge_name: registration.edge_name,
+        mqtt: {
+          url: registration.mqtt.url,
+          username: registration.mqtt.username,
+          password: registration.mqtt.password,
+        },
+        provisioned: true,
+      });
+
+      // Start MQTT
+      await lifecycleService.handleReconnect();
+
+      return res.json({
+        success: true,
+        edge_id: registration.edge_id,
+        edge_name: registration.edge_name,
+      });
+    } catch (err: any) {
+      console.error('[CliController] Pairing error:', err);
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
   /** POST /api/cli/connect — authenticate with Spark and register this edge */
   @Post('/connect')
   async connect(req: Request, res: Response) {
@@ -92,24 +160,32 @@ export class CliController {
       const { dbManager } = await import('spark-edge-db');
       const { data: config } = dbManager.edge.getEdgeConfig();
 
-      if (!config?.name) {
+      if (!config?.edge_name) {
         return res.status(400).json({ message: 'Onboarding incompleto. Defina o nome e localização do Edge primeiro.' });
       }
 
-      const sparkApiUrl = process.env.SPARK_API_URL || 'http://localhost:3009/api/spark-cloud';
-
       // Step 1: Authenticate — ephemeral JWT
-      const { token } = await cloudLogin(email, password, sparkApiUrl);
+      const { token } = await cloudLogin(email, password, sparkEdgeCloudApiUrl);
+
+      // Collect system metadata (lazy as well)
+      const { collectSystemMetadata } = await import('spark-edge-core');
+      const { version } = require('../../../package.json');
+      const systemMetadata = await collectSystemMetadata(version);
 
       // Step 2: Register edge with cloud (sending onboarding data)
       const registration = await registerEdge({
         userToken: token,
-        edgeName: config.name,
-        sparkApiUrl,
+        edgeName: config.edge_name,
         metadata: {
           lat: config.lat,
           lng: config.lng,
           tags: config.tags || [],
+          description: config.description,
+          os: systemMetadata.os,
+          os_version: systemMetadata.os_version,
+          edge_version: systemMetadata.edge_version,
+          hardware: systemMetadata.hardware,
+          environment: 'production'
         }
       });
 
@@ -179,6 +255,47 @@ export class CliController {
       }
 
       return res.json({ success: true });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  /** POST /api/cli/remove — stop MQTT and DELETE all credentials/identity */
+  @Post('/remove')
+  async remove(_req: Request, res: Response) {
+    try {
+      const { provisionService, mqttClient, mqttService, unpairWithCloud } = await import('spark-edge-core');
+      const { dbManager } = await import('spark-edge-db');
+
+      const edgeData = await provisionService.load();
+      if (!edgeData || !edgeData.provisioned) {
+        return res.status(400).json({ message: 'Edge não está vinculado ao Cloud — nada para remover.' });
+      }
+
+      // 1. Signal Cloud (Synchronous)
+      // This informs SparkCloud/API that the device is being removed
+      try {
+        await unpairWithCloud(edgeData.edge_id);
+      } catch (cloudErr: any) {
+        console.warn('[CliController] Cloud unpairing signal failed:', cloudErr.message);
+        // We continue anyway to wipe local data, or should we block? 
+        // User asked for "sincrono entre os sistemas", so we might want to inform if it fails,
+        // but local wipe should probably still happens to allow re-onboarding.
+      }
+
+      // 2. Stop active connection
+      if (mqttClient.isConnected()) {
+        try { await mqttService.publishOfflineStatus(); } catch { /* best-effort */ }
+        await mqttClient.disconnect();
+      }
+
+      // 2. Clear provisioning data (JSON + identity table + mqtt_credentials table)
+      await provisionService.clear();
+
+      // 3. Optional: Clear onboarding/config from DB to return to state 1
+      dbManager.edge.clearEdgeConfig();
+
+      return res.json({ success: true, message: 'Edge resetado com sucesso (conexão removida).' });
     } catch (err: any) {
       return res.status(500).json({ message: err.message });
     }

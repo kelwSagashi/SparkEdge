@@ -18,6 +18,18 @@ export class CommandRegistry {
         switch (this.commandName) {
 
             // ─── Cloud Provisioning ───────────────────────────────────────
+            case 'pair': {
+                const { PairCommand } = await import('./commands/pair.command');
+                await new PairCommand().run(process.argv.slice(3));
+                break;
+            }
+
+            case 'status': {
+                const { StatusCommand } = await import('./commands/status.command');
+                await new StatusCommand().run();
+                break;
+            }
+
             case 'connect': {
                 const { ConnectCommand } = await import('./commands/connect.command');
                 await new ConnectCommand().run();
@@ -27,6 +39,12 @@ export class CommandRegistry {
             case 'disconnect': {
                 const { DisconnectCommand } = await import('./commands/disconnect.command');
                 await new DisconnectCommand().run();
+                break;
+            }
+
+            case 'remove': {
+                const { RemoveCommand } = await import('./commands/remove.command');
+                await new RemoveCommand().run();
                 break;
             }
 

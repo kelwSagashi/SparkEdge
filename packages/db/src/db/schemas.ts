@@ -387,11 +387,20 @@ export const MqttQueueTable = sqliteTable('mqtt_queue', {
 
 export const EdgeConfigTable = sqliteTable('edge_config', {
   id: text('id').primaryKey().$defaultFn(() => nanoid()),
-  name: text('name'),
+  edge_name: text('edge_name'),
   lat: text('lat'),
   lng: text('lng'),
   location_source: text('location_source').default('manual'),
   tags: text('tags', { mode: 'json' }).$type<string[]>().$defaultFn(() => []),
+  
+  // New metadata fields
+  os: text('os'),
+  os_version: text('os_version'),
+  edge_version: text('edge_version'),
+  hardware: text('hardware'),
+  environment: text('environment').default('production'),
+  description: text('description'),
+  
   updated_at: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 

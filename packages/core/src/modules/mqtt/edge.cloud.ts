@@ -23,8 +23,6 @@ export interface EdgeRegistrationResult {
   };
 }
 
-const DEFAULT_SPARK_URL = process.env.SPARK_API_URL ?? 'https://api.sparkmon.io';
-
 /**
  * Authenticate the user with the Spark cloud.
  * Returns an ephemeral JWT — NEVER stored to disk.
@@ -32,9 +30,9 @@ const DEFAULT_SPARK_URL = process.env.SPARK_API_URL ?? 'https://api.sparkmon.io'
 export async function cloudLogin(
   email: string,
   password: string,
-  sparkApiUrl: string = DEFAULT_SPARK_URL
+  sparkCloudApiUrl: string
 ): Promise<CloudLoginResult> {
-  const url = `${sparkApiUrl}/auth/login`;
+  const url = `${sparkCloudApiUrl}/auth/login`;
 
   let res: Response;
   try {
@@ -44,7 +42,7 @@ export async function cloudLogin(
       body: JSON.stringify({ email, password }),
     });
   } catch (err: any) {
-    throw new Error(`[Cloud] Cannot reach Spark API at ${sparkApiUrl}: ${err.message}`);
+    throw new Error(`[Cloud] Cannot reach Spark API at ${sparkCloudApiUrl}: ${err.message}`);
   }
 
   if (!res.ok) {
@@ -60,6 +58,8 @@ export async function cloudLogin(
   return { token: data.token };
 }
 
+const DEFAULT_SPARK_CLOUD_URL = 'https://sparkapi.okelwen.site';
+
 /**
  * Register a new Edge instance with the Spark cloud.
  * Uses the ephemeral user JWT acquired from cloudLogin().
@@ -69,16 +69,20 @@ export async function registerEdge(
   options: {
     userToken: string;
     edgeName: string;
-    sparkApiUrl?: string;
     metadata?: {
       lat?: string | null;
       lng?: string | null;
       tags?: string[];
+      description?: string | null;
+      os?: string;
+      os_version?: string;
+      edge_version?: string;
+      hardware?: string;
+      environment?: string;
     };
   }
 ): Promise<EdgeRegistrationResult> {
-  const sparkApiUrl = options.sparkApiUrl ?? DEFAULT_SPARK_URL;
-  const url = `${sparkApiUrl}/edges/register`;
+  const url = `${DEFAULT_SPARK_CLOUD_URL}/edges/register`;
 
   let res: Response;
   try {
@@ -88,26 +92,92 @@ export async function registerEdge(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${options.userToken}`,
       },
-      body: JSON.stringify({ 
-        name: options.edgeName, 
-        user_token: options.userToken,
-        ...options.metadata 
-      }),
+    body: JSON.stringify({ 
+      name: options.edgeName, 
+      user_token: options.userToken,
+      ...options.metadata 
+    }),
+  });
+} catch (err: any) {
+  throw new Error(`[Cloud] Cannot reach Spark API: ${err.message}`);
+}
+
+if (!res.ok) {
+  const body = await res.text().catch(() => '');
+  throw new Error(`[Cloud] Edge registration failed (${res.status}): ${body || res.statusText}`);
+}
+
+const data = (await res.json()) as Partial<EdgeRegistrationResult>;
+
+if (!data.edge_id || !data.mqtt?.url || !data.mqtt?.username || !data.mqtt?.password) {
+  throw new Error('[Cloud] Invalid registration response — missing required fields.');
+}
+
+return data as EdgeRegistrationResult;
+}
+
+/**
+* Pair a new Edge using a short-lived pairing token.
+* This is the modern replacement for user JWT based registration.
+*/
+export async function pairWithToken(
+token: string,
+edgeName?: string,
+metadata?: any
+): Promise<EdgeRegistrationResult> {
+const url = `${DEFAULT_SPARK_CLOUD_URL}/edges/pair`;
+console.log(`[EDGE] pair url ${url}`)
+
+let res: Response;
+try {
+  res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      token, 
+      edge_name: edgeName,
+      name: edgeName, // Consistency
+      metadata 
+    }),
     });
   } catch (err: any) {
-    throw new Error(`[Cloud] Cannot reach Spark API: ${err.message}`);
+    throw new Error(`[Cloud] Cannot reach Spark API at ${url}: ${err.message}`);
   }
 
   if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    throw new Error(`[Cloud] Edge registration failed (${res.status}): ${body || res.statusText}`);
+    const body = await res.json().catch(() => ({ message: res.statusText })) as any;
+    throw new Error(`[Cloud] Pairing failed (${res.status}): ${body.message || res.statusText}`);
   }
 
   const data = (await res.json()) as Partial<EdgeRegistrationResult>;
 
   if (!data.edge_id || !data.mqtt?.url || !data.mqtt?.username || !data.mqtt?.password) {
-    throw new Error('[Cloud] Invalid registration response — missing required fields.');
+    throw new Error('[Cloud] Invalid pairing response — missing required fields.');
   }
 
   return data as EdgeRegistrationResult;
+}
+
+/**
+ * Signal the Spark Cloud to unpair and remove this Edge identity.
+ * This is a synchronous operation used before local data wipe.
+ */
+export async function unpairWithCloud(edgeId: string): Promise<void> {
+  const url = `${DEFAULT_SPARK_CLOUD_URL}/edges/unpair`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ edgeId }),
+    });
+  } catch (err: any) {
+    throw new Error(`[Cloud] Cannot reach Spark API at ${url}: ${err.message}`);
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ message: res.statusText })) as any;
+    throw new Error(`[Cloud] Unpairing failed (${res.status}): ${body.message || res.statusText}`);
+  }
 }

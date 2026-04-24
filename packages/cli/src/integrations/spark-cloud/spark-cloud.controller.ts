@@ -39,7 +39,7 @@ export class SparkCloudController {
 
     return res.json({
       edge_id: newEdgeId,
-      edge_name: name || `Simulated Edge ${newEdgeId}`,
+      edge_name: name || `Edge ${newEdgeId}`,
       mqtt: {
         url: 'mqtt://localhost:1883',
         username: `spark-user-${newEdgeId}`,

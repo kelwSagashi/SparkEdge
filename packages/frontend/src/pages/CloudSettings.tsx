@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Wifi, WifiOff, Loader2, Unplug, RefreshCw, Mail, Lock, Zap, CheckCircle2,
   AlertCircle, PlugZap, Building2, MapPin, Tag, ArrowRight, Settings2,
-  Navigation, MousePointer2
+  Navigation, MousePointer2, Trash2, Key
 } from 'lucide-react';
 
 // Leaflet imports
@@ -63,10 +63,13 @@ export default function CloudSettingsPage() {
   const [step, setStep] = useState<Step>('loading');
   const [status, setStatus] = useState<CloudStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [token, setToken] = useState('');
+  const [useToken, setUseToken] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
   // Onboarding state
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [location, setLocation] = useState<L.LatLng | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
@@ -94,6 +97,7 @@ export default function CloudSettingsPage() {
           setStep('onboarding');
           if (onb.data.data) {
             setName(onb.data.data.name || '');
+            setDescription(onb.data.data.description || '');
             if (onb.data.data.lat && onb.data.data.lng) {
               setLocation(new L.LatLng(Number(onb.data.data.lat), Number(onb.data.data.lng)));
             }
@@ -127,6 +131,7 @@ export default function CloudSettingsPage() {
     try {
       await cloudService.saveOnboarding({ 
         name, 
+        description,
         lat: String(location.lat), 
         lng: String(location.lng), 
         tags 
@@ -155,6 +160,21 @@ export default function CloudSettingsPage() {
     );
   };
 
+  const handlePair = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setActionLoading(true);
+    try {
+      await cloudService.pair(token);
+      setToken('');
+      await fetchStatus();
+    } catch (err: any) {
+      setError(err?.message ?? 'Falha ao vincular dispositivo.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -178,6 +198,28 @@ export default function CloudSettingsPage() {
       await fetchStatus();
     } catch (err: any) {
       setError(err?.message ?? 'Erro ao desconectar.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!confirm('AVISO: Isso irá remover completamente a identidade deste Edge e desconectar do Spark Cloud. Deseja continuar?')) return;
+    
+    setError(null);
+    setActionLoading(true);
+    try {
+      await cloudService.remove();
+      // Reset local state
+      setName('');
+      setLocation(null);
+      setTags([]);
+      setEmail('');
+      setPassword('');
+      setStep('onboarding');
+      await fetchStatus();
+    } catch (err: any) {
+      setError(err?.message ?? 'Falha ao remover conexão.');
     } finally {
       setActionLoading(false);
     }
@@ -281,6 +323,17 @@ export default function CloudSettingsPage() {
             </div>
 
             <div>
+              <label className={labelCls}>Descrição (Opcional)</label>
+              <textarea
+                placeholder="Uma breve descrição sobre a finalidade deste dispositivo..."
+                className={`${inputCls} min-h-[80px] py-3 resize-none`}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                disabled={actionLoading}
+              />
+            </div>
+
+            <div>
               <div className="flex items-center justify-between mb-2">
                 <label className={labelCls}><MapPin size={11} className="inline mr-1" /> Localização</label>
                 <button 
@@ -371,57 +424,122 @@ export default function CloudSettingsPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-white">Passo 2: Vincular ao Spark</p>
-              <p className="text-xs text-zinc-500">Registre "{name}" na sua conta Spark Cloud</p>
+              <p className="text-xs text-zinc-500">Escolha como conectar "{name}" ao Cloud</p>
             </div>
           </div>
 
-          <form onSubmit={handleConnect} className="space-y-5">
-            <div>
-              <label className={labelCls}><Mail size={11} className="inline mr-1" /> Email da conta Spark</label>
-              <input
-                type="email"
-                placeholder="voce@exemplo.com"
-                className={inputCls}
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                disabled={actionLoading}
-              />
-            </div>
+          <div className="flex p-1 bg-white/5 rounded-xl border border-white/5 mb-6">
+            <button
+              onClick={() => setUseToken(true)}
+              className={`flex-1 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${useToken ? 'bg-white/10 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+            >
+              Via Token
+            </button>
+            <button
+              onClick={() => setUseToken(false)}
+              className={`flex-1 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all ${!useToken ? 'bg-white/10 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+            >
+              Via Email/Senha
+            </button>
+          </div>
 
-            <div>
-              <label className={labelCls}><Lock size={11} className="inline mr-1" /> Senha</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className={inputCls}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                disabled={actionLoading}
-              />
-            </div>
+          {useToken ? (
+            <form onSubmit={handlePair} className="space-y-5">
+              <div>
+                <label className={labelCls}><Key size={11} className="inline mr-1" /> Token de Pareamento</label>
+                <input
+                  type="text"
+                  placeholder="Cole o token gerado no dashboard"
+                  className={`${inputCls} font-mono uppercase tracking-widest text-center`}
+                  value={token}
+                  onChange={e => setToken(e.target.value.toUpperCase())}
+                  required
+                  disabled={actionLoading}
+                />
+                <p className="mt-2 text-[10px] text-zinc-500 text-center leading-relaxed">
+                  Para obter um token, acesse o dashboard do Spark Cloud, selecione uma Unit e clique em "Conectar Edge".
+                </p>
+              </div>
 
-            <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 border-white/5 text-zinc-400 hover:text-white"
-                    onClick={() => setStep('onboarding')}
-                    disabled={actionLoading}
+                  type="button"
+                  variant="outline"
+                  className="flex-1 border-white/5 text-zinc-400 hover:text-white"
+                  onClick={() => setStep('onboarding')}
+                  disabled={actionLoading}
                 >
-                    Voltar
+                  Voltar
                 </Button>
                 <Button
-                    type="submit"
-                    className="flex-[2] gap-2 bg-emerald-500 text-white hover:bg-emerald-600 font-medium h-11 shadow-lg shadow-emerald-500/20"
-                    disabled={actionLoading || !email || !password}
-                    >
-                    {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <Wifi size={15} />}
-                    Vincular Agora
+                  type="submit"
+                  className="flex-[2] gap-2 bg-purple-500 text-white hover:bg-purple-600 font-medium h-11 shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
+                  disabled={actionLoading || !token}
+                >
+                  {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <Wifi size={15} />}
+                  Vincular via Token
                 </Button>
-            </div>
-          </form>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleConnect} className="space-y-5">
+              <div>
+                <label className={labelCls}><Mail size={11} className="inline mr-1" /> Email da conta Spark</label>
+                <input
+                  type="email"
+                  placeholder="voce@exemplo.com"
+                  className={inputCls}
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  disabled={actionLoading}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}><Lock size={11} className="inline mr-1" /> Senha</label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className={inputCls}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  disabled={actionLoading}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 border-white/5 text-zinc-400 hover:text-white"
+                  onClick={() => setStep('onboarding')}
+                  disabled={actionLoading}
+                >
+                  Voltar
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-[2] gap-2 bg-emerald-500 text-white hover:bg-emerald-600 font-medium h-11 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                  disabled={actionLoading || !email || !password}
+                >
+                  {actionLoading ? <Loader2 size={15} className="animate-spin" /> : <Wifi size={15} />}
+                  Vincular Agora
+                </Button>
+              </div>
+            </form>
+          )}
+          
+          <button
+            type="button"
+            onClick={handleRemove}
+            disabled={actionLoading}
+            className="w-full mt-6 text-[10px] uppercase font-bold text-zinc-600 hover:text-red-400/70 transition-colors flex items-center justify-center gap-1.5"
+          >
+            <Trash2 size={10} />
+            Resetar Configurações e Voltar ao Início
+          </button>
         </div>
       )}
 
@@ -467,24 +585,39 @@ export default function CloudSettingsPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-3">
+              {status.mqtt.connected ? (
+                <Button
+                  variant="outline"
+                  className="flex-1 h-11 gap-2 border-red-500/10 bg-red-500/[0.02] text-red-500/60 hover:bg-red-500/10 hover:text-red-400 transition-all active:scale-95"
+                  disabled={actionLoading}
+                  onClick={handleDisconnect}
+                >
+                  {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Unplug size={14} />}
+                  Desconectar MQTT
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="flex-1 h-11 gap-2 border-emerald-500/10 bg-emerald-500/[0.02] text-emerald-500/60 hover:bg-emerald-500/10 hover:text-emerald-400 transition-all active:scale-95"
+                  disabled={actionLoading}
+                  onClick={handleReconnect}
+                >
+                  {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                  Conectar MQTT
+                </Button>
+              )}
+            </div>
+
             <Button
               variant="outline"
-              className="flex-1 h-11 gap-2 border-white/5 bg-white/[0.02] text-zinc-300 hover:bg-white/[0.05] hover:text-white transition-all active:scale-95"
+              className="w-full h-11 gap-2 border-red-500/10 bg-red-500/[0.05] text-red-500 hover:bg-red-500/20 hover:text-red-400 transition-all active:scale-95 border-dashed"
               disabled={actionLoading}
-              onClick={handleReconnect}
+              onClick={handleRemove}
             >
-              {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-              Reconectar
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 h-11 gap-2 border-red-500/10 bg-red-500/[0.02] text-red-500/60 hover:bg-red-500/10 hover:text-red-400 transition-all active:scale-95"
-              disabled={actionLoading}
-              onClick={handleDisconnect}
-            >
-              {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Unplug size={14} />}
-              Desconectar
+              {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+              Remover Identidade e Desvincular do Cloud
             </Button>
           </div>
 

@@ -4,6 +4,8 @@ import * as topics from './mqtt.topics';
 import { publish, publishRetained } from './mqtt.publisher';
 import { retryAll } from './mqtt.queue';
 import { dbManager } from 'spark-edge-db';
+import { collectSystemStats } from '../system/stats.collector';
+
 
 export interface StatusPayload {
   edge_id: string;
@@ -22,6 +24,8 @@ export interface StatusPayload {
 
 let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 let queueRetryTimer: ReturnType<typeof setInterval> | null = null;
+let statsTimer: ReturnType<typeof setInterval> | null = null;
+
 
 
 async function buildStatusPayload(
@@ -59,7 +63,41 @@ export async function publishStatus(): Promise<void> {
 
   const topic = topics.getStatusTopic(edgeData.edge_id);
   const payload = await buildStatusPayload(true);
+  
   await publishRetained(topic, payload);
+  
+  // Also publish full metadata on status update
+  await publishMetadata().catch(err => {
+    console.error('[Mqtt] Failed to publish initial metadata:', err);
+  });
+}
+
+/**
+ * Publish the full edge metadata (name, location, hardware, etc.)
+ */
+export async function publishMetadata(): Promise<void> {
+  const edgeData = await provisionService.load();
+  if (!edgeData?.provisioned) return;
+
+  const { data: config } = dbManager.edge.getEdgeConfig();
+  const { collectSystemMetadata } = await import('../system/metadata');
+  const systemMetadata = await collectSystemMetadata();
+
+  const topic = topics.getMetaTopic(edgeData.edge_id);
+  
+  await publish(topic, {
+    edge_name: config?.edge_name || edgeData.edge_name,
+    description: config?.description || null,
+    lat: config?.lat || null,
+    lng: config?.lng || null,
+    tags: config?.tags || [],
+    os: systemMetadata.os,
+    os_version: systemMetadata.os_version,
+    edge_version: systemMetadata.edge_version,
+    hardware: systemMetadata.hardware,
+    environment: config?.environment || 'production',
+    timestamp: new Date().toISOString()
+  });
 }
 
 /**
@@ -87,6 +125,20 @@ export async function publishHeartbeat(): Promise<void> {
     ts: Math.floor(Date.now() / 1000) 
   });
 }
+
+/**
+ * Publish real-time system statistics.
+ */
+export async function publishStats(): Promise<void> {
+  const edgeData = await provisionService.load();
+  if (!edgeData?.provisioned) return;
+
+  const topic = topics.getStatsTopic(edgeData.edge_id);
+  const stats = collectSystemStats();
+  
+  await publish(topic, stats);
+}
+
 
 /**
  * Publish the result of a command execution.
@@ -122,6 +174,25 @@ export async function publishLog(message: string, level: 'info' | 'warn' | 'erro
 }
 
 /**
+ * Publish the active local user context.
+ */
+export async function publishContext(user: { id: string, email: string, first_name?: string | null, last_name?: string | null }): Promise<void> {
+  const edgeData = await provisionService.load();
+  if (!edgeData?.provisioned) return;
+
+  const topic = topics.getContextTopic(edgeData.edge_id);
+  await publish(topic, {
+    edge_id: edgeData.edge_id,
+    local_user: {
+      id: user.id,
+      name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email.split('@')[0],
+      email: user.email
+    },
+    timestamp: new Date().toISOString()
+  });
+}
+
+/**
  * Start the heartbeat interval (every 30s).
  */
 export function startHeartbeat(): void {
@@ -152,6 +223,26 @@ export function startQueueRetry(): void {
 }
 
 /**
+ * Start the system stats publication interval (every 60s).
+ */
+export function startStatsInterval(): void {
+  if (statsTimer) return;
+  
+  // Initial collection
+  publishStats().catch(() => {});
+
+  statsTimer = setInterval(async () => {
+    try {
+      await publishStats();
+    } catch (err) {
+      console.error('[Mqtt] Failed to publish system stats:', err);
+    }
+  }, 60_000);
+  console.log('[Mqtt] System stats publishing started (60s interval)');
+}
+
+
+/**
  * Stop all background timers.
  */
 export function stopTimers(): void {
@@ -163,4 +254,9 @@ export function stopTimers(): void {
     clearInterval(queueRetryTimer);
     queueRetryTimer = null;
   }
+  if (statsTimer) {
+    clearInterval(statsTimer);
+    statsTimer = null;
+  }
 }
+

@@ -31,7 +31,7 @@ export const cloudService = {
 
   getOnboarding: (): Promise<ReturningQueries<{ complete: boolean; data: any }>> => axios_api_instance.get(`/cli/onboarding`),
 
-  saveOnboarding: (data: { name: string; lat: string; lng: string; tags: string[] }): Promise<ReturningQueries<{ success: boolean }>> => axios_api_instance.post(`/cli/onboarding`, data),
+  saveOnboarding: (data: { name: string; description?: string; lat: string; lng: string; tags: string[] }): Promise<ReturningQueries<{ success: boolean }>> => axios_api_instance.post(`/cli/onboarding`, data),
 
   connect: (payload: ConnectPayload): Promise<ConnectResult> =>
     axios_api_instance.post(`/cli/connect`, payload),
@@ -41,4 +41,10 @@ export const cloudService = {
 
   reconnect: (): Promise<{ success: boolean; mqtt: { connected: boolean } }> =>
     axios_api_instance.post(`/cli/reconnect`),
+
+  remove: (): Promise<{ success: boolean }> =>
+    axios_api_instance.post(`/cli/remove`),
+
+  pair: (token: string, name?: string): Promise<ConnectResult> =>
+    axios_api_instance.post(`/cli/pair`, { token, name }),
 };

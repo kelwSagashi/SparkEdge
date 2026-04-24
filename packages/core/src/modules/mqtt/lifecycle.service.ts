@@ -24,6 +24,7 @@ export const lifecycleService = {
           await mqttService.publishStatus();
           mqttService.startHeartbeat();
           mqttService.startQueueRetry();
+          mqttService.startStatsInterval();
           console.log('[Lifecycle] Auto-connect successful.');
         }
       } catch (err: any) {
@@ -45,6 +46,7 @@ export const lifecycleService = {
       await mqttService.publishStatus();
       mqttService.startHeartbeat();
       mqttService.startQueueRetry();
+      mqttService.startStatsInterval();
       return true;
     }
     return false;

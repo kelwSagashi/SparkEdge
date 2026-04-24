@@ -10,7 +10,7 @@ export type CommandOptions = {
 export type ICommand = {
 	flags?: object;
 	init?: () => Promise<void>;
-	run: () => Promise<void>;
+	run: (args?: any) => Promise<void>;
 	catch?: (e: Error) => Promise<void>;
 	finally?: (e?: Error) => Promise<void>;
 };

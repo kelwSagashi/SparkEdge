@@ -62,6 +62,16 @@ export class AuthService {
     result.data.token = token;
     result.data.user = user;
 
+    // Broadcast context to cloud
+    try {
+      const { mqttService } = await import('spark-edge-core');
+      mqttService.publishContext(user).catch(err => {
+        console.warn('[AuthService] Failed to publish user context to cloud:', err);
+      });
+    } catch (e) {
+      // Core might not be available in some environments
+    }
+
     if (result.data.user) {
       dbManager.projects.upsert({
         name: 'PERSONAL',

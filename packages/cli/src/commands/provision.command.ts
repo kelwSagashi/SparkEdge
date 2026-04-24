@@ -9,6 +9,7 @@ import {
   getEdgeId
 } from 'spark-edge-core';
 import type { ICommand } from './types';
+import { sparkEdgeCloudApiUrl } from '@/integrations/constants';
 
 const { reconnectWithNewCredentials } = mqttClient;
 
@@ -53,20 +54,16 @@ export class ProvisionCommand implements ICommand {
       const edgeName = await ask('  Edge Name (optional, e.g. "Warehouse-01"): ');
 
       console.log('\n  Authenticating...');
-      
-      // Use local mock cloud URL by default for this phase, or environment variable
-      const sparkApiUrl = process.env.SPARK_API_URL || 'http://localhost:3009/api/spark-cloud';
 
       // Step 1: Login
-      const { token } = await cloudLogin(email.trim(), password.trim(), sparkApiUrl);
+      const { token } = await cloudLogin(email.trim(), password.trim(), sparkEdgeCloudApiUrl);
       console.log('  ✓ Authenticated successfully.');
 
       // Step 2: Register
       console.log('  Registering device...');
       const registration = await registerEdge({
         userToken: token,
-        edgeName: edgeName.trim() || undefined as any, // Handle optional name
-        sparkApiUrl
+        edgeName: edgeName.trim() || undefined as any,
       });
 
       // Step 3: Persist

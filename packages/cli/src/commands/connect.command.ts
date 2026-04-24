@@ -1,5 +1,6 @@
 import * as readline from 'readline';
 import type { ICommand } from './types';
+import { sparkEdgeCloudApiUrl } from '@/integrations/constants';
 
 /**
  * `spark-edge connect`
@@ -58,7 +59,6 @@ export class ConnectCommand implements ICommand {
       });
 
     try {
-      const sparkApiUrl = process.env.SPARK_API_URL || 'http://localhost:3009/api/spark-cloud';
       const email = await ask('  Spark email: ');
       if (!email.trim()) { console.error('\n✗ Email is required.\n'); return; }
 
@@ -72,15 +72,14 @@ export class ConnectCommand implements ICommand {
 
       // Step 1: Authenticate (ephemeral — JWT never stored to disk)
       process.stdout.write('\n  Authenticating with Spark...');
-      const { token } = await cloudLogin(email.trim(), password, sparkApiUrl);
+      const { token } = await cloudLogin(email.trim(), password, sparkEdgeCloudApiUrl);
       console.log(' ✓');
 
       // Step 2: Register edge with cloud
       process.stdout.write('  Registering Edge instance...');
       const registration = await registerEdge({
         userToken: token,
-        edgeName: edgeName.trim(),
-        sparkApiUrl,
+        edgeName: edgeName.trim()
       });
       console.log(' ✓');
 

@@ -54,7 +54,9 @@ export class Server {
         private readonly logger: Logger
     ) {
         this.app = express();
-        this.app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+        this.app.use(
+          cors({ origin: [/^http:\/\/localhost:5\d{3}$/], credentials: true }),
+        );
         this.app.use(cookieParser() as any);
         this.app.use(express.json());
     }

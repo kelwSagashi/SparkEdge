@@ -1,10 +1,10 @@
 {
-  "edge_id": "edge-0e7e3db0",
-  "edge_name": "casa",
+  "edge_id": "52df7e84-f593-44b2-ab6b-c19293fa51a9",
+  "edge_name": "teste",
   "mqtt": {
     "url": "mqtt://localhost:1883",
-    "username": "spark-user-edge-0e7e3db0",
-    "password": "spark-pass-2f106975"
+    "username": "edge_52df7e84-f593-44b2-ab6b-c19293fa51a9",
+    "password": "4ad965eee0fdb348207bb794ca8a42ca"
   },
   "provisioned": true
 }

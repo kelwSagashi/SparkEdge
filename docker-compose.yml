@@ -1,0 +1,30 @@
+services:
+  spark-edge:
+    build:
+      context: .
+      target: runner
+    container_name: spark-edge
+    ports:
+      - "5174:3009"
+    volumes:
+      - ./packages/db/monitor.db:/app/packages/db/monitor.db
+    env_file:
+      - .env
+    environment:
+      - MQTT_URL=mqtt://mosquitto:1883
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: spark-edge-mosquitto
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    restart: unless-stopped
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:

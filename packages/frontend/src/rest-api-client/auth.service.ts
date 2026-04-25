@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { UserReturningValues } from 'spark-edge-db/src/types';
 
-const baseURL = 'http://localhost:3009/api';
+const baseURL = '/api';
 const axiosInstance = axios.create({ baseURL, withCredentials: true });
 
 type APIResponse<T> = { data: T; error: string | null };

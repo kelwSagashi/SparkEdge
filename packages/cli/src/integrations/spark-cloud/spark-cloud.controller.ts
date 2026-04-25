@@ -41,7 +41,7 @@ export class SparkCloudController {
       edge_id: newEdgeId,
       edge_name: name || `Edge ${newEdgeId}`,
       mqtt: {
-        url: 'mqtt://localhost:1883',
+        url: process.env.MQTT_URL || 'mqtt://localhost:1883',
         username: `spark-user-${newEdgeId}`,
         password: `spark-pass-${uuidv4().substring(0, 8)}`,
       }

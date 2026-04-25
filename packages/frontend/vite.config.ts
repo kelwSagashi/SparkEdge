@@ -29,9 +29,8 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:3009',
+        target: process.env.VITE_API_URL || 'http://localhost:3009',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     }
   }

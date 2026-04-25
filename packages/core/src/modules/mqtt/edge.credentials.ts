@@ -38,7 +38,7 @@ export async function getMqttCredentials(): Promise<MqttCredentials | null> {
   }
 
   return {
-    brokerUrl: data.broker_url,
+    brokerUrl: process.env.MQTT_URL || data.broker_url,
     username: data.username || undefined,
     password: data.password || undefined,
   };

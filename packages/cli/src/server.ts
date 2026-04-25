@@ -147,10 +147,28 @@ export class Server {
         await AdapterRegistry.syncWithDatabase();
 
         this.setupMiddlewares();
+        
         const nodesIconsPath = path.resolve(__dirname, "../../nodes/dist/nodes")
         this.app.use("/icons", express.static(nodesIconsPath));
 
+        // Serve Frontend Build
+        const frontendPath = path.resolve(__dirname, "../../frontend/dist");
+        this.app.use(express.static(frontendPath));
+
         this.setupRoutes();
+
+        // Support for SPA routing in production: redirect all non-API/non-static requests to index.html
+        this.app.get("*", (req, res, next) => {
+            if (req.path.startsWith("/api") || req.path.startsWith("/icons") || req.path.includes(".")) {
+                return next();
+            }
+            res.sendFile(path.join(frontendPath, "index.html"), (err) => {
+                if (err) {
+                    // index.html not found, continue to next middleware (which will be 404)
+                    next();
+                }
+            });
+        });
 
         // Start the instance execution scheduler
         Container.get(InstanceSchedulerService).start();

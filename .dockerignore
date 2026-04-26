@@ -1,0 +1,6 @@
+**/.turbo
+.git
+.env*
+packages/*/src
+packages/*/*.ts
+!packages/**/*.d.ts

@@ -83,13 +83,13 @@ export class ControllerRegistry {
 				...([]), // skip auth
 				...([]), // liscence
 				...([]), // access scope
-				...controllerMiddlewares,
-				...route.middlewares,
+				...(controllerMiddlewares as any),
+				...(route.middlewares as any),
 				route.usesTemplates
-					? async (req, res) => {
+					? async (req: Request, res: Response) => {
 							await handler(req, res);
 						}
-					: send(handler),
+					: (send(handler) as any),
 			);
 		}
 

@@ -15,7 +15,7 @@ function ServerHeaderForm({ form }: {form: UseFormReturn<FullServerValues> }) {
     fields
   } = useFieldArray({
     control: form.control,
-    name: 'server.header',
+    name: 'server.headers',
   });
 
   return (
@@ -38,39 +38,39 @@ function ServerHeaderForm({ form }: {form: UseFormReturn<FullServerValues> }) {
                     <div className='flex flex-row gap-2 w-full justify-between'>
                         <div className='w-full'>
                             <div className='h-9'>
-                                <Tooltip open={(!!form.formState.errors.server?.header?.[index]?.key)}>
+                                <Tooltip open={(!!form.formState.errors.server?.headers?.[index]?.key)}>
                                     <TooltipTrigger asChild>
                                         <Input
                                             id={`server-header-${index}-key`}
                                             placeholder="Nome do campo"
-                                            {...form.register(`server.header.${index}.key`)}
+                                            {...form.register(`server.headers.${index}.key`)}
                                             className={cn(
-                                                form.formState.errors.server?.header?.[index]?.key ? "border-destructive" : "",
+                                                form.formState.errors.server?.headers?.[index]?.key ? "border-destructive" : "",
                                                 "text-primary border-none focus-visible:ring-0 px-0"
                                             )}
                                         />
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        {form.formState.errors.server?.header?.[index]?.key && <p className="text-destructive text-sm mt-1">{form.formState.errors.server?.header[index]?.key?.message}</p>}
+                                        {form.formState.errors.server?.headers?.[index]?.key && <p className="text-destructive text-sm mt-1">{form.formState.errors.server?.headers[index]?.key?.message}</p>}
                                     </TooltipContent>
                                 </Tooltip>
                             </div>
                             <Input
                                 id={`server-header-${index}-value`}
                                 placeholder="Valor do campo"
-                                {...form.register(`server.header.${index}.value`)}
+                                {...form.register(`server.headers.${index}.value`)}
                                 className={cn(
-                                    form.formState.errors.server?.header?.[index]?.value ? "border-destructive" : "",
+                                    form.formState.errors.server?.headers?.[index]?.value ? "border-destructive" : "",
                                     "text-primary"
                                 )}
                             />
-                            {form.formState.errors.server?.header?.[index]?.value && <p className="text-destructive text-sm mt-1">{form.formState.errors.server?.header[index]?.value?.message}</p>}
+                            {form.formState.errors.server?.headers?.[index]?.value && <p className="text-destructive text-sm mt-1">{form.formState.errors.server?.headers[index]?.value?.message}</p>}
                         </div>
                         <div>
                             <div className='h-9 py-1'>
                                 <label className="text-secondary text-sm" htmlFor={`server-header-${index}-type`}>Tipo</label>
                             </div>
-                            <Select onValueChange={(val: "text" | "number") => form.setValue(`server.header.${index}.type`, val)} defaultValue={form.watch(`server.header.${index}.type`)}>
+                            <Select onValueChange={(val: "text" | "number") => form.setValue(`server.headers.${index}.type`, val)} defaultValue={form.watch(`server.headers.${index}.type`)}>
                                 <SelectTrigger className="w-30 text-primary">
                                     <SelectValue placeholder="Selecionar tipo" />
                                 </SelectTrigger>
@@ -79,7 +79,7 @@ function ServerHeaderForm({ form }: {form: UseFormReturn<FullServerValues> }) {
                                     <SelectItem value="number">Numérico</SelectItem>
                                 </SelectContent>
                             </Select>
-                            {form.formState.errors.server?.header?.[index]?.type && <p className="text-destructive text-sm mt-1">{form.formState.errors.server?.header?.[index]?.type?.message}</p>}
+                            {form.formState.errors.server?.headers?.[index]?.type && <p className="text-destructive text-sm mt-1">{form.formState.errors.server?.headers?.[index]?.type?.message}</p>}
                         </div>
                     </div>
                 </div>

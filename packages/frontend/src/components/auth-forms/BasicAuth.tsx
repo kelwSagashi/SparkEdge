@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import type { FullServerValues } from '../add-server/schemas';
 
 interface BasicAuthFormProps {
-    form: UseFormReturn<FullServerValues>
+    form: UseFormReturn<any>
 }
 
 export const BasicAuthForm: React.FC<BasicAuthFormProps> = ({ form }) => {
@@ -23,6 +23,7 @@ export const BasicAuthForm: React.FC<BasicAuthFormProps> = ({ form }) => {
                         <Input
                             placeholder="Nome de usuário"
                             {...field}
+                            value={field.value || ''}
                             className={cn(fieldState.error && "border-destructive", "text-primary rounded")}
                         />
                         {fieldState.error && <p className="text-destructive text-sm mt-1">{fieldState.error.message}</p>}
@@ -38,6 +39,7 @@ export const BasicAuthForm: React.FC<BasicAuthFormProps> = ({ form }) => {
                             type="password"
                             placeholder="Sua senha"
                             {...field}
+                            value={field.value || ''}
                             className={cn(fieldState.error && "border-destructive", "text-primary rounded")}
                         />
                         {fieldState.error && <p className="text-destructive text-sm mt-1">{fieldState.error.message}</p>}

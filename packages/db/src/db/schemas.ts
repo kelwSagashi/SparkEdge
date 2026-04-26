@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
-import { DeviceConnectionMethods, SchemaConfig } from '../types';
+import { DeviceConnectionMethods, type SchemaConfig } from '../types';
 import { nanoid } from 'nanoid';
 
 // ─── Server Infrastructure ────────────────────────────────────────────────────

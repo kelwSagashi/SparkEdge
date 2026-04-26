@@ -10,7 +10,7 @@ import type { FullServerValues } from '../add-server/schemas';
 
 
 interface BearerTokenAuthFormProps {
-    form: UseFormReturn<FullServerValues>
+    form: UseFormReturn<any>
 }
 
 export const BearerTokenAuthForm: React.FC<BearerTokenAuthFormProps> = ({ form }) => {
@@ -32,6 +32,7 @@ export const BearerTokenAuthForm: React.FC<BearerTokenAuthFormProps> = ({ form }
                                     type={tokenInputType}
                                     placeholder="Token"
                                     {...field}
+                                    value={field.value || ''}
                                     className={cn(fieldState.error && "border-destructive", "text-primary")}
                                 />
                                 <InputGroupAddon align="inline-end">

@@ -6,6 +6,7 @@ import { Container, Service } from "@spark-edge/di";
 import { ControllerRegistry } from "./controller.registry";
 import { send } from "./response-helper";
 import path from "node:path";
+import fs from "node:fs";
 import cookieParser from "cookie-parser";
 
 import '@/devices/device.controller';
@@ -152,13 +153,23 @@ export class Server {
         this.app.use("/icons", express.static(nodesIconsPath));
 
         // Serve Frontend Build
-        const frontendPath = path.resolve(__dirname, "../../frontend/dist");
-        this.app.use(express.static(frontendPath));
+        // In Docker, it's copied to /app/public. Locally, it's in ../../frontend/dist relative to dist/server.js
+        let frontendPath = path.resolve(__dirname, "../../frontend/dist");
+        if (!fs.existsSync(frontendPath)) {
+            frontendPath = path.resolve(process.cwd(), "./public");
+        }
+        
+        if (fs.existsSync(frontendPath)) {
+            this.logger.log(`[Server] Serving frontend from: ${frontendPath}`);
+            this.app.use(express.static(frontendPath));
+        } else {
+            this.logger.log(`[Server] Warning: Frontend dist folder not found at ${frontendPath}`);
+        }
 
         this.setupRoutes();
 
         // Support for SPA routing in production: redirect all non-API/non-static requests to index.html
-        this.app.get("*", (req, res, next) => {
+        this.app.get(/.*/, (req, res, next) => {
             if (req.path.startsWith("/api") || req.path.startsWith("/icons") || req.path.includes(".")) {
                 return next();
             }

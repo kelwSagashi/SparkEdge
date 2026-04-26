@@ -1,46 +1,26 @@
-# ---- Base ----
-FROM node:22-slim AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-
-# Install build dependencies for native modules (better-sqlite3)
-RUN apt-get update && apt-get install -y python3 make g++ curl --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
-
-# ---- Prune: extract minimal monorepo subset for the CLI and UI ----
-FROM base AS pruner
-WORKDIR /app
-COPY . .
-# We use the package names defined in package.json: spark-edge (cli) and spark-edge-ui (frontend)
-RUN pnpm dlx turbo prune spark-edge spark-edge-ui --docker
-
-# ---- Installer: Install dependencies and build ----
-FROM base AS installer
-WORKDIR /app
-
-# 1. Copy manifests for cache optimization
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-
-# 2. Copy source and build everything
-COPY --from=pruner /app/out/full/ .
-RUN pnpm dlx turbo run build --filter=spark-edge --filter=spark-edge-ui
-
-# ---- Runner: Production image ----
-FROM node:22-slim AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy built artifacts and production node_modules
-# We copy the whole /app from installer then remove source code to keep it clean, 
-# or copy specific packages. Using the injectWorkspacePackages flow, copying all is safer.
-COPY --from=installer /app .
+# Copiar arquivos de configuração do workspace
+COPY package.json ./
+COPY pnpm-workspace.yaml ./
 
-# Expose the unified port
+# Copiar os pacotes mantendo a estrutura para que os symlinks do node_modules funcionem
+# O .dockerignore já filtra src e arquivos .ts, mantendo apenas bin, dist e package.json
+COPY packages/cli ./packages/cli
+COPY packages/core ./packages/core
+COPY packages/db ./packages/db
+COPY packages/@spark-edge/di ./packages/@spark-edge/di
+
+# Copiar o build do frontend para a pasta public (servida pelo server.ts)
+COPY packages/frontend/dist ./public
+
+# Copiar node_modules (assume-se que foram instalados/compilados corretamente para Linux)
+COPY node_modules ./node_modules
+
+COPY entrypoint.sh ./entrypoint.sh
+
 EXPOSE 3009
-
-# Start the CLI which now serves the UI
-CMD ["pnpm", "--filter", "spark-edge", "start"]
+ENTRYPOINT ["./entrypoint.sh"]

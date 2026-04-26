@@ -8,7 +8,7 @@ import type { FullServerValues } from '../add-server/schemas';
 
 
 interface DigestAuthFormProps {
-    form: UseFormReturn<FullServerValues>
+    form: UseFormReturn<any>
 }
 
 export const DigestAuthForm: React.FC<DigestAuthFormProps> = ({ form }) => {
@@ -25,6 +25,7 @@ export const DigestAuthForm: React.FC<DigestAuthFormProps> = ({ form }) => {
                             id="digest_auth_username"
                             placeholder="Nome de usuário"
                             {...field}
+                            value={field.value || ''}
                             className={cn(fieldState.error && "border-destructive", "text-primary rounded")}
                         />
                         {fieldState.error && <p className="text-destructive text-sm mt-1">{fieldState.error.message}</p>}
@@ -41,6 +42,7 @@ export const DigestAuthForm: React.FC<DigestAuthFormProps> = ({ form }) => {
                             type="password"
                             placeholder="Sua senha"
                             {...field}
+                            value={field.value || ''}
                             className={cn(fieldState.error && "border-destructive", "text-primary rounded")}
                         />
                         {fieldState.error && <p className="text-destructive text-sm mt-1">{fieldState.error.message}</p>}
@@ -57,6 +59,7 @@ export const DigestAuthForm: React.FC<DigestAuthFormProps> = ({ form }) => {
                             placeholder="Realm de autenticação"
                             className={cn("text-primary rounded")}
                             {...field}
+                            value={field.value || ''}
                         />
                     </div>
                 )} />

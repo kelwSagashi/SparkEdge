@@ -11,7 +11,7 @@ import { Eye, EyeClosed } from 'lucide-react';
 import type { FullServerValues } from '../add-server/schemas';
 
 interface ApiKeyAuthFormProps {
-    form: UseFormReturn<FullServerValues>
+    form: UseFormReturn<any>
 }
 
 export const ApiKeyAuthForm: React.FC<ApiKeyAuthFormProps> = ({ form }) => {
@@ -33,6 +33,7 @@ export const ApiKeyAuthForm: React.FC<ApiKeyAuthFormProps> = ({ form }) => {
                                 type={apiKeyInputType}
                                 placeholder="Sua API Key"
                                 {...field}
+                                value={field.value || ''}
                                 className={cn(fieldState.error && "border-destructive", "w-full text-primary")}
                             />
 
@@ -90,6 +91,7 @@ export const ApiKeyAuthForm: React.FC<ApiKeyAuthFormProps> = ({ form }) => {
                                 <Input
                                     placeholder="Ex: X-API-Key, Authorization"
                                     {...field}
+                                    value={field.value || ''}
                                     className={cn(fieldState.error && "border-destructive", "w-full text-primary")}
                                 />
                                 {fieldState.error && <p className="text-destructive text-sm mt-1">{fieldState.error.message}</p>}
@@ -110,6 +112,7 @@ export const ApiKeyAuthForm: React.FC<ApiKeyAuthFormProps> = ({ form }) => {
                                 <Input
                                     placeholder="Ex: api_key, key"
                                     {...field}
+                                    value={field.value || ''}
                                     className={cn(fieldState.error && "border-destructive", "w-full text-primary")}
                                 />
                                 {fieldState.error && <p className="text-destructive text-sm mt-1">{fieldState.error.message}</p>}

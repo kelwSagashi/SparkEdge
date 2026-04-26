@@ -6,9 +6,10 @@ import * as schema from './schemas';
 
 export const Tables = schema;
 
-const sqlite = new Database(
-    path.resolve(__dirname, "../../monitor.db")
-);
+const rawDbPath = process.env.DB_FILE_NAME || path.resolve(__dirname, "../../monitor.db");
+const dbPath = rawDbPath.startsWith('file:') ? rawDbPath.replace('file:', '') : rawDbPath;
+
+const sqlite = new Database(dbPath);
 sqlite.pragma('foreign_keys = ON');
 export const db = drizzle(sqlite, { schema });
 

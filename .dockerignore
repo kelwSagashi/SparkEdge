@@ -1,6 +1,2 @@
-**/.turbo
-.git
-.env*
-packages/*/src
-packages/*/*.ts
-!packages/**/*.d.ts
+node_modules
+**/node_modules

@@ -30,3 +30,5 @@ dist-ssr
 **/*/monitor.db
 
 .env
+*.env
+.env.local

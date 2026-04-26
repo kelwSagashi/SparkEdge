@@ -2,7 +2,7 @@ import type {
   ServerUpsertValues, 
   ServerResourceUpsertValues, 
   ResourceOperationUpsertValues 
-} from 'spark-edge-db/src/types';
+} from 'spark-edge-db';
 import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace ServerRequest {

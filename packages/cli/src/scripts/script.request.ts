@@ -1,4 +1,4 @@
-import type { DownloadedScriptUpsertValues } from 'spark-edge-db/src/types';
+import type { DownloadedScriptUpsertValues } from 'spark-edge-db';
 import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace ScriptRequest {

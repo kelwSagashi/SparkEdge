@@ -1,4 +1,4 @@
-import type { CredentialUpsertValues } from 'spark-edge-db/src/types';
+import type { CredentialUpsertValues } from 'spark-edge-db';
 import { AuthenticatedRequest } from '@/auth/authenticated-request';
 
 export namespace CredentialsRequest {

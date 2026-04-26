@@ -3,7 +3,7 @@ import { dbManager } from 'spark-edge-db';
 import { PythonVenvService } from './python-venv.service';
 import { FallbackQueueService } from './fallback-queue.service';
 import { Logger } from '@/simple-logger';
-import type { InstanceReturningValues, InstanceDestinationReturningValues } from 'spark-edge-db/src/types';
+import type { InstanceReturningValues, InstanceDestinationReturningValues } from 'spark-edge-db';
 import { nanoid } from 'nanoid';
 import path from 'node:path';
 import { JSONPath } from 'jsonpath-plus';

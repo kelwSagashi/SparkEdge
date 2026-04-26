@@ -7,7 +7,7 @@ import type {
   DeviceReturningValues,
   DownloadedScriptReturningValues,
   InstanceReturningValues,
-} from "spark-edge-db/src/types";
+} from "spark-edge-db";
 
 export type TriggerType = "interval" | "webhook" | "interval_and_webhook";
 export type FallbackStrategy = "background_job" | "active_queue";

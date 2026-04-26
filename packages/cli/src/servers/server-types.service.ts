@@ -1,6 +1,6 @@
 import { Service } from '@spark-edge/di';
 import { dbManager } from 'spark-edge-db';
-import type { ServerTypeUpsertValues } from 'spark-edge-db/src/types';
+import type { ServerTypeUpsertValues } from 'spark-edge-db';
 
 @Service()
 export class ServerTypesService {

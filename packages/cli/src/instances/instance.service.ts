@@ -7,7 +7,7 @@ import type {
   InstanceReturningValues,
   InstanceDestinationUpsertValues,
   DataMappingUpsertValues,
-} from "spark-edge-db/src/types";
+} from "spark-edge-db";
 
 import { InstanceRequest } from "./instance.request";
 import type { 

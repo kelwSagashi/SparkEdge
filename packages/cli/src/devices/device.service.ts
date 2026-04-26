@@ -1,7 +1,7 @@
 import { Service } from '@spark-edge/di';
 import { dbManager } from 'spark-edge-db';
-import type { ReturningQueries } from 'spark-edge-db/src/types';
-import type { DeviceUpsertValues, DeviceReturningValues } from 'spark-edge-db/src/types';
+import type { ReturningQueries } from 'spark-edge-db';
+import type { DeviceUpsertValues, DeviceReturningValues } from 'spark-edge-db';
 
 @Service()
 export class DeviceService {

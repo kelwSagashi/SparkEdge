@@ -10,7 +10,7 @@ import { DataMappingService } from "./data-mapping.service";
 import type {
   ReturningQueries,
   InstanceReturningValues,
-} from "spark-edge-db/src/types";
+} from "spark-edge-db";
 
 @Service()
 export class InstanceServiceEnhanced {

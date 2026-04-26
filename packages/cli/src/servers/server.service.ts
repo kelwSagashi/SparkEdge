@@ -4,7 +4,7 @@ import type {
   ServerUpsertValues, 
   ServerResourceUpsertValues, 
   ResourceOperationUpsertValues 
-} from 'spark-edge-db/src/types';
+} from 'spark-edge-db';
 import { CredentialsService } from '../credentials/credentials.service';
 
 @Service()

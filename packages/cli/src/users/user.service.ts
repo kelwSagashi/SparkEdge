@@ -1,6 +1,6 @@
 import { Service } from '@spark-edge/di';
 import { dbManager } from 'spark-edge-db';
-import type { ReturningQueries, UserUpsertValues, UserReturningValues } from 'spark-edge-db/src/types';
+import type { ReturningQueries, UserUpsertValues, UserReturningValues } from 'spark-edge-db';
 
 @Service()
 export class UserService {

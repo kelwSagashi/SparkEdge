@@ -7,7 +7,7 @@ export default {
   out: './drizzle',
   dialect: 'sqlite',
   dbCredentials: {
-    url: process.env.DB_FILE_NAME!,
+    url: 'file:monitor.db',
   },
 } satisfies Config;
 

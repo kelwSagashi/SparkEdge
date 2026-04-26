@@ -10,7 +10,7 @@ services:
       SPARK_EDGE_API_URL: ${SPARK_EDGE_API_URL}
       JWT_SECRET: ${JWT_SECRET:-dev-secret}
       MQTT_URL: mqtt://mosquitto:1883
-      DB_FILE_NAME: file:/app/packages/db/monitor.db
+      DB_FILE_NAME: /app/packages/db/monitor.db
     volumes:
       - ./packages/db/monitor.db:/app/packages/db/monitor.db
     depends_on:

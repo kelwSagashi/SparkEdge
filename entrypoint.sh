@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+echo "Preparando banco de dados em $DB_FILE_NAME..."
+
 # Rodar comandos do Drizzle para preparar o banco
 echo "Preparando banco de dados (Drizzle)..."
 pnpm --filter spark-edge-db run db:generate

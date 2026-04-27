@@ -33,16 +33,16 @@ export async function connect(): Promise<MqttClient | null> {
   const statusTopic = getStatusTopic(edgeId);
 
   const options: IClientOptions = {
-    clientId: `edge-${edgeId}-${Math.random().toString(16).slice(2, 8)}`,
+    clientId: `${edgeId}`,  // Use edgeId directly as clientId for EMQX username matching
     username,
     password,
-    reconnectPeriod: 5000, // Auto-reconnect every 5s
+    reconnectPeriod: 5000,
     keepalive: 30,
     clean: true,
-    // Last Will: broadcast offline if connection drops unexpectedly
+    // Last Will: EMQX will broadcast this if connection drops unexpectedly
     will: {
       topic: statusTopic,
-      payload: Buffer.from(JSON.stringify({ online: false, edge_id: edgeId })),
+      payload: Buffer.from('offline'),  // Plain string — matches SparkAPI handler
       qos: 1,
       retain: true,
     },
@@ -56,8 +56,8 @@ export async function connect(): Promise<MqttClient | null> {
       connected = true;
       console.log('[Mqtt] Connected');
       
-      // Explicitly publish online status
-      client?.publish(statusTopic, JSON.stringify({ online: true, edge_id: edgeId }), { qos: 1, retain: true });
+      // Publish online status as plain string (matches EMQX/SparkAPI standard)
+      client?.publish(statusTopic, 'online', { qos: 1, retain: true });
       
       resolve(client!);
     });

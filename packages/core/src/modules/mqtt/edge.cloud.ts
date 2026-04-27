@@ -58,7 +58,7 @@ export async function cloudLogin(
   return { token: data.token };
 }
 
-const DEFAULT_SPARK_CLOUD_URL = 'https://sparkapi.okelwen.site';
+const DEFAULT_SPARK_CLOUD_URL = process.env.SPARK_CLOUD_URL || 'https://sparkcloud.okelwen.site';
 
 /**
  * Register a new Edge instance with the Spark cloud.

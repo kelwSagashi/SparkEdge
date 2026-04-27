@@ -1,70 +1,30 @@
 import { provisionService } from './provision.service';
-import { getSystemIdentity } from './edge.identity';
 import * as topics from './mqtt.topics';
-import { publish, publishRetained } from './mqtt.publisher';
+import { publish } from './mqtt.publisher';
 import { retryAll } from './mqtt.queue';
 import { dbManager } from 'spark-edge-db';
 import { collectSystemStats } from '../system/stats.collector';
 
-
-export interface StatusPayload {
-  edge_id: string;
-  online: boolean;
-  timestamp: string;
-  system: {
-    version: string;
-    uptime: number;
-  };
-  location: {
-    lat: string | null;
-    lng: string | null;
-    source: string;
-  };
-}
 
 let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 let queueRetryTimer: ReturnType<typeof setInterval> | null = null;
 let statsTimer: ReturnType<typeof setInterval> | null = null;
 
 
-
-async function buildStatusPayload(
-  online: boolean
-): Promise<StatusPayload> {
-  const identity = await getSystemIdentity();
-  if (!identity.edge_id) {
-    throw new Error('Edge ID not available');
-  }
-
-  const { data: config } = dbManager.edge.getEdgeConfig();
-
-  return {
-    edge_id: identity.edge_id,
-    online,
-    timestamp: new Date().toISOString(),
-    system: {
-      version: process.env.npm_package_version ?? '1.0.0',
-      uptime: process.uptime(),
-    },
-    location: {
-      lat: config?.lat || null,
-      lng: config?.lng || null,
-      source: config?.location_source || 'manual',
-    },
-  };
-}
-
 /**
  * Publish the edge online status with retention.
+ */
+/**
+ * Publish the edge online status with retention.
+ * Uses plain string 'online' as payload — matches SparkAPI handler format.
  */
 export async function publishStatus(): Promise<void> {
   const edgeData = await provisionService.load();
   if (!edgeData?.provisioned) return;
 
   const topic = topics.getStatusTopic(edgeData.edge_id);
-  const payload = await buildStatusPayload(true);
-  
-  await publishRetained(topic, payload);
+  const mqttClient = (await import('./mqtt.client')).getClient();
+  mqttClient.publish(topic, 'online', { qos: 1, retain: true });
   
   // Also publish full metadata on status update
   await publishMetadata().catch(err => {
@@ -108,8 +68,12 @@ export async function publishOfflineStatus(): Promise<void> {
   if (!edgeData?.provisioned) return;
 
   const topic = topics.getStatusTopic(edgeData.edge_id);
-  const payload = await buildStatusPayload(false);
-  await publishRetained(topic, payload);
+  try {
+    const mqttClient = (await import('./mqtt.client')).getClient();
+    mqttClient.publish(topic, 'offline', { qos: 1, retain: true });
+  } catch {
+    // Client may already be disconnecting
+  }
 }
 
 /**

@@ -1,0 +1,10 @@
+{
+  "edge_id": "f6dc9120-a06a-40b7-a64b-cf8c5855791b",
+  "edge_name": "teste",
+  "mqtt": {
+    "url": "mqtt://shortline.proxy.rlwy.net:25500",
+    "username": "edge_f6dc9120-a06a-40b7-a64b-cf8c5855791b",
+    "password": "a82d5d1be8a4aba5609873546f78de6c"
+  },
+  "provisioned": true
+}

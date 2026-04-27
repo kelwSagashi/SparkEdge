@@ -9,29 +9,74 @@ services:
       SPARK_CLOUD_URL: ${SPARK_CLOUD_URL}
       SPARK_EDGE_API_URL: ${SPARK_EDGE_API_URL}
       JWT_SECRET: ${JWT_SECRET:-dev-secret}
-      MQTT_URL: mqtt://mosquitto:1883
+      MQTT_URL: mqtt://emqx:1883
       DB_FILE_NAME: /app/packages/db/monitor.db
     volumes:
       - ./packages/db/monitor.db:/app/packages/db/monitor.db
     depends_on:
-      mosquitto:
+      emqx:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - spark-edge-network
 
-  mosquitto:
-    image: eclipse-mosquitto:2.0
-    container_name: spark-edge-mosquitto
+  emqx:
+    image: emqx/emqx:5.8.3
+    container_name: spark-edge-emqx
+    ports:
+      - "1883:1883"    # MQTT
+      - "8083:8083"    # MQTT over WebSocket
+      - "8084:8084"    # MQTT over WSS
+      - "8883:8883"    # MQTT over SSL
+      - "18083:18083"  # Dashboard (admin UI)
+    environment:
+      # ── Core ──────────────────────────────────────────
+      EMQX_NAME: spark-emqx
+      EMQX_HOST: "127.0.0.1"
+      EMQX_NODE__COOKIE: sparkcloud_secret_cookie
+
+      # ── Dashboard default credentials ─────────────────
+      EMQX_DASHBOARD__DEFAULT_USERNAME: ${EMQX_DASHBOARD_USER:-admin}
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: ${EMQX_DASHBOARD_PASS:-changeme}
+
+      # ── Authentication: HTTP backend ───────────────────
+      # Delegates every MQTT connect to SparkAPI /mqtt/auth
+      EMQX_AUTHENTICATION__1__MECHANISM: password_based
+      EMQX_AUTHENTICATION__1__BACKEND: http
+      EMQX_AUTHENTICATION__1__METHOD: post
+      EMQX_AUTHENTICATION__1__URL: "http://spark-edge:3009/mqtt/auth"
+      EMQX_AUTHENTICATION__1__HEADERS__CONTENT_TYPE: "application/json"
+      EMQX_AUTHENTICATION__1__BODY__USERNAME: "${username}"
+      EMQX_AUTHENTICATION__1__BODY__PASSWORD: "${password}"
+      EMQX_AUTHENTICATION__1__BODY__CLIENTID: "${clientid}"
+      EMQX_AUTHENTICATION__1__POOL_SIZE: "8"
+      EMQX_AUTHENTICATION__1__REQUEST_TIMEOUT: "5s"
+
+      # ── Authorization: HTTP backend ────────────────────
+      # Delegates every pub/sub to SparkAPI /mqtt/acl
+      EMQX_AUTHORIZATION__SOURCES__1__TYPE: http
+      EMQX_AUTHORIZATION__SOURCES__1__METHOD: post
+      EMQX_AUTHORIZATION__SOURCES__1__URL: "http://spark-edge:3009/mqtt/acl"
+      EMQX_AUTHORIZATION__SOURCES__1__HEADERS__CONTENT_TYPE: "application/json"
+      EMQX_AUTHORIZATION__SOURCES__1__BODY__USERNAME: "${username}"
+      EMQX_AUTHORIZATION__SOURCES__1__BODY__TOPIC: "${topic}"
+      EMQX_AUTHORIZATION__SOURCES__1__BODY__ACTION: "${action}"
+      EMQX_AUTHORIZATION__SOURCES__1__POOL_SIZE: "8"
+      EMQX_AUTHORIZATION__SOURCES__1__REQUEST_TIMEOUT: "5s"
+
+      # Fallback when authorization source fails: deny
+      EMQX_AUTHORIZATION__NO_MATCH: deny
+      EMQX_AUTHORIZATION__DENY_ACTION: disconnect
+
     volumes:
-      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - mosquitto_data:/mosquitto/data
-      - mosquitto_log:/mosquitto/log
+      - emqx_data:/opt/emqx/data
+      - emqx_log:/opt/emqx/log
     healthcheck:
-      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
     restart: unless-stopped
     networks:
       - spark-edge-network
@@ -41,5 +86,5 @@ networks:
     driver: bridge
 
 volumes:
-  mosquitto_data:
-  mosquitto_log:
+  emqx_data:
+  emqx_log:

@@ -14,7 +14,7 @@ export * as systemStats from './modules/system/stats.collector';
 // Named type re-exports
 export type { MqttCommand } from './modules/mqtt/mqtt.handlers';
 export type { MqttConfig, MqttConfigResult } from './modules/mqtt/mqtt.config';
-export type { StatusPayload } from './modules/mqtt/mqtt.service';
+
 export type { QueuedMessage } from './modules/mqtt/mqtt.queue';
 export type { MqttCredentials } from './modules/mqtt/edge.credentials';
 export type { CloudLoginResult, EdgeRegistrationResult } from './modules/mqtt/edge.cloud';

@@ -43,13 +43,36 @@ export class AuthController {
   @Post('/logout')
   async logout(req: Request, res: Response) {
     res.clearCookie(COOKIE_NAME);
+
+    // Clear context in cloud
+    try {
+      const { mqttService } = await import('spark-edge-core');
+      mqttService.publishContext({ id: "", email: "", first_name: "", last_name: "" }).catch(() => {});
+    } catch { /* ignore */ }
+
     return { data: true };
   }
 
   @Get('/me')
   async me(req: Request) {
-    // middleware should attach user to req as any.user
-    return { data: (req as any).user ?? null };
+    const user = (req as any).user;
+    
+    // Broadcast context to cloud if user exists
+    if (user) {
+      try {
+        const { mqttService } = await import('spark-edge-core');
+        mqttService.publishContext({
+          id: user.id ?? "",
+          email: user.email ?? "",
+          first_name: user.first_name ?? "",
+          last_name: user.last_name ?? ""
+        }).catch(() => {});
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    return { data: user ?? null };
   }
 
   @Post('/generate-new-api-key/:userId')

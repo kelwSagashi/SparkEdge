@@ -64,6 +64,20 @@ export class CliController {
       const edgeData = await provisionService.load();
       const mqttConnected = mqttClient.isConnected();
 
+      // If connected and user available, publish context (keeps cloud in sync)
+      const user = (_req as any).user;
+      if (mqttConnected && user) {
+        try {
+          const { mqttService } = await import('spark-edge-core');
+          mqttService.publishContext({
+            id: user.id || "",
+            email: user.email || "",
+            first_name: user.first_name || "",
+            last_name: user.last_name || ""
+          }).catch(() => {});
+        } catch { /* best-effort */ }
+      }
+
       return res.json({
         connected: !!edgeData?.provisioned,
         edge_id: edgeData?.edge_id || null,
@@ -128,6 +142,20 @@ export class CliController {
 
       // Start MQTT
       await lifecycleService.handleReconnect();
+
+      // Immediately publish user context if logged in
+      const user = (req as any).user;
+      if (user) {
+        try {
+          const { mqttService } = await import('spark-edge-core');
+          await mqttService.publishContext({
+            id: user.id || "",
+            email: user.email || "",
+            first_name: user.first_name || "",
+            last_name: user.last_name || ""
+          });
+        } catch { /* best-effort */ }
+      }
 
       return res.json({
         success: true,
@@ -203,6 +231,20 @@ export class CliController {
 
       // Step 4: Start MQTT using the lifecycle service
       await lifecycleService.handleReconnect();
+
+      // Immediately publish user context if logged in
+      const user = (req as any).user;
+      if (user) {
+        try {
+          const { mqttService } = await import('spark-edge-core');
+          await mqttService.publishContext({
+            id: user.id || "",
+            email: user.email || "",
+            first_name: user.first_name || "",
+            last_name: user.last_name || ""
+          });
+        } catch { /* best-effort */ }
+      }
 
       return res.json({
         success: true,

@@ -59,6 +59,19 @@ export async function connect(): Promise<MqttClient | null> {
       // Publish online status as plain string (matches EMQX/SparkAPI standard)
       client?.publish(statusTopic, 'online', { qos: 1, retain: true });
       
+      // Force timer resets and immediate resync on reconnection
+      import('./mqtt.service').then(s => {
+        s.stopTimers();
+        s.startHeartbeat();
+        s.startQueueRetry();
+        s.startStatsInterval();
+        s.publishHeartbeat().catch(() => {});
+      });
+
+      import('./mqtt.queue').then(q => {
+        q.retryAll().catch(() => {});
+      });
+
       resolve(client!);
     });
 

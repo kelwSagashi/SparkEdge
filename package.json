@@ -6,7 +6,7 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo run dev --parallel",
-    "start": "turbo start",
+    "start": "node ./packages/cli/bin/spark-edge",
     "predev": "pnpm -w run db:migrate && pnpm -w run db:seed",
     "prestart": "pnpm -w run db:migrate",
     "db:generate": "turbo db:generate",

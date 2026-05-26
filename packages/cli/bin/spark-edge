@@ -1,7 +1,86 @@
-require('reflect-metadata');
+const fs = require("fs");
+const path = require("path");
 
-(async () => {
-	const { Container } = await import('@spark-edge/di');
-	const { CommandRegistry } = await import('../dist/command-registry.js');
-	await Container.get(CommandRegistry).execute();
-})();
+console.log("[spark-edge-launcher] Starting launcher...");
+console.log("[spark-edge-launcher] process.execPath:", process.execPath);
+console.log("[spark-edge-launcher] __dirname:", __dirname);
+console.log("[spark-edge-launcher] process.cwd():", process.cwd());
+
+require("reflect-metadata");
+
+const binaryDir = path.dirname(process.execPath);
+const scriptDir = __dirname;
+const rootCandidates = [
+  scriptDir,
+  path.resolve(scriptDir, ".."),
+  path.resolve(scriptDir, "..", ".."),
+  path.resolve(scriptDir, "..", "..", ".."),
+  binaryDir,
+  path.resolve(binaryDir, ".."),
+  path.resolve(binaryDir, "..", ".."),
+];
+
+function findWorkDir() {
+  // First try to find monorepo root
+  for (const dir of rootCandidates) {
+    if (!fs.existsSync(dir)) continue;
+    if (fs.existsSync(path.join(dir, "pnpm-workspace.yaml"))) return dir;
+  }
+  
+  // Fallbacks
+  for (const dir of rootCandidates) {
+    if (!fs.existsSync(dir)) continue;
+    if (fs.existsSync(path.join(dir, "package.json"))) return dir;
+    if (fs.existsSync(path.join(dir, "dist", "assets", "index.html")))
+      return dir;
+    if (fs.existsSync(path.join(dir, "frontend", "dist", "index.html")))
+      return dir;
+    if (fs.existsSync(path.join(dir, "public"))) return dir;
+  }
+  return binaryDir;
+}
+
+const packageRoot = findWorkDir();
+console.log("[spark-edge-launcher] Package root resolved to:", packageRoot);
+try {
+  process.chdir(packageRoot);
+} catch (error) {
+  console.warn(
+    "[spark-edge] could not change working directory to package root:",
+    packageRoot,
+    error?.message || error,
+  );
+}
+
+process.on("uncaughtException", (error) => {
+  console.error("[spark-edge] Uncaught exception:", error?.stack || error);
+  waitForUserBeforeExit();
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("[spark-edge] Unhandled rejection:", reason);
+  waitForUserBeforeExit();
+});
+
+async function main() {
+  console.log("[spark-edge] Starting application...");
+  const { Container } = await import("@spark-edge/di");
+  const { CommandRegistry } = await import("../dist/command-registry.js");
+  await Container.get(CommandRegistry).execute();
+}
+
+main().catch((error) => {
+  console.error("[spark-edge] Startup failed:", error?.stack || error);
+  waitForUserBeforeExit();
+});
+
+function waitForUserBeforeExit() {
+  if (process.platform !== "win32") {
+    process.exit(1);
+    return;
+  }
+
+  console.error("\n[spark-edge] Press Enter to exit...");
+  process.stdin.resume();
+  process.stdin.on("data", () => process.exit(1));
+}

@@ -1,6 +1,6 @@
-# @spark-edge/core — MQTT Module
+# spark-edge-core — MQTT Module
 
-This module manages all MQTT communication for the Spark Edge instance. It handles identity persistence, secure credential management, topic subscription, and a robust command/response protocol with the Spark Cloud.
+This package manages all MQTT communication for the **Spark Edge** instance. It handles identity persistence, secure credential management, topic subscription, and a robust command/response protocol with the Spark Cloud.
 
 ## 🏗️ Architecture
 

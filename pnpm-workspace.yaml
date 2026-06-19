@@ -1,7 +1,10 @@
 packages:
-  - packages/*
-  - packages/frontend/**
-  - packages/@spark-edge/*
+  - packages/cli
+  - packages/core
+  - packages/db
+  - packages/frontend
+  - packages/@spark-edge/di
+  - packages/@spark-edge/typescript-config
 
 catalog:
   '@types/cors': ^2.8.19

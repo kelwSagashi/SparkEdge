@@ -45,7 +45,12 @@
   },
   "packageManager": "pnpm@10.22.0",
   "workspaces": [
-    "packages/*"
+    "packages/cli",
+    "packages/core",
+    "packages/db",
+    "packages/frontend",
+    "packages/@spark-edge/di",
+    "packages/@spark-edge/typescript-config"
   ],
   "devDependencies": {
     "@changesets/cli": "^2.31.0",

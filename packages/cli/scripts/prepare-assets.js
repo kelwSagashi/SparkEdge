@@ -43,3 +43,14 @@ if (fs.existsSync(dbDrizzle)) {
 } else {
   console.warn('DB drizzle migrations not found at', dbDrizzle);
 }
+
+const rootReadme = path.resolve(cliDir, '..', '..', 'README.md');
+const cliReadme = path.resolve(cliDir, 'README.md');
+
+console.log('[prepare-assets] Copying root README.md to CLI package...');
+if (fs.existsSync(rootReadme)) {
+  fs.copyFileSync(rootReadme, cliReadme);
+  console.log('README.md copied successfully.');
+} else {
+  console.warn('Root README.md not found at', rootReadme);
+}

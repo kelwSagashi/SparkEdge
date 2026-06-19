@@ -32,3 +32,6 @@ dist-ssr
 .env
 *.env
 .env.local
+
+# Auto-copied package READMEs
+packages/cli/README.md

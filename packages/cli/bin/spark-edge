@@ -22,6 +22,16 @@ if (!process.versions.bun) {
   return;
 }
 
+// 2. Patch node:v8 startupSnapshot.isBuildingSnapshot for Bun compatibility
+try {
+  const v8 = require("node:v8");
+  if (v8 && v8.startupSnapshot) {
+    v8.startupSnapshot.isBuildingSnapshot = () => false;
+  }
+} catch (e) {
+  // Ignore
+}
+
 console.log("[spark-edge-launcher] Starting launcher under Bun...");
 console.log("[spark-edge-launcher] process.execPath:", process.execPath);
 console.log("[spark-edge-launcher] __dirname:", __dirname);
@@ -73,7 +83,7 @@ try {
   );
 }
 
-// 2. Set up SPARK_EDGE_DATA_DIR
+// 3. Set up SPARK_EDGE_DATA_DIR
 if (!process.env.SPARK_EDGE_DATA_DIR) {
   if (fs.existsSync(path.join(packageRoot, "pnpm-workspace.yaml"))) {
     process.env.SPARK_EDGE_DATA_DIR = packageRoot;
@@ -82,6 +92,22 @@ if (!process.env.SPARK_EDGE_DATA_DIR) {
   }
 }
 console.log("[spark-edge-launcher] Data directory set to:", process.env.SPARK_EDGE_DATA_DIR);
+
+// 4. Set up SPARK_EDGE_MIGRATIONS_DIR
+if (!process.env.SPARK_EDGE_MIGRATIONS_DIR) {
+  const prodMigrations = path.join(packageRoot, "dist", "drizzle");
+  const devMigrations = path.join(packageRoot, "packages", "cli", "dist", "drizzle");
+  const dbMigrations = path.join(packageRoot, "packages", "db", "drizzle");
+  
+  if (fs.existsSync(prodMigrations)) {
+    process.env.SPARK_EDGE_MIGRATIONS_DIR = prodMigrations;
+  } else if (fs.existsSync(devMigrations)) {
+    process.env.SPARK_EDGE_MIGRATIONS_DIR = devMigrations;
+  } else if (fs.existsSync(dbMigrations)) {
+    process.env.SPARK_EDGE_MIGRATIONS_DIR = dbMigrations;
+  }
+}
+console.log("[spark-edge-launcher] Migrations directory set to:", process.env.SPARK_EDGE_MIGRATIONS_DIR);
 
 process.on("uncaughtException", (error) => {
   console.error("[spark-edge] Uncaught exception:", error?.stack || error);

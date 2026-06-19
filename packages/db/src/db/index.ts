@@ -13,7 +13,16 @@ export const Tables = schema;
 function resolveDatabasePath(): string {
   const envValue = process.env.DB_FILE_NAME;
   if (envValue) {
-    return envValue;
+    if (path.isAbsolute(envValue)) {
+      return envValue;
+    }
+    if (process.env.SPARK_EDGE_DATA_DIR) {
+      if (process.env.SPARK_EDGE_DATA_DIR !== process.cwd()) {
+        return path.join(process.env.SPARK_EDGE_DATA_DIR, "monitor.db");
+      }
+      return path.resolve(process.env.SPARK_EDGE_DATA_DIR, envValue);
+    }
+    return path.resolve(process.cwd(), envValue);
   }
 
   if (process.env.SPARK_EDGE_DATA_DIR) {
@@ -57,7 +66,9 @@ function runMigrations(): void {
     );
 
     let drizleDir: string | undefined;
-    if (fs.existsSync(repoDrizlePath)) {
+    if (process.env.SPARK_EDGE_MIGRATIONS_DIR && fs.existsSync(process.env.SPARK_EDGE_MIGRATIONS_DIR)) {
+      drizleDir = process.env.SPARK_EDGE_MIGRATIONS_DIR;
+    } else if (fs.existsSync(repoDrizlePath)) {
       drizleDir = repoDrizlePath;
     } else if (fs.existsSync(binDrizlePath)) {
       drizleDir = binDrizlePath;

@@ -12,9 +12,15 @@
     "db:generate": "turbo db:generate",
     "db:migrate": "turbo db:migrate",
     "db:seed": "turbo db:seed",
-    "release": "pnpm run build && pnpm --filter spark-edge run package:release",
     "prepare-assets": "pnpm --filter spark-edge run prepare-assets",
-    "publish:all": "pnpm -r publish --access public --no-git-checks"
+    "publish:all": "pnpm -r publish --access public --no-git-checks",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
+    "release:cli": "pnpm --filter spark-edge run changeset publish",
+    "release:core": "pnpm --filter spark-edge-core run changeset publish",
+    "release:db": "pnpm --filter spark-edge-db run changeset publish",
+    "release:di": "pnpm --filter spark-edge-di run changeset publish"
   },
   "repository": {
     "type": "git",
@@ -42,6 +48,7 @@
     "packages/*"
   ],
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
     "@spark-edge/typescript-config": "workspace:*",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",

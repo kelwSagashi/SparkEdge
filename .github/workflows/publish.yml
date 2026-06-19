@@ -58,10 +58,10 @@ jobs:
         run: pnpm prepare-assets
 
       - name: Publish to NPM
-        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
-        run: |
-          echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
-          pnpm publish:all
+        uses: actions/checkout@v4
+        uses: actions/setup-node@v4
+        with:
+          registry-url: https://registry.npmjs.org/
+        run: pnpm publish:all
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

@@ -33,8 +33,6 @@ jobs:
 
       - name: Install PNPM
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Get PNPM Cache Directory
         id: pnpm-cache

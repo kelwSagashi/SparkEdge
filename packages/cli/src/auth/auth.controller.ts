@@ -1,4 +1,4 @@
-import { Post, Get, RestController } from '@spark-edge/di';
+import { Post, Get, RestController } from 'spark-edge-di';
 import { Response, Request } from 'express';
 import AuthService from './auth.service';
 import AuthRequest from './auth.request';

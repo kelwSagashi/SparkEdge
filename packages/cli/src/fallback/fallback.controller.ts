@@ -1,4 +1,4 @@
-import { Get, Post, Delete, RestController } from '@spark-edge/di';
+import { Get, Post, Delete, RestController } from 'spark-edge-di';
 import { dbManager } from 'spark-edge-db';
 import type { AuthenticatedRequest } from '@/auth/authenticated-request';
 import { InstanceRunnerService } from '@/instances/instance-runner.service';

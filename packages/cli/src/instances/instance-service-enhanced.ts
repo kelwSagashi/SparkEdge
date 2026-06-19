@@ -4,7 +4,7 @@
  * Uses existing InstanceService from instance.service.ts
  */
 
-import { Service } from "@spark-edge/di";
+import { Service } from "spark-edge-di";
 import { dbManager } from "spark-edge-db";
 import { DataMappingService } from "./data-mapping.service";
 import type {

@@ -1,7 +1,8 @@
-import { Service } from '@spark-edge/di';
+import { Service } from 'spark-edge-di';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import fs from 'node:fs';
+import os from 'node:os';
 import { Logger } from '@/simple-logger';
 
 /**
@@ -13,7 +14,16 @@ export class PythonVenvService {
   private readonly baseVenvDir: string;
 
   constructor(private readonly logger: Logger) {
-    this.baseVenvDir = path.resolve(process.cwd(), '.spark-edge', 'venvs');
+    if (process.env.SPARK_EDGE_DATA_DIR) {
+      this.baseVenvDir = path.join(process.env.SPARK_EDGE_DATA_DIR, 'venvs');
+    } else {
+      const devVenvPath = path.resolve(process.cwd(), 'packages/db');
+      if (fs.existsSync(devVenvPath)) {
+        this.baseVenvDir = path.resolve(process.cwd(), '.spark-edge', 'venvs');
+      } else {
+        this.baseVenvDir = path.join(os.homedir(), '.spark-edge', 'venvs');
+      }
+    }
     if (!fs.existsSync(this.baseVenvDir)) {
       fs.mkdirSync(this.baseVenvDir, { recursive: true });
     }

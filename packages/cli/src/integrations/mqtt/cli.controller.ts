@@ -1,4 +1,4 @@
-import { Get, Post, Put, RestController } from '@spark-edge/di';
+import { Get, Post, Put, RestController } from 'spark-edge-di';
 import { Request, Response } from 'express';
 import { sparkEdgeCloudApiUrl } from '../constants';
 

@@ -1,4 +1,4 @@
-import { Delete, Get, Post, Put, RestController } from '@spark-edge/di';
+import { Delete, Get, Post, Put, RestController } from 'spark-edge-di';
 import { dbManager } from 'spark-edge-db';
 import type { AuthenticatedRequest } from '@/auth/authenticated-request';
 

@@ -1,4 +1,4 @@
-import { Container, Service } from '@spark-edge/di'
+import { Container, Service } from 'spark-edge-di'
 import { Server } from './server';
 import { CommandMetadata } from './commands/command-metadata';
 

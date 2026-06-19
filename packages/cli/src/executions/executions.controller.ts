@@ -1,4 +1,4 @@
-import { Get, RestController } from '@spark-edge/di';
+import { Get, RestController } from 'spark-edge-di';
 import { dbManager } from 'spark-edge-db';
 import type { AuthenticatedRequest } from '@/auth/authenticated-request';
 

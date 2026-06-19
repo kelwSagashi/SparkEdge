@@ -1,4 +1,4 @@
-import { Service } from '@spark-edge/di';
+import { Service } from 'spark-edge-di';
 import { dbManager } from 'spark-edge-db';
 import type { ReturningQueries, DownloadedScriptUpsertValues, DownloadedScriptReturningValues } from 'spark-edge-db';
 import { resolveHomePath } from './script.helper';

@@ -1,4 +1,4 @@
-import { Delete, Get, Post, Put, RestController } from "@spark-edge/di";
+import { Delete, Get, Post, Put, RestController } from "spark-edge-di";
 import { InstanceService } from "./instance.service";
 import InstanceRequest from "./instance.request";
 import { InstanceRunnerService } from "./instance-runner.service";

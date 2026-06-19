@@ -1,19 +1,33 @@
 {
   "name": "spark-edge",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Spark Edge CLI and Backend",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index",
   "types": "dist/index.d.ts",
   "scripts": {
-    "clean": "rimraf dist .turbo",
+    "clean": "rimraf dist .turbo release-artifacts",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "prepare-assets": "node ./scripts/prepare-assets.js",
+    "package:release": "pnpm run prepare-assets && node ./scripts/build-release.js",
     "buildAndDev": "pnpm run build && pnpm run dev",
-    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 concurrently -k -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"pnpm watch\" \"nodemon\"",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 concurrently -k -n \"TypeScript,Bun\" -c \"yellow.bold,cyan.bold\" \"pnpm watch\" \"bun --watch ./bin/spark-edge\"",
     "start": "run-script-os",
-    "start:default": "cd bin && ./spark-edge",
-    "start:windows": "cd bin && spark-edge",
-    "watch": "cross-env NODE_OPTIONS=--max-old-space-size=4096 tsc-watch -p tsconfig.build.json --onCompilationComplete \"tsc-alias -p tsconfig.build.json\""
+    "start:default": "cd bin && bun ./spark-edge",
+    "start:windows": "cd bin && bun spark-edge",
+    "watch": "cross-env NODE_OPTIONS=--max-old-space-size=4096 tsc-watch -p tsconfig.build.json --onCompilationComplete \"tsc-alias -p tsconfig.build.json\"",
+    "build:binary": "pkg dist/index.js --target node20-linux-x64,node20-macos-arm64,node20-win-x64 --outdir release"
+  },
+  "pkg": {
+    "assets": [
+      "dist/**/*",
+      "../../frontend/dist/**/*",
+      "node_modules/**/*.node"
+    ],
+    "scripts": "dist/**/*.js"
   },
   "bin": {
     "spark-edge": "./bin/spark-edge"
@@ -45,7 +59,7 @@
     "typescript": "catalog:"
   },
   "dependencies": {
-    "@spark-edge/di": "workspace:*",
+    "spark-edge-di": "workspace:*",
     "adm-zip": "^0.5.17",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.4.6",

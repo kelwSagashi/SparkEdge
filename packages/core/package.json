@@ -1,7 +1,10 @@
 {
   "name": "spark-edge-core",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Spark Edge Core Engine",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "vitest run",
     "dev": "pnpm watch",

@@ -1,4 +1,4 @@
-import { Post, Get, Put, Delete, RestController } from '@spark-edge/di';
+import { Post, Get, Put, Delete, RestController } from 'spark-edge-di';
 import { CredentialsService } from './credentials.service';
 import CredentialsRequest from './credentials.request';
 

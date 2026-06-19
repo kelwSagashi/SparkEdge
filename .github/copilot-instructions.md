@@ -13,12 +13,12 @@
   - `packages/cli`: Backend (Express + Node.js) - the main service
   - `packages/frontend`: React + Vite dashboard (port 5173)
   - `packages/db`: SQLite database layer (Drizzle ORM)
-  - `packages/@spark-edge/di`: Custom lightweight DI container
+  - `packages/spark-edge-di`: Custom lightweight DI container
   - `packages/extensions`: Python SDK for custom scripts
 
 ### Dependency Injection Pattern
 
-- Uses custom `@spark-edge/di` container with decorators: `@Service()`, `@RestController()`, `@Get/@Post/@Put/@Delete`
+- Uses custom `spark-edge-di` container with decorators: `@Service()`, `@RestController()`, `@Get/@Post/@Put/@Delete`
 - Controllers auto-register in `ControllerRegistry` via side-effect imports in `server.ts`
 - No factory patterns - constructor injection only with circular dependency detection
 
@@ -121,7 +121,7 @@ Services return wrapped responses; controllers extract data/error. Never throw -
 ## Critical Files to Understand First
 
 1. **Architecture**: `spark-edge-spec.md` (business domain requirements)
-2. **DI Container**: `packages/@spark-edge/di/src/di.ts`
+2. **DI Container**: `packages/spark-edge-di/src/di.ts`
 3. **Server Setup**: `packages/cli/src/server.ts` (all middleware, controller registration)
 4. **DB Schema Example**: `packages/db/src/db/schemas.ts` (Drizzle table definitions)
 5. **Service Example**: `packages/cli/src/devices/device.service.ts`

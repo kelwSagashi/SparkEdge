@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Container } from '@spark-edge/di';
+import { Container } from 'spark-edge-di';
 import InstanceRunnerService from './instances/instance-runner.service';
 import { dbManager } from 'spark-edge-db';
 import { Logger } from './simple-logger';

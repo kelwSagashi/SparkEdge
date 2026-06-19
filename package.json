@@ -6,12 +6,15 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo run dev --parallel",
-    "start": "node ./packages/cli/bin/spark-edge",
+    "start": "bun ./packages/cli/bin/spark-edge",
     "predev": "pnpm -w run db:migrate && pnpm -w run db:seed",
     "prestart": "pnpm -w run db:migrate",
     "db:generate": "turbo db:generate",
     "db:migrate": "turbo db:migrate",
-    "db:seed": "turbo db:seed"
+    "db:seed": "turbo db:seed",
+    "release": "pnpm run build && pnpm --filter spark-edge run package:release",
+    "prepare-assets": "pnpm --filter spark-edge run prepare-assets",
+    "publish:all": "pnpm -r publish --access public --no-git-checks"
   },
   "repository": {
     "type": "git",

@@ -3,7 +3,7 @@
  * Handles mapping of script output and device data to resource operation input schema
  */
 
-import { Service } from "@spark-edge/di";
+import { Service } from "spark-edge-di";
 import type { IDataMapping, IDataField } from "./instance.types";
 
 @Service()

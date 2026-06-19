@@ -1,7 +1,28 @@
+#!/usr/bin/env node
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 
-console.log("[spark-edge-launcher] Starting launcher...");
+// 1. Relaunch with Bun if running under Node.js
+if (!process.versions.bun) {
+  const { spawnSync } = require("child_process");
+  try {
+    const fileArg = process.platform === "win32" ? `"${__filename}"` : __filename;
+    const result = spawnSync("bun", [fileArg, ...process.argv.slice(2)], {
+      stdio: "inherit",
+      shell: true,
+    });
+    process.exit(result.status ?? 0);
+  } catch (err) {
+    console.error(
+      "[spark-edge] Error: Bun is required to run Spark Edge. Please install Bun (https://bun.sh) and try again."
+    );
+    process.exit(1);
+  }
+  return;
+}
+
+console.log("[spark-edge-launcher] Starting launcher under Bun...");
 console.log("[spark-edge-launcher] process.execPath:", process.execPath);
 console.log("[spark-edge-launcher] __dirname:", __dirname);
 console.log("[spark-edge-launcher] process.cwd():", process.cwd());
@@ -52,6 +73,16 @@ try {
   );
 }
 
+// 2. Set up SPARK_EDGE_DATA_DIR
+if (!process.env.SPARK_EDGE_DATA_DIR) {
+  if (fs.existsSync(path.join(packageRoot, "pnpm-workspace.yaml"))) {
+    process.env.SPARK_EDGE_DATA_DIR = packageRoot;
+  } else {
+    process.env.SPARK_EDGE_DATA_DIR = path.join(os.homedir(), ".spark-edge");
+  }
+}
+console.log("[spark-edge-launcher] Data directory set to:", process.env.SPARK_EDGE_DATA_DIR);
+
 process.on("uncaughtException", (error) => {
   console.error("[spark-edge] Uncaught exception:", error?.stack || error);
   waitForUserBeforeExit();
@@ -64,7 +95,7 @@ process.on("unhandledRejection", (reason) => {
 
 async function main() {
   console.log("[spark-edge] Starting application...");
-  const { Container } = await import("@spark-edge/di");
+  const { Container } = await import("spark-edge-di");
   const { CommandRegistry } = await import("../dist/command-registry.js");
   await Container.get(CommandRegistry).execute();
 }

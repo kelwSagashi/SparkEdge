@@ -1,4 +1,4 @@
-import { Service } from "@spark-edge/di";
+import { Service } from "spark-edge-di";
 import { dbManager } from "spark-edge-db";
 import { TagsService } from "../tags/tags.service";
 import type {

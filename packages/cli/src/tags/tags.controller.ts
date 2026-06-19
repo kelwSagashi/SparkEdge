@@ -1,4 +1,4 @@
-import { Delete, Get, Post, RestController } from '@spark-edge/di';
+import { Delete, Get, Post, RestController } from 'spark-edge-di';
 import { TagsService } from './tags.service';
 import TagsRequest from './tags.request';
 

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Service } from '@spark-edge/di';
+import { Service } from 'spark-edge-di';
 import { dbManager, UserUpsertValues } from 'spark-edge-db';
 import AuthRequest from './auth.request';
 import AuthResponse from './auth.response';

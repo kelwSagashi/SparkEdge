@@ -3,7 +3,7 @@
  * REST API endpoints for instance management
  */
 
-import { RestController, Get, Post, Put, Delete } from "@spark-edge/di";
+import { RestController, Get, Post, Put, Delete } from "spark-edge-di";
 import { dbManager } from "spark-edge-db";
 import { InstanceService } from "./instance.service";
 import { InstanceServiceEnhanced } from "./instance-service-enhanced";

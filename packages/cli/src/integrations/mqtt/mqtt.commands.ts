@@ -37,7 +37,7 @@ export function registerMqttCommandHandlers(): void {
     await publishLog(`Executing script: ${instanceId}`, 'info');
 
     try {
-      const { Container } = await import('@spark-edge/di');
+      const { Container } = await import('spark-edge-di');
       const { InstanceRunnerService } = await import('../../instances/instance-runner.service');
       const runner = Container.get(InstanceRunnerService);
       const result = await runner.triggerManual(instanceId);

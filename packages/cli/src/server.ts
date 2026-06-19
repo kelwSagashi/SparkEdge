@@ -2,7 +2,7 @@ import express, { Application, Request, Response, Router } from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import { Logger } from "./simple-logger";
-import { Container, Service } from "@spark-edge/di";
+import { Container, Service } from "spark-edge-di";
 import { ControllerRegistry } from "./controller.registry";
 import { send } from "./response-helper";
 import path from "node:path";

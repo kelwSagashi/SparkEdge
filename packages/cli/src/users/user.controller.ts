@@ -1,4 +1,4 @@
-import { Delete, Get, Post, Put, RestController } from '@spark-edge/di';
+import { Delete, Get, Post, Put, RestController } from 'spark-edge-di';
 import { UserService } from './user.service';
 import UserRequest from './user.request';
 

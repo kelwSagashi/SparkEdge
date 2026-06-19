@@ -36,7 +36,7 @@ export function onReconnect(): void {
   retryAll().catch(() => {});
   
   // Trigger fallback queue flush on reconnection
-  const { Container } = require('@spark-edge/di');
+  const { Container } = require('spark-edge-di');
   const { InstanceSchedulerService } = require('../../instances/instance-scheduler.service');
   Container.get(InstanceSchedulerService).triggerFallbackFlush().catch(() => {});
 }

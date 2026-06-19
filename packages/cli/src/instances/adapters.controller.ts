@@ -1,4 +1,4 @@
-import { Get, Post, RestController } from '@spark-edge/di';
+import { Get, Post, RestController } from 'spark-edge-di';
 import { AdapterRegistry } from './adapter-base';
 import { DestinationFactory } from './destination-adapters';
 import { Logger } from '@/simple-logger';

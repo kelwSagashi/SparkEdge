@@ -1,4 +1,4 @@
-import { Constructable } from "@spark-edge/di";
+import { Constructable } from "spark-edge-di";
 
 
 export type CommandOptions = {

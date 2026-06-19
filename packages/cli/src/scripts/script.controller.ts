@@ -1,4 +1,4 @@
-import { Delete, Get, Post, Put, RestController } from "@spark-edge/di";
+import { Delete, Get, Post, Put, RestController } from "spark-edge-di";
 import { ScriptService } from "./script.service";
 import ScriptRequest from "./script.request";
 // import { PythonVenvService } from "../instances/python-venv.service";

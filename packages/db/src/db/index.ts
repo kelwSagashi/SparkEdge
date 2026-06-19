@@ -1,29 +1,31 @@
+/// <reference types="bun-types" />
 import "dotenv/config";
 import fs from "node:fs";
 import path from "node:path";
-import { BetterSQLite3Database, drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import Database from "better-sqlite3";
+import os from "node:os";
+import { BunSQLiteDatabase, drizzle } from "drizzle-orm/bun-sqlite";
+import { migrate } from "drizzle-orm/bun-sqlite/migrator";
+import { Database } from "bun:sqlite";
 import * as schema from "./schemas";
 
 export const Tables = schema;
 
 function resolveDatabasePath(): string {
   const envValue = process.env.DB_FILE_NAME;
-  const repoDbPath = path.resolve(process.cwd(), "packages/db/monitor.db");
-  const binaryDbPath = path.resolve(
-    path.dirname(process.execPath),
-    "monitor.db",
-  );
-  const defaultPath = fs.existsSync(path.dirname(repoDbPath))
-    ? repoDbPath
-    : binaryDbPath;
-
-  if (!envValue) {
-    return defaultPath;
+  if (envValue) {
+    return envValue;
   }
 
-  return envValue;
+  if (process.env.SPARK_EDGE_DATA_DIR) {
+    return path.join(process.env.SPARK_EDGE_DATA_DIR, "monitor.db");
+  }
+
+  const devDbPath = path.resolve(process.cwd(), "packages/db/monitor.db");
+  if (fs.existsSync(path.dirname(devDbPath))) {
+    return devDbPath;
+  }
+
+  return path.join(os.homedir(), ".spark-edge", "monitor.db");
 }
 
 function ensureDatabaseDirectory(dbPath: string): void {
@@ -31,7 +33,7 @@ function ensureDatabaseDirectory(dbPath: string): void {
 
   const resolved = dbPath.startsWith("file:")
     ? path.resolve(process.cwd(), dbPath.slice("file:".length))
-    : path.resolve(process.cwd(), dbPath);
+    : path.resolve(dbPath);
 
   fs.mkdirSync(path.dirname(resolved), { recursive: true });
 }
@@ -40,7 +42,7 @@ const dbPath = resolveDatabasePath();
 ensureDatabaseDirectory(dbPath);
 
 const sqlite = new Database(dbPath);
-sqlite.pragma("foreign_keys = ON");
+sqlite.exec("PRAGMA foreign_keys = ON;");
 export const db = drizzle(sqlite, { schema });
 
 function runMigrations(): void {
@@ -85,9 +87,9 @@ runMigrations();
 
 console.log("DB_FILE_NAME", process.env.DB_FILE_NAME);
 
-console.log("sqlite.name", sqlite.name);
-export type DBType = BetterSQLite3Database<typeof schema> & {
-  $client: Database.Database;
+console.log("sqlite.name", sqlite.filename);
+export type DBType = BunSQLiteDatabase<typeof schema> & {
+  $client: Database;
 };
 
 export * from "./schemas";

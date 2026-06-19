@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "@spark-edge/typescript-config": "workspace:*",
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "express": "catalog:",
+    "@types/express": "catalog:"
   }
 }

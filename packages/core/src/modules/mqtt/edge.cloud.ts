@@ -7,7 +7,11 @@
  *
  * The JWT is used only during the session and discarded immediately after.
  * MQTT credentials returned by the server are the permanent identity.
+ *
+ * Cloud URL priority: spark-edge.config.yml → SPARK_CLOUD_URL env → default
  */
+
+import { appConfig } from '../../config/cloud-integration.config';
 
 export interface CloudLoginResult {
   token: string;
@@ -58,7 +62,8 @@ export async function cloudLogin(
   return { token: data.token };
 }
 
-const DEFAULT_SPARK_CLOUD_URL = process.env.SPARK_CLOUD_URL || 'https://sparkcloud.okelwen.site';
+/** Lazily-resolved cloud URL — reads from CloudIntegration config at call time */
+const getCloudUrl = () => appConfig.cloud.url;
 
 /**
  * Register a new Edge instance with the Spark cloud.
@@ -82,7 +87,7 @@ export async function registerEdge(
     };
   }
 ): Promise<EdgeRegistrationResult> {
-  const url = `${DEFAULT_SPARK_CLOUD_URL}/edges/register`;
+  const url = `${getCloudUrl()}/edges/register`;
 
   let res: Response;
   try {
@@ -125,7 +130,7 @@ token: string,
 edgeName?: string,
 metadata?: any
 ): Promise<EdgeRegistrationResult> {
-const url = `${DEFAULT_SPARK_CLOUD_URL}/edges/pair`;
+const url = `${getCloudUrl()}/edges/pair`;
 console.log(`[EDGE] pair url ${url}`)
 
 let res: Response;
@@ -163,7 +168,7 @@ try {
  * This is a synchronous operation used before local data wipe.
  */
 export async function unpairWithCloud(edgeId: string): Promise<void> {
-  const url = `${DEFAULT_SPARK_CLOUD_URL}/edges/unpair`;
+  const url = `${getCloudUrl()}/edges/unpair`;
 
   let res: Response;
   try {

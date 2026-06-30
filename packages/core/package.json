@@ -40,9 +40,11 @@
     "typescript": "catalog:"
   },
   "dependencies": {
+    "@types/js-yaml": "^4.0.9",
     "bullmq": "^5.61.0",
     "cors": "catalog:",
     "fast-glob": "^3.3.3",
+    "js-yaml": "^5.2.0",
     "lodash": "^4.17.21",
     "mqtt": "^5.15.1",
     "p-cancelable": "^4.0.1",

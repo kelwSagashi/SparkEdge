@@ -15,7 +15,7 @@
 	},
 	"include": ["src/**/*.ts"],
 	"references": [
-		{ "path": "../spark-edge-di/tsconfig.build.json" },
+		{ "path": "../@spark-edge/di/tsconfig.build.json" },
 		{ "path": "../db/tsconfig.build.json" },
 		{ "path": "../core/tsconfig.build.json" }
 	]

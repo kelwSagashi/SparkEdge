@@ -1,0 +1,34 @@
+# SparkEdge Configuration
+# Edit this file to configure your SparkEdge instance.
+# Changes require a service restart to take full effect.
+#
+# Documentation: https://github.com/sparkcloud/spark-edge
+#
+# ──────────────────────────────────────────────────────────────────────────────
+# Priority chain:
+#   spark-edge.config.yml  >  environment variables (.env)  >  built-in defaults
+# ──────────────────────────────────────────────────────────────────────────────
+
+cloud:
+  # Base URL of the Spark Cloud REST API.
+  # Used for Edge provisioning (pairing, registration, unpairing).
+  url: https://sparkcloud.okelwen.site
+
+  # MQTT broker URL returned to new Edges during registration via the local simulator.
+  # Only relevant if you are running SparkEdge's built-in cloud simulator (dev mode).
+  # In production, the real Spark Cloud returns the broker URL automatically.
+  mqtt_url: mqtt://localhost:1883
+
+db:
+  # Path to the SQLite database file.
+  # Can be relative to the directory where SparkEdge runs, or an absolute path.
+  file: packages/db/monitor.db
+
+auth:
+  # Secret key used to sign and verify JWT tokens for local API access.
+  # Change this to a long, random string in production!
+  jwt_secret: dev-secret
+
+server:
+  # HTTP port the SparkEdge backend will listen on.
+  port: 3009

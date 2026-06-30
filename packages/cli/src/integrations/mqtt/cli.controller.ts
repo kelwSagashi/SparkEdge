@@ -1,6 +1,7 @@
 import { Get, Post, Put, RestController } from 'spark-edge-di';
 import { Request, Response } from 'express';
 import { sparkEdgeCloudApiUrl } from '../constants';
+import { appConfig, saveConfig } from 'spark-edge-core';
 
 /**
  * /api/cli/* — Edge Cloud Management endpoints
@@ -342,4 +343,92 @@ export class CliController {
       return res.status(500).json({ message: err.message });
     }
   }
+
+  // ─── CloudIntegration Configuration Endpoints ───────────────────────────────
+
+  /**
+   * GET /api/cli/config — return the current CloudIntegration configuration.
+   * Sensitive values (jwt_secret) are partially masked in the response.
+   */
+  @Get('/config')
+  async getConfig(_req: Request, res: Response) {
+    try {
+      const cfg = appConfig;
+      return res.json({
+        cloud: {
+          url: cfg.cloud.url,
+          mqtt_url: cfg.cloud.mqtt_url,
+        },
+        db: {
+          file: cfg.db.file,
+        },
+        auth: {
+          // Mask the secret — show only first 4 chars + asterisks
+          jwt_secret: cfg.auth.jwt_secret
+            ? cfg.auth.jwt_secret.slice(0, 4) + '*'.repeat(Math.min(cfg.auth.jwt_secret.length - 4, 20))
+            : '',
+          is_default: cfg.auth.jwt_secret === 'dev-secret',
+        },
+        server: {
+          port: cfg.server.port,
+        },
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
+
+  /**
+   * PUT /api/cli/config — save new configuration to spark-edge.config.yml.
+   * Only provided fields are updated; unspecified fields remain unchanged.
+   * A service restart is needed for all changes to fully take effect.
+   */
+  @Put('/config')
+  async updateConfig(req: Request, res: Response) {
+    try {
+      const { cloud, db, auth, server } = req.body ?? {};
+
+      const updates: Record<string, any> = {};
+
+      if (cloud?.url !== undefined || cloud?.mqtt_url !== undefined) {
+        updates.cloud = {};
+        if (cloud?.url !== undefined) updates.cloud.url = String(cloud.url).trim();
+        if (cloud?.mqtt_url !== undefined) updates.cloud.mqtt_url = String(cloud.mqtt_url).trim();
+      }
+
+      if (db?.file !== undefined) {
+        updates.db = { file: String(db.file).trim() };
+      }
+
+      if (auth?.jwt_secret !== undefined && auth.jwt_secret !== '') {
+        // Reject obviously-weak secrets in production-like contexts
+        if (auth.jwt_secret.length < 8) {
+          return res.status(400).json({ message: 'jwt_secret deve ter pelo menos 8 caracteres.' });
+        }
+        updates.auth = { jwt_secret: String(auth.jwt_secret) };
+      }
+
+      if (server?.port !== undefined) {
+        const port = parseInt(String(server.port), 10);
+        if (isNaN(port) || port < 1 || port > 65535) {
+          return res.status(400).json({ message: 'Porta inválida. Use um valor entre 1 e 65535.' });
+        }
+        updates.server = { port };
+      }
+
+      if (Object.keys(updates).length === 0) {
+        return res.status(400).json({ message: 'Nenhum campo válido para atualizar.' });
+      }
+
+      saveConfig(updates as any);
+
+      return res.json({
+        success: true,
+        message: 'Configuração salva em spark-edge.config.yml. Reinicie o serviço para aplicar todas as mudanças.',
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: err.message });
+    }
+  }
 }
+

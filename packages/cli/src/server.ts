@@ -66,7 +66,8 @@ export class Server {
     this.app.use(async (req: Request, _res: Response, next) => {
       try {
         const { dbManager } = await import("spark-edge-db");
-        const secret = process.env.JWT_SECRET ?? "dev-secret";
+        const { appConfig } = await import("spark-edge-core");
+        const secret = appConfig.auth.jwt_secret;
 
         // Helper to verify JWT and find user
         const verifyUserByToken = (token: string) => {

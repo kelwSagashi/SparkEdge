@@ -59,6 +59,13 @@ for (const target of targets) {
     const drizzleDir = path.join(cliDir, 'dist', 'drizzle');
     if (fs.existsSync(drizzleDir)) zip.addLocalFolder(drizzleDir, 'drizzle');
 
+    // Add default config template — user can edit after extracting
+    const configTemplate = path.join(cliDir, 'dist', 'spark-edge.config.yml');
+    if (fs.existsSync(configTemplate)) {
+      zip.addLocalFile(configTemplate, '', 'spark-edge.config.yml');
+      console.log('  + spark-edge.config.yml added to archive');
+    }
+
     // Windows launcher bat
     const batContents = `@echo off\r\nREM Launcher for spark-edge\r\n"%~dp0\\${binName}" %* ^> con 2^>&1\r\necho.\r\necho Pressione qualquer tecla para sair...\r\npause >nul\r\n`;
     zip.addFile('spark-edge.bat', Buffer.from(batContents, 'utf8'));

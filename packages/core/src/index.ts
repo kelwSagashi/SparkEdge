@@ -1,3 +1,7 @@
+// CloudIntegration Configuration
+export { appConfig, loadConfig, reloadConfig, saveConfig } from './config/cloud-integration.config';
+export type { SparkEdgeConfig, CloudIntegrationConfig, DbConfig, AuthConfig, ServerConfig } from './config/cloud-integration.config';
+
 // MQTT module
 export * as mqttClient from './modules/mqtt/mqtt.client';
 export * as mqttPublisher from './modules/mqtt/mqtt.publisher';

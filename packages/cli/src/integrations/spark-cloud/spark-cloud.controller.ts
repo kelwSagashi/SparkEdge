@@ -1,6 +1,7 @@
 import { Post, RestController } from 'spark-edge-di';
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { appConfig } from 'spark-edge-core';
 
 /**
  * /api/spark-cloud/* — Simulation of Spark Cloud behavior
@@ -18,7 +19,7 @@ export class SparkCloudController {
   @Post('/auth/login')
   async login(_req: Request, res: Response) {
     return res.json({
-      token: 'mock-cloud-token-' + uuidv4(),
+      token: 'spark-cloud-token-' + uuidv4(),
     });
   }
 
@@ -41,7 +42,7 @@ export class SparkCloudController {
       edge_id: newEdgeId,
       edge_name: name || `Edge ${newEdgeId}`,
       mqtt: {
-        url: process.env.MQTT_URL || 'mqtt://localhost:1883',
+        url: appConfig.cloud.mqtt_url,
         username: `spark-user-${newEdgeId}`,
         password: `spark-pass-${uuidv4().substring(0, 8)}`,
       }

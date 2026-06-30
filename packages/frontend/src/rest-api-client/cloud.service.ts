@@ -1,6 +1,5 @@
 import { axios_api_instance } from '@/server/instance';
-import { request } from './utils';
-import type { ReturningQueries } from 'spark-edge-db/src/types';
+import type { ReturningQueries } from 'spark-edge-db';
 
 const BASE = '/api';
 
@@ -26,6 +25,32 @@ export interface ConnectResult {
   mqtt: { connected: boolean };
 }
 
+// ─── CloudIntegration Config types ─────────────────────────────────────────
+
+export interface EdgeConfig {
+  cloud: {
+    url: string;
+    mqtt_url: string;
+  };
+  db: {
+    file: string;
+  };
+  auth: {
+    jwt_secret: string;
+    is_default: boolean;
+  };
+  server: {
+    port: number;
+  };
+}
+
+export interface EdgeConfigUpdate {
+  cloud?: { url?: string; mqtt_url?: string };
+  db?: { file?: string };
+  auth?: { jwt_secret?: string };
+  server?: { port?: number };
+}
+
 export const cloudService = {
   getStatus: (): Promise<ReturningQueries<CloudStatus>> => axios_api_instance.get(`/cli/status`),
 
@@ -47,4 +72,14 @@ export const cloudService = {
 
   pair: (token: string, name?: string): Promise<ConnectResult> =>
     axios_api_instance.post(`/cli/pair`, { token, name }),
+
+  // ─── CloudIntegration Configuration ────────────────────────────────────────
+
+  /** Get current configuration (jwt_secret is partially masked) */
+  getConfig: (): Promise<ReturningQueries<EdgeConfig>> =>
+    axios_api_instance.get(`/cli/config`),
+
+  /** Persist config updates to spark-edge.config.yml */
+  updateConfig: (updates: EdgeConfigUpdate): Promise<ReturningQueries<{ success: boolean; message: string }>> =>
+    axios_api_instance.put(`/cli/config`, updates),
 };

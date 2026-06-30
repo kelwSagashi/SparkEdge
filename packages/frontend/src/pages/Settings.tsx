@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth-store';
 import { Button } from '@/components/ui/button';
-import { User, Mail, Lock, Save, Key, Fingerprint, Globe, RefreshCcw, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { User, Mail, Lock, Save, Key, Fingerprint, Globe, RefreshCcw, ShieldCheck, ShieldAlert, AlertTriangle, Settings2, ChevronRight } from 'lucide-react';
 import { systemService } from '@/rest-api-client/system.service';
 import type { SystemIdentity, MqttConfig } from '@/rest-api-client/system.service';
 import { toast } from 'sonner';
 
 export default function SettingsPage() {
+  const navigate = useNavigate();
   const { user, generateNewApiKey } = useAuthStore();
   const [name, setName] = useState(user?.first_name ?? '');
   const [saving, setSaving] = useState(false);
@@ -108,8 +110,36 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+
+        {/* Advanced Settings card */}
+        <div className="space-y-6 mt-6">
+          <button
+            onClick={() => navigate('/settings/advanced')}
+            className="w-full bg-amber-500/[0.05] border border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/[0.08] rounded-xl p-5 text-left transition-all group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Settings2 size={16} className="text-amber-400" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-white">Configurações Avançadas</p>
+                    <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full">
+                      <AlertTriangle size={9} />
+                      Avançado
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    Spark Cloud URL, MQTT broker, banco de dados, JWT secret e porta do servidor.
+                  </p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-zinc-600 group-hover:text-amber-400 transition-colors shrink-0 ml-2" />
+            </div>
+          </button>
+        </div>
       </div>
     </main>
   );
 }
-

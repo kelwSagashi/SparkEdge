@@ -2,11 +2,14 @@ const fs = require('fs');
 const path = require('path');
 
 const cliDir = path.resolve(__dirname, '..');
+// Monorepo root is two levels up from the cli package
+const monorepoRoot = path.resolve(cliDir, '..', '..');
 const frontendDist = path.resolve(cliDir, '..', 'frontend', 'dist');
 const dbDrizzle = path.resolve(cliDir, '..', 'db', 'drizzle');
 
 const cliAssetsDist = path.resolve(cliDir, 'dist', 'assets');
 const cliDrizzleDist = path.resolve(cliDir, 'dist', 'drizzle');
+const cliConfigDest = path.resolve(cliDir, 'dist', 'spark-edge.config.yml');
 
 function copyRecursiveSync(src, dest) {
   const exists = fs.existsSync(src);
@@ -53,4 +56,18 @@ if (fs.existsSync(rootReadme)) {
   console.log('README.md copied successfully.');
 } else {
   console.warn('Root README.md not found at', rootReadme);
+}
+
+// ─── Copy spark-edge.config.yml (default config template) ────────────────────
+// This file is embedded inside the published npm package under dist/.
+// On first run, the CLI will copy it to the user's working directory if no
+// config file is found there, allowing the user to edit it.
+console.log('[prepare-assets] Copying spark-edge.config.yml to dist...');
+const sourceConfig = path.resolve(monorepoRoot, 'spark-edge.config.yml');
+if (fs.existsSync(sourceConfig)) {
+  fs.copyFileSync(sourceConfig, cliConfigDest);
+  console.log(`spark-edge.config.yml copied to ${cliConfigDest}`);
+} else {
+  console.warn('spark-edge.config.yml not found at', sourceConfig,
+    '\n  → The published package will not include a default config template.');
 }
